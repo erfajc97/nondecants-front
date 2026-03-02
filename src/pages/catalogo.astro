@@ -1,0 +1,11 @@
+---
+import PublicLayout from '@/layouts/PublicLayout.astro';
+import Catalog from '@/app/features/catalog/Catalog';
+---
+
+<PublicLayout
+  title="Catálogo — NönDecants"
+  description="Explora nuestro catálogo de perfumes sellados, decants y nondecants en Ecuador."
+>
+  <Catalog client:load />
+</PublicLayout>

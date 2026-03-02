@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Colores de marca ───────────────────────────── */
+  --color-bg:              #1B1919;
+  --color-surface:         #252222;
+  --color-surface-raised:  #2E2B2B;
+  --color-accent:          #CCB377;
+  --color-accent-hover:    #B89B5E;
+  --color-text:            #FFFFFF;
+  --color-text-muted:      #A09A9A;
+  --color-border:          #3A3636;
+  --color-border-accent:   #CCB377;
+  --color-error:           #E05252;
+  --color-success:         #4CAF50;
+
+  /* ── Tipografía ────────────────────────────────── */
+  --font-heading: "Oswald", sans-serif;
+  --font-body:    "Inter", sans-serif;
+
+  /* ── Radios ────────────────────────────────────── */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+}
+
+/* ── Reset base ─────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background-color: var(--color-bg);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}

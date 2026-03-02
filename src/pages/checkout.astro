@@ -1,0 +1,11 @@
+---
+import PublicLayout from '@/layouts/PublicLayout.astro';
+import CheckoutIsland from '@/app/features/checkout/Checkout';
+---
+
+<PublicLayout
+  title="Checkout — NönDecants"
+  description="Completa tu compra en NönDecants."
+>
+  <CheckoutIsland client:load />
+</PublicLayout>

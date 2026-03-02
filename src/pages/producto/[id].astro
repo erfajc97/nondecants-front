@@ -1,0 +1,10 @@
+---
+import PublicLayout from '@/layouts/PublicLayout.astro';
+import ProductDetail from '@/app/features/product/ProductDetail';
+
+const { id } = Astro.params;
+---
+
+<PublicLayout title="Producto — NönDecants">
+  <ProductDetail productId={id!} client:load />
+</PublicLayout>
