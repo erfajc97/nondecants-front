@@ -1,147 +1,98 @@
 const TRUST_BADGES = [
   {
     icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
+        <rect x="1" y="3" width="15" height="13" rx="1"/>
+        <path d="M16 8h4l3 5v3h-7V8z"/>
+        <circle cx="5.5" cy="18.5" r="2.5"/>
+        <circle cx="18.5" cy="18.5" r="2.5"/>
+      </svg>
+    ),
+    label: 'Envíos a todo Ecuador',
+  },
+  {
+    icon: (
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <polyline points="9 12 11 14 15 10"/>
       </svg>
     ),
-    label: 'Compra Segura',
+    label: 'Autenticidad de productos',
   },
   {
     icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <polyline points="20 6 9 17 4 12"/>
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
+        <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/>
       </svg>
     ),
-    label: 'Autenticidad Garantizada',
+    label: 'Decants originales',
   },
   {
     icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
       </svg>
     ),
-    label: 'Alta Calidad',
+    label: 'Compra 100% segura',
   },
-  {
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5.07"/>
-      </svg>
-    ),
-    label: 'Devoluciones',
-  },
-];
+]
 
 export default function HeroSection() {
   return (
-    <section className="relative bg-[--color-bg] overflow-hidden">
-      {/* Fondo gradiente radial */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            'radial-gradient(ellipse 70% 60% at 70% 40%, rgba(204,179,119,0.12) 0%, transparent 70%)',
-        }}
+    <section className="relative flex min-h-screen flex-col overflow-hidden">
+
+      {/* ── Imagen de fondo full-vh ── */}
+      <img
+        src="/home.png"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover object-center"
+        fetchPriority="high"
       />
 
-      <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[520px] items-center gap-8 py-16 lg:py-20">
+      {/* ── Overlay gradiente: Black Carbón izquierda → transparente derecha ── */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[--color-bg] via-[--color-bg]/80 to-[--color-bg]/25" />
+      {/* Capa extra en móvil para legibilidad */}
+      <div className="absolute inset-0 bg-[--color-bg]/50 lg:hidden" />
 
-          {/* Columna izquierda — texto */}
-          <div className="flex flex-col items-start gap-6 z-10">
-            <p className="font-heading text-xs tracking-[0.35em] text-[--color-accent] uppercase">
-              NönDecants — Ecuador
-            </p>
+      {/* ── Contenido principal ── */}
+      <div className="relative z-10 flex flex-1 items-start">
+        <div className="mx-auto w-full max-w-7xl px-2 pt-32 pb-20 lg:px-4">
+          <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
 
-            <div>
-              <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl text-[--color-text] leading-[0.95] uppercase">
-                Única<br />Experiencia
-              </h1>
-              <span
-                className="block font-heading text-5xl md:text-6xl lg:text-7xl uppercase mt-1"
-                style={{
-                  WebkitTextStroke: '2px var(--color-accent)',
-                  color: 'transparent',
-                  lineHeight: '0.95',
-                }}
-              >
-                Decants
-              </span>
+            {/* ── Columna izquierda ── */}
+            <div className="flex flex-col gap-8">
+              <div>
+                <h1 className="font-heading text-[clamp(1.6rem,3vw,2.8rem)] font-normal uppercase leading-[0.96] tracking-[-0.02em] text-white">
+                  Única<br />Experiencia
+                </h1>
+                <span className="mt-1 block font-body text-[clamp(3.5rem,8vw,7rem)] font-black italic leading-[0.96] tracking-[-0.02em] text-accent">
+                  Decants
+                </span>
+              </div>
             </div>
 
-            <p className="text-[--color-text-muted] text-sm leading-relaxed max-w-sm">
-              Fragancias originales, selladas y en decant, de las mejores marcas del mundo.
-              Envíos a todo Ecuador vía Servientrega.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <a
-                href="/catalogo"
-                className="px-8 py-3.5 bg-[--color-accent] text-[--color-bg] font-heading text-sm uppercase tracking-widest text-center hover:bg-[--color-accent-hover] transition-colors"
-                style={{ borderRadius: 'var(--radius-sm)' }}
-              >
-                Explorar colección
-              </a>
-              <a
-                href="/catalogo?type=DECANT"
-                className="px-8 py-3.5 border border-[--color-border-accent] text-[--color-accent] font-heading text-sm uppercase tracking-widest text-center hover:bg-[--color-surface] transition-colors"
-                style={{ borderRadius: 'var(--radius-sm)' }}
-              >
-                Ver decants
-              </a>
-            </div>
-          </div>
-
-          {/* Columna derecha — imágenes collage */}
-          <div className="relative hidden lg:flex items-end justify-center h-[480px]">
-            {/* Imagen principal */}
-            <div
-              className="absolute right-0 bottom-0 w-52 h-72 overflow-hidden shadow-2xl"
-              style={{ borderRadius: 'var(--radius-md)' }}
-            >
-              <img
-                src="https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=300&h=400&fit=crop&q=85"
-                alt="Fragancia"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div
-              className="absolute right-40 bottom-12 w-40 h-56 overflow-hidden shadow-xl"
-              style={{ borderRadius: 'var(--radius-md)' }}
-            >
-              <img
-                src="https://images.unsplash.com/photo-1541643600914-78b084683702?w=240&h=320&fit=crop&q=85"
-                alt="Fragancia"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div
-              className="absolute right-80 bottom-20 w-32 h-48 overflow-hidden shadow-lg"
-              style={{ borderRadius: 'var(--radius-md)', opacity: 0.85 }}
-            >
-              <img
-                src="https://images.unsplash.com/photo-1594035910387-fea47794261f?w=200&h=280&fit=crop&q=85"
-                alt="Fragancia"
-                className="w-full h-full object-cover"
-              />
+            {/* ── Columna derecha (solo desktop) ── */}
+            <div className="hidden flex-col items-end gap-5 self-start lg:flex">
+              <p className="max-w-[22rem] text-right text-xl leading-relaxed text-white">
+                Conoce nuestra experiencia en perfumería de lujo. Decants y sellados
+                de las mejores marcas, disponibles para envío a todo Ecuador.
+              </p>
             </div>
 
-            {/* Glow effect */}
-            <div
-              className="absolute bottom-0 right-0 w-64 h-64 rounded-full pointer-events-none blur-3xl"
-              style={{ background: 'rgba(204,179,119,0.15)' }}
-            />
           </div>
         </div>
+      </div>
 
-        {/* Trust badges */}
-        <div className="border-t border-[--color-border] py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {/* ── Trust badges — anclados al pie del hero ── */}
+      <div className="relative z-10 border-t border-[--color-border]/50 bg-[--color-bg]/75 backdrop-blur-sm">
+        <div className="mx-auto max-w-7xl px-6 py-5 lg:px-10">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-4">
             {TRUST_BADGES.map((badge) => (
-              <div key={badge.label} className="flex flex-col items-center gap-2 text-center">
-                <span className="text-[--color-accent]">{badge.icon}</span>
-                <span className="font-heading text-xs uppercase tracking-wider text-[--color-text-muted]">
+              <div key={badge.label} className="flex items-center gap-3">
+                <span className="shrink-0 text-[--color-accent]">{badge.icon}</span>
+                <span className="font-heading text-[10px] font-medium uppercase leading-tight tracking-wider text-[--color-text-muted]">
                   {badge.label}
                 </span>
               </div>
@@ -149,6 +100,7 @@ export default function HeroSection() {
           </div>
         </div>
       </div>
+
     </section>
-  );
+  )
 }
