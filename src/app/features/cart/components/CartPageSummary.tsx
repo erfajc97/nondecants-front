@@ -1,6 +1,9 @@
 import { formatCurrency } from '@/app/helpers/formatCurrency';
 import PaymentMethodIcons from '@/app/components/PaymentMethodIcons';
 import TrustIcons from '@/app/components/UI/TrustIcons';
+import CouponField from '@/app/features/checkout/components/CouponField';
+import { useCouponHook } from '@/app/features/checkout/hooks/useCouponHook';
+import FreeShippingBar from './FreeShippingBar';
 
 interface CartPageSummaryProps {
   immediateSubtotal: number;
@@ -9,6 +12,11 @@ interface CartPageSummaryProps {
   total: number;
   immediateCount: number;
   bajoCount: number;
+  afterDiscount: number;
+  couponDiscount: number;
+  freeShippingThreshold: number;
+  qualifiesFreeShipping: boolean;
+  remainingForFreeShipping: number;
 }
 
 export default function CartPageSummary({
@@ -18,14 +26,27 @@ export default function CartPageSummary({
   total,
   immediateCount,
   bajoCount,
+  afterDiscount,
+  couponDiscount,
+  freeShippingThreshold,
+  qualifiesFreeShipping,
 }: CartPageSummaryProps) {
+  const coupon = useCouponHook();
+
   return (
     <div className="flex flex-col gap-6">
-      {/* ── Resumen ── */}
       <div className="bg-bg-alt p-7 md:p-8">
         <span className="eyebrow">— Resumen</span>
 
-        <div className="mt-6 flex flex-col gap-3 font-body text-sm">
+        <div className="mt-6">
+          <FreeShippingBar
+            subtotal={afterDiscount}
+            threshold={freeShippingThreshold}
+            unlocked={qualifiesFreeShipping}
+          />
+        </div>
+
+        <div className="flex flex-col gap-3 font-body text-sm">
           {immediateCount > 0 && (
             <div className="flex items-center justify-between">
               <span className="text-text-soft">Subtotal — en stock</span>
@@ -38,9 +59,17 @@ export default function CartPageSummary({
               <span className="text-text">{formatCurrency(bajoSubtotal)}</span>
             </div>
           )}
+          {couponDiscount > 0 && (
+            <div className="flex items-center justify-between">
+              <span className="text-text-soft">Cupón</span>
+              <span className="text-success">-{formatCurrency(couponDiscount)}</span>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <span className="text-text-muted">Envío estimado · Servientrega</span>
-            <span className="text-text-muted">{formatCurrency(shipping)}</span>
+            <span className={qualifiesFreeShipping ? 'text-success' : 'text-text-muted'}>
+              {qualifiesFreeShipping ? 'GRATIS' : formatCurrency(shipping)}
+            </span>
           </div>
         </div>
 
@@ -52,7 +81,22 @@ export default function CartPageSummary({
           Envío e impuestos finales se confirman en el pago.
         </p>
 
-        {/* CTA — marco dorado en loop: es el paso que queremos que se siga */}
+        {coupon.hasNonComboItems && (
+          <div className="mt-6">
+            <CouponField
+              couponCode={coupon.couponCode}
+              couponDiscount={coupon.couponDiscount}
+              couponFreeShipping={coupon.couponFreeShipping}
+              couponApplied={coupon.couponApplied}
+              couponLoading={coupon.couponLoading}
+              couponMessage={coupon.couponMessage}
+              onCouponCodeChange={coupon.setCouponCode}
+              onApplyCoupon={coupon.handleApplyCoupon}
+              onRemoveCoupon={coupon.handleRemoveCoupon}
+            />
+          </div>
+        )}
+
         <a
           href="/checkout"
           className="gold-frame mt-6 flex w-full items-center justify-between gap-2 bg-text px-6 py-4 font-body text-xs font-medium uppercase tracking-[0.2em] text-bg transition-colors hover:bg-accent"

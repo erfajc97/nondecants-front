@@ -291,7 +291,10 @@ export default function ProductPurchaseOptions({
     }),
   ].sort((a, b) => a.ml - b.ml);
 
+  const canPurchase = product.isPurchasable !== false;
+
   const handleAddToCart = () => {
+    if (!canPurchase) return;
     if (!hasHydrated) { sonnerResponse('Cargando carrito...', 'error'); return; }
     const item = getCartItem();
     if (!item) { sonnerResponse('Selecciona una opcion.', 'error'); return; }
@@ -301,6 +304,7 @@ export default function ProductPurchaseOptions({
   };
 
   const handleFastPurchase = () => {
+    if (!canPurchase) return;
     if (!hasHydrated) { sonnerResponse('Cargando carrito...', 'error'); return; }
     const item = getCartItem();
     if (!item) { sonnerResponse('Selecciona una opcion.', 'error'); return; }
@@ -400,6 +404,8 @@ export default function ProductPurchaseOptions({
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-40 flex flex-col gap-2 border-t border-border bg-bg/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm md:static md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+        {canPurchase ? (
+          <>
         <button
           onClick={handleAddToCart}
           /* Marco dorado en loop en el CTA de añadir. */
@@ -425,6 +431,12 @@ export default function ProductPurchaseOptions({
             </svg>
           </button>
         </div>
+          </>
+        ) : (
+          <p className="border border-border bg-bg-alt px-4 py-3.5 text-center font-body text-xs uppercase tracking-[0.18em] text-text-muted">
+            No disponible para compra
+          </p>
+        )}
       </div>
 
       {/* Pago — medios aceptados */}

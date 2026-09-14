@@ -26,6 +26,10 @@ export default function CartPage() {
     hasHydrated,
     deliveryOffset,
     cutoffHour,
+    freeShippingThreshold,
+    qualifiesFreeShipping,
+    couponDiscount,
+    afterDiscount,
   } = useCartPageHook();
 
   // Esqueleto mientras se hidrata el carrito desde localStorage: evita el
@@ -150,6 +154,10 @@ export default function CartPage() {
             total={total}
             immediateCount={immediate.length}
             bajoCount={bajo.length}
+            afterDiscount={afterDiscount}
+            couponDiscount={couponDiscount}
+            freeShippingThreshold={freeShippingThreshold}
+            qualifiesFreeShipping={qualifiesFreeShipping}
           />
         </aside>
       </div>

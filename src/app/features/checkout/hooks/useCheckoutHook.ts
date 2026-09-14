@@ -11,6 +11,8 @@ import { API_ENDPOINTS } from '@/app/api/endpoints';
 import { normalizeCustomerField, validateContact } from '../validators';
 import { isPickupMethod, PICKUP_METHODS, type DeliveryMode } from '../components/DeliverySection';
 import type { CustomerFormData, PaymentMethod, DeliveryMethod } from '../types';
+import { useCouponHook } from './useCouponHook';
+import { useFreeShippingThresholdQuery } from '@/app/tanstack-queries/settingsQuery';
 
 const PREFS_KEY = 'nondecants-checkout-prefs';
 
@@ -52,13 +54,6 @@ function getInitialDeliveryMethod(prefs: CheckoutPrefs): DeliveryMethod | null {
   const user = useAuthStore.getState().user;
   const method = user?.preferredDeliveryMethod ?? prefs.deliveryMethod;
   return (method as DeliveryMethod) ?? null;
-}
-
-interface CouponResult {
-  valid: boolean;
-  discount: number;
-  freeShipping: boolean;
-  message: string;
 }
 
 interface OrderItemPayload {
@@ -149,21 +144,22 @@ export function useCheckoutHook() {
     }).catch(() => {});
   }, []);
 
-  // Coupon state
-  const [couponCode, setCouponCode] = useState('');
-  const [couponDiscount, setCouponDiscount] = useState(0);
-  const [couponFreeShipping, setCouponFreeShipping] = useState(false);
-  const [couponMessage, setCouponMessage] = useState('');
-  const [couponApplied, setCouponApplied] = useState(false);
-  const [couponLoading, setCouponLoading] = useState(false);
+  // Coupon — compartido con el carrito (sessionStorage).
+  const {
+    couponCode,
+    couponDiscount,
+    couponFreeShipping,
+    couponApplied,
+    couponLoading,
+    couponMessage,
+    setCouponCode,
+    handleApplyCoupon,
+    handleRemoveCoupon,
+  } = useCouponHook();
+  const { data: freeShippingThreshold = 0 } = useFreeShippingThresholdQuery();
 
   const items    = useCartStore((s) => s.items);
   const subtotal = useCartStore((s) => s.total());
-
-  // Subtotal only for non-combo items (coupons don't apply to combos)
-  const productSubtotal = items
-    .filter((i) => i.comboId == null)
-    .reduce((acc, i) => acc + i.price * i.quantity, 0);
 
   const { methods: deliveryOptions, isLoading: deliveryLoading } = useDeliveryMethodsHook(customer.city);
 
@@ -177,13 +173,15 @@ export function useCheckoutHook() {
     }
   }, [deliveryOptions, deliveryMethod]);
 
-  const deliveryCost = couponFreeShipping
+  const afterDiscount = Math.max(0, subtotal - (couponApplied ? couponDiscount : 0));
+  const qualifiesFreeShipping =
+    (couponApplied && couponFreeShipping) ||
+    (freeShippingThreshold > 0 && afterDiscount >= freeShippingThreshold);
+  const deliveryCost = qualifiesFreeShipping
     ? 0
     : deliveryMethod
       ? (deliveryOptions.find((m) => m.method === deliveryMethod)?.cost ?? 0)
       : 0;
-
-  const afterDiscount = Math.max(0, subtotal - couponDiscount);
   const isPayphone = paymentMethod === 'PAYPHONE';
   const payphoneSurcharge = isPayphone ? calcPayphoneSurcharge(afterDiscount + deliveryCost) : 0;
   const total = afterDiscount + deliveryCost + payphoneSurcharge;
@@ -219,45 +217,6 @@ export function useCheckoutHook() {
       const currentIsPickup = PICKUP_METHODS.includes(current);
       return currentIsPickup === (mode === 'pickup') ? current : null;
     });
-  };
-
-  const handleApplyCoupon = async () => {
-    if (!couponCode.trim()) return;
-    setCouponLoading(true);
-    setCouponMessage('');
-    try {
-      const { data } = await axiosInstance.post(API_ENDPOINTS.COUPONS_VALIDATE, {
-        code: couponCode,
-        orderAmount: productSubtotal,
-      });
-      const result: CouponResult = data?.data ?? data;
-      if (result.valid) {
-        setCouponDiscount(result.discount);
-        setCouponFreeShipping(result.freeShipping);
-        setCouponApplied(true);
-        setCouponMessage(result.message);
-        sonnerResponse(result.message, 'success');
-      } else {
-        setCouponDiscount(0);
-        setCouponFreeShipping(false);
-        setCouponApplied(false);
-        setCouponMessage(result.message);
-        sonnerResponse(result.message, 'error');
-      }
-    } catch {
-      setCouponMessage('Error al validar el cupón');
-      sonnerResponse('Error al validar el cupón', 'error');
-    } finally {
-      setCouponLoading(false);
-    }
-  };
-
-  const handleRemoveCoupon = () => {
-    setCouponCode('');
-    setCouponDiscount(0);
-    setCouponFreeShipping(false);
-    setCouponApplied(false);
-    setCouponMessage('');
   };
 
   const handleNextStep = () => {

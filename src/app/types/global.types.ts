@@ -58,6 +58,8 @@ export interface Product {
   openBottleMlRemaining: number;
   availableMl: number;
   isActive: boolean;
+  /** Si es false, se muestra el producto pero no se puede comprar. */
+  isPurchasable?: boolean;
   bajoPedido?: boolean;
   gender?: Gender;
   timeOfDay?: TimeOfDay;

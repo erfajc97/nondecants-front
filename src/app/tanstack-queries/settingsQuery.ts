@@ -36,3 +36,15 @@ export function useDispatchCutoffQuery() {
     staleTime: 1000 * 60 * 5,
   });
 }
+
+/**
+ * Subtotal mínimo para envío gratis (`free_shipping_threshold`).
+ * 0 = promo desactivada.
+ */
+export function useFreeShippingThresholdQuery() {
+  return useQuery({
+    queryKey: ['settings', 'free_shipping_threshold'],
+    queryFn: () => readSettingNumber('free_shipping_threshold', 0),
+    staleTime: 1000 * 60 * 5,
+  });
+}

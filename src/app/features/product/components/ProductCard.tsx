@@ -128,7 +128,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     return price > 0 ? buildFull(price) : null;
   };
 
+  const canPurchase = product.isPurchasable !== false;
+
   const handleQuickAdd = () => {
+    if (!canPurchase) return;
     const item = buildCartItem();
     if (!item) {
       window.location.href = productUrl;
@@ -178,16 +181,20 @@ export default function ProductCard({ product }: ProductCardProps) {
           </span>
         )}
 
-        {/* Añadir al carrito — siempre visible en móvil, al hover en desktop.
-            Negro con texto blanco; al pasar el cursor por encima se invierte
-            (beige con texto negro) sin dejar franja. */}
-        <button
-          type="button"
-          onClick={handleQuickAdd}
-          className="gold-frame absolute inset-x-0 bottom-0 z-10 bg-text py-2.5 font-body text-[10px] uppercase tracking-[0.18em] text-white transition-[background-color,color,opacity,transform] duration-150 hover:bg-bg hover:text-text sm:translate-y-full sm:opacity-0 sm:group-hover/card:translate-y-0 sm:group-hover/card:opacity-100"
-        >
-          Añadir al carrito
-        </button>
+        {/* Añadir al carrito: visible siempre (no solo hover). */}
+        {canPurchase ? (
+          <button
+            type="button"
+            onClick={handleQuickAdd}
+            className="gold-frame absolute inset-x-0 bottom-0 z-10 bg-text py-2.5 font-body text-[10px] uppercase tracking-[0.18em] text-white transition-[background-color,color] duration-150 hover:bg-bg hover:text-text"
+          >
+            Agregar al carrito
+          </button>
+        ) : (
+          <span className="absolute inset-x-0 bottom-0 z-10 bg-bg-alt py-2.5 text-center font-body text-[10px] uppercase tracking-[0.18em] text-text-muted">
+            No disponible
+          </span>
+        )}
       </div>
 
       {/* Info */}

@@ -2,7 +2,12 @@ import { useCartStore, type CartItem } from '@/app/store/cart/cartStore';
 import { ESTIMATED_SHIPPING } from '@/app/features/checkout/data';
 import { splitCartStock, getSplit } from '@/app/helpers/cartStockSplit';
 import { DEFAULT_DISPATCH_CUTOFF_HOUR } from '@/app/helpers/deliveryWindow';
-import { useDeliveryOffsetQuery, useDispatchCutoffQuery } from '@/app/tanstack-queries/settingsQuery';
+import {
+  useDeliveryOffsetQuery,
+  useDispatchCutoffQuery,
+  useFreeShippingThresholdQuery,
+} from '@/app/tanstack-queries/settingsQuery';
+import { useCouponStore } from '@/app/store/coupon/couponStore';
 
 export interface CartRow {
   item: CartItem;
@@ -28,6 +33,9 @@ export function useCartPageHook() {
   const hasHydrated = useCartStore((s) => s._hasHydrated);
   const { data: deliveryOffset = 0 } = useDeliveryOffsetQuery();
   const { data: cutoffHour = DEFAULT_DISPATCH_CUTOFF_HOUR } = useDispatchCutoffQuery();
+  const { data: freeShippingThreshold = 0 } = useFreeShippingThresholdQuery();
+  const couponDiscount = useCouponStore((s) => (s.applied ? s.discount : 0));
+  const couponFreeShipping = useCouponStore((s) => s.applied && s.freeShipping);
 
   const immediate: CartRow[] = [];
   const bajo: CartRow[] = [];
@@ -52,9 +60,14 @@ export function useCartPageHook() {
   const immediateCount = immediate.reduce((a, r) => a + r.portionQty, 0);
   const bajoCount = bajo.reduce((a, r) => a + r.portionQty, 0);
   const subtotal = immediateSubtotal + bajoSubtotal;
-  const shipping = items.length > 0 ? ESTIMATED_SHIPPING : 0;
-  const total = subtotal + shipping;
+  const afterDiscount = Math.max(0, subtotal - couponDiscount);
+  const qualifiesFreeShipping =
+    couponFreeShipping ||
+    (freeShippingThreshold > 0 && afterDiscount >= freeShippingThreshold);
+  const shipping = items.length > 0 && !qualifiesFreeShipping ? ESTIMATED_SHIPPING : 0;
+  const total = afterDiscount + shipping;
   const itemCount = items.reduce((a, i) => a + i.quantity, 0);
+  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - afterDiscount);
 
   return {
     items,
@@ -65,6 +78,7 @@ export function useCartPageHook() {
     immediateCount,
     bajoCount,
     subtotal,
+    afterDiscount,
     shipping,
     total,
     itemCount,
@@ -73,5 +87,9 @@ export function useCartPageHook() {
     hasHydrated,
     deliveryOffset,
     cutoffHour,
+    freeShippingThreshold,
+    qualifiesFreeShipping,
+    remainingForFreeShipping,
+    couponDiscount,
   };
 }

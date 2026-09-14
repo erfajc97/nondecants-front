@@ -66,6 +66,7 @@ export const mapProduct = (raw: any): Product => {
     openBottleMlRemaining: Number(raw.openBottleMlRemaining ?? 0),
     availableMl: Number(raw.availableMl ?? 0),
     isActive: raw.isActive ?? true,
+    isPurchasable: raw.isPurchasable !== false,
     bajoPedido: raw.bajoPedido ?? false,
     gender: raw.gender ?? undefined,
     timeOfDay: raw.timeOfDay ?? undefined,
