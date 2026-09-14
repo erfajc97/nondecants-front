@@ -181,19 +181,17 @@ export default function ProductCard({ product }: ProductCardProps) {
           </span>
         )}
 
-        {/* Añadir al carrito: visible siempre (no solo hover). */}
-        {canPurchase ? (
+        {/* Desktop: overlay al hover. En móvil el CTA vive abajo, en el
+            cuerpo de la card: aquí no cabe “Agregar al carrito” y tapaba
+            el frasco. */}
+        {canPurchase && (
           <button
             type="button"
             onClick={handleQuickAdd}
-            className="gold-frame absolute inset-x-0 bottom-0 z-10 bg-text py-2.5 font-body text-[10px] uppercase tracking-[0.18em] text-white transition-[background-color,color] duration-150 hover:bg-bg hover:text-text"
+            className="gold-frame absolute inset-x-0 bottom-0 z-10 hidden bg-text py-2.5 font-body text-[10px] uppercase tracking-[0.18em] text-bg transition-[background-color,color] duration-150 hover:bg-accent hover:text-bg md:block md:translate-y-full md:opacity-0 md:group-hover/card:translate-y-0 md:group-hover/card:opacity-100"
           >
             Agregar al carrito
           </button>
-        ) : (
-          <span className="absolute inset-x-0 bottom-0 z-10 bg-bg-alt py-2.5 text-center font-body text-[10px] uppercase tracking-[0.18em] text-text-muted">
-            No disponible
-          </span>
         )}
       </div>
 
@@ -260,6 +258,21 @@ export default function ProductCard({ product }: ProductCardProps) {
               </a>
             )}
           </div>
+        )}
+
+        {/* Móvil / tablet: el botón va en el container, no sobre la foto. */}
+        {canPurchase ? (
+          <button
+            type="button"
+            onClick={handleQuickAdd}
+            className="gold-frame mt-2 min-h-9 w-full bg-text px-1.5 py-2 font-body text-[9px] font-medium uppercase leading-none tracking-[0.08em] text-bg transition-colors hover:bg-accent md:hidden"
+          >
+            Agregar al carrito
+          </button>
+        ) : (
+          <span className="mt-2 block w-full bg-bg-alt px-1.5 py-2 text-center font-body text-[9px] uppercase leading-tight tracking-[0.12em] text-text-muted md:hidden">
+            No disponible
+          </span>
         )}
       </div>
     </div>

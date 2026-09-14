@@ -16,6 +16,7 @@ export default function ProductCardSkeleton() {
           <div className="h-6 w-12 rounded-sm bg-bg-alt" />
           <div className="h-6 w-12 rounded-sm bg-bg-alt" />
         </div>
+        <div className="mt-2 h-8 w-full bg-bg-alt md:hidden" />
       </div>
     </div>
   );
