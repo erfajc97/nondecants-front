@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import AppProviders from '@/app/providers/AppProviders';
 import ProductPurchaseOptions from './ProductPurchaseOptions';
+import ExclusiveCouponBadge from '@/app/features/coupons/ExclusiveCouponBadge';
 import { EMBLA_DURATION } from '@/app/components/UI/CarouselNav';
 import type { Product, ProductVariant } from '@/app/types/global.types';
 
@@ -159,6 +160,7 @@ function ProductDetailContent({ product }: ProductDetailIslandProps) {
         <ProductGallery images={galleryImages} name={product.name} bajoPedido={product.bajoPedido} />
       </div>
       <div className="md:sticky md:top-20">
+        <ExclusiveCouponBadge productId={product.id} variantId={selectedVariant?.id} className="mb-3" />
         <ProductPurchaseOptions
           product={product}
           selectedVariant={selectedVariant}

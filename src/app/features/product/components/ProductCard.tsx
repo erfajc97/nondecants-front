@@ -4,6 +4,7 @@ import { productUrl as productUrlHelper } from '@/app/helpers/productUrl';
 import { useCartStore, type CartItem } from '@/app/store/cart/cartStore';
 import { sonnerResponse } from '@/app/helpers/sonnerResponse';
 import type { Product } from '@/app/types/global.types';
+import ExclusiveCouponBadge from '@/app/features/coupons/ExclusiveCouponBadge';
 
 interface ProductCardProps {
   product: Product;
@@ -197,6 +198,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* Info */}
       <div className="flex flex-1 flex-col gap-1 px-3 pb-3 pt-2.5">
+        <ExclusiveCouponBadge productId={product.id} className="mb-1" />
         <a href={productUrl}>
           {/* Altura mínima de 2 líneas: los nombres largos ya no desalinean
               los chips de formato entre cards vecinas */}

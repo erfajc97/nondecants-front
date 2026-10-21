@@ -10,6 +10,7 @@ interface CouponResult {
   discount: number;
   freeShipping: boolean;
   message: string;
+  itemDiscounts?: { productId?: number; productVariationId?: number; discount: number }[];
 }
 
 export function useCouponHook() {
@@ -28,6 +29,7 @@ export function useCouponHook() {
       .filter((i) => i.comboId == null)
       .reduce((acc, i) => acc + i.price * i.quantity, 0),
   );
+  const cartItems = useCartStore((s) => s.items);
   const hasNonComboItems = useCartStore((s) => s.items.some((i) => i.comboId == null));
 
   const handleApply = async () => {
@@ -37,6 +39,15 @@ export function useCouponHook() {
       const { data } = await axiosInstance.post(API_ENDPOINTS.COUPONS_VALIDATE, {
         code,
         orderAmount: productSubtotal,
+        // Líneas del carrito (sin combos): el servidor decide cuáles son elegibles.
+        items: cartItems
+          .filter((i) => i.comboId == null)
+          .map((i) => ({
+            productId: parseInt(i.productId, 10),
+            ...(i.variantId.startsWith('full-') ? {} : { productVariationId: parseInt(i.variantId, 10) }),
+            price: i.price,
+            quantity: i.quantity,
+          })),
       });
       const result: CouponResult = data?.data ?? data;
       if (result.valid) {
@@ -44,6 +55,7 @@ export function useCouponHook() {
           discount: result.discount,
           freeShipping: result.freeShipping,
           message: result.message,
+          itemDiscounts: result.itemDiscounts,
         });
         sonnerResponse(result.message, 'success');
       } else {
@@ -52,6 +64,7 @@ export function useCouponHook() {
           discount: 0,
           freeShipping: false,
           message: result.message,
+          itemDiscounts: [],
         });
         sonnerResponse(result.message, 'error');
       }

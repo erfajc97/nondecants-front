@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import axiosInstance from '@/app/config/axiosConfig';
 import { API_ENDPOINTS } from '@/app/api/endpoints';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
+import OrderReviewsPanel from '@/app/features/reviews/components/OrderReviewsPanel';
 
 interface OrderItem {
   id: number;
+  productId?: number;
   productName?: string;
   productImage?: string;
   mlSize?: number;
@@ -39,6 +41,8 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
   order_delayed: { label: 'Retrasado', color: 'bg-amber-100 text-amber-700' },
   order_rejected: { label: 'Rechazado', color: 'bg-error text-white' },
 }
+
+const PAID_STATUSES = ['order_received', 'order_accepted', 'order_shipped', 'order_delivered'];
 
 const isServientrega = (m?: string) => m === 'SERVIENTREGA_GYE' || m === 'SERVIENTREGA_NACIONAL';
 
@@ -124,6 +128,10 @@ export default function OrdersTab() {
             </div>
           ))}
         </div>
+
+        {PAID_STATUSES.includes(selected.status) && (
+          <OrderReviewsPanel items={selected.items} />
+        )}
 
         {/* Total */}
         <div className="flex justify-between items-center text-base font-bold text-text">

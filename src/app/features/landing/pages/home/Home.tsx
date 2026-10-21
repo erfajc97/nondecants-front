@@ -5,6 +5,7 @@ import ProductRankingSection from '../../components/sections-home/ProductRanking
 import BlogCarousel from '@/app/features/blog/components/BlogCarousel';
 import HowItWorksSection from '../../components/sections-home/HowItWorksSection';
 import ExploreCategoriesSection from '../../components/sections-home/ExploreCategoriesSection';
+import VerifiedReviewsSection from '../../components/sections-home/VerifiedReviewsSection';
 import GoogleReviewsSection from '../../components/sections-home/GoogleReviewsSection';
 
 function HomeContent() {
@@ -61,6 +62,7 @@ function HomeContent() {
       {/* El blog cierra después del ranking: cuenta la casa cuando el visitante
           ya vio los productos que se venden. Las valoraciones van justo después. */}
       <BlogCarousel />
+      <VerifiedReviewsSection />
       <GoogleReviewsSection />
 
       {rest.map((section, index) => (

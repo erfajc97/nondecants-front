@@ -209,6 +209,8 @@ export const fetchProductById = async (id: string): Promise<Product> => {
     return mapProduct(data);
   } catch (error) {
     console.warn(`Error fetching product ${numericId}:`, error);
+    // Sin mock habilitado no inventamos un producto: la página responde 404.
+    if (!MOCK_ENABLED) return null as unknown as Product;
     return MOCK_PRODUCTS.find(p => p.id === numericId) ?? MOCK_PRODUCTS[0];
   }
 };

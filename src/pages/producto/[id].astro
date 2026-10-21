@@ -13,6 +13,7 @@ import {
 import { productShareImagePath } from '@/app/helpers/ogCard';
 import ProductDetailIsland from '@/app/features/product/components/ProductDetailIsland';
 import ProductEditorial from '@/app/features/product/components/ProductEditorial.astro';
+import ProductReviews from '@/app/features/reviews/components/ProductReviews';
 import ExploreCategoriesCarousel from '@/app/features/product/components/ExploreCategoriesCarousel';
 
 const { id } = Astro.params;
@@ -79,6 +80,9 @@ const listingLabel = product.bajoPedido ? 'Bajo Pedido' : 'Perfumes';
 
     {/* Secciones editoriales (perfil olfativo · carácter/ocasión · firma · promesas) */}
     <ProductEditorial product={product} />
+
+    {/* Reseñas verificadas (solo aprobadas) + formulario */}
+    <ProductReviews productId={product.id} client:visible />
 
     {/* Relacionados — misma categoría, otras casas. Sin relacionados no se
         pinta el contenedor: si no, queda un bloque vacío antes del footer. */}

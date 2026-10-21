@@ -32,6 +32,7 @@ export const API_ENDPOINTS = {
 
   // ── Coupons ─────────────────────────────────────
   COUPONS_VALIDATE:           '/coupons/validate',     // POST
+  COUPONS_EXCLUSIVE:          '/coupons/exclusive',    // GET (public, badges)
 
   // ── Categories ──────────────────────────────────
   CATEGORIES:                 '/categories',           // GET all (public), POST create (admin)
@@ -85,6 +86,13 @@ export const API_ENDPOINTS = {
 
   // ── Newsletter ────────────────────────────────────
   NEWSLETTER_SUBSCRIBE:         '/newsletter/subscribe', // POST - public
+
+  // ── Reseñas ──────────────────────────────────────
+  REVIEWS:                      '/reviews',              // POST (auth) - crea reseña pendiente
+  REVIEWS_MINE: '/reviews/mine',     // GET (auth)
+  REVIEWS_LATEST:               '/reviews/latest',       // GET public
+  REVIEWS_BY_PRODUCT:           '/reviews/product',      // + /:id GET public
+  REVIEWS_CAN_REVIEW:           '/reviews/can-review',   // + /:productId GET (auth)
 
   // ── Settings ─────────────────────────────────────
   SETTINGS:                     '/settings',             // GET all (public), PUT /:key (admin)

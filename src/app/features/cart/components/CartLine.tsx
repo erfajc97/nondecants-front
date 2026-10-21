@@ -1,6 +1,8 @@
 import { formatCurrency } from '@/app/helpers/formatCurrency';
 import DeliveryEta from '@/app/components/UI/DeliveryEta';
 import { DEFAULT_DISPATCH_CUTOFF_HOUR } from '@/app/helpers/deliveryWindow';
+import { useCouponStore } from '@/app/store/coupon/couponStore';
+import { lineCouponDiscount } from '@/app/helpers/couponItemDiscount';
 import type { CartRow } from '../hooks/useCartPageHook';
 
 interface CartLineProps {
@@ -17,6 +19,11 @@ export default function CartLine({ row, group, deliveryOffset = 0, cutoffHour = 
   const { item, portionQty, total, split } = row;
   const isBajo = group === 'bajo';
   const isCombo = item.comboId != null;
+  // Cupón aplicado: descuento de esta línea (proporcional a la porción mostrada).
+  const lineDiscount = useCouponStore((s) =>
+    s.applied ? lineCouponDiscount(item, s.itemDiscounts ?? []) : 0,
+  );
+  const portionDiscount = total > 0 ? (lineDiscount * portionQty) / total : 0;
 
   // Decant topado por los ml del producto: nunca se piden más unidades que las
   // que da el inventario (si los frascos del carrito ya ocuparon esos ml, la
@@ -112,6 +119,9 @@ export default function CartLine({ row, group, deliveryOffset = 0, cutoffHour = 
           </div>
         )}
         <p className="font-body text-sm text-text">{formatCurrency(item.price * portionQty)}</p>
+        {portionDiscount > 0 && (
+          <p className="font-body text-[11px] text-accent">Cupón −{formatCurrency(portionDiscount)}</p>
+        )}
       </div>
     </div>
   );

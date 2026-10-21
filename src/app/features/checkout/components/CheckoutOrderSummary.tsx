@@ -1,5 +1,7 @@
 import CouponField from './CouponField';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
+import { useCouponStore } from '@/app/store/coupon/couponStore';
+import { lineCouponDiscount } from '@/app/helpers/couponItemDiscount';
 import { useCartStore, type CartItem } from '@/app/store/cart/cartStore';
 import { splitCartStock, getSplit } from '@/app/helpers/cartStockSplit';
 import { lineDeliveryLabel, orderDeliveryLabel, DEFAULT_DISPATCH_CUTOFF_HOUR } from '@/app/helpers/deliveryWindow';
@@ -40,6 +42,9 @@ export default function CheckoutOrderSummary({
 }: CheckoutOrderSummaryProps) {
   const removeItem = useCartStore((s) => s.removeItem);
   const updateQty = useCartStore((s) => s.updateQty);
+  const lineCouponApplied = useCouponStore((s) => s.applied);
+  const storedItemDiscounts = useCouponStore((s) => s.itemDiscounts);
+  const itemDiscounts = lineCouponApplied ? storedItemDiscounts ?? [] : [];
 
   const hasNonComboItems = items.some((item) => item.comboId == null);
 
@@ -107,6 +112,11 @@ export default function CheckoutOrderSummary({
                   )}
                   <p className="font-body text-sm text-text">{formatCurrency(item.price * item.quantity)}</p>
                 </div>
+                {lineCouponDiscount(item, itemDiscounts) > 0 && (
+                  <p className="mt-1 text-right font-body text-[11px] text-accent">
+                    Cupón −{formatCurrency(lineCouponDiscount(item, itemDiscounts))}
+                  </p>
+                )}
 
                 {/* Cuándo llega esta línea */}
                 <p className="mt-2 flex items-center gap-1.5 font-body text-[11px] text-text-soft">
