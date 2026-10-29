@@ -21,7 +21,7 @@ try {
 const fmtDate = (d?: string | null) =>
   d ? new Date(d).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }) : '';
 const date = fmtDate(post.publishedAt || post.createdAt);
-const FALLBACK = '/banner-catalog.png';
+const FALLBACK = '/banner-catalog.webp';
 ---
 
 <PublicLayout

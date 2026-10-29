@@ -51,3 +51,26 @@ export function validateContact(
   if (!isValidPhone(c.phone)) return 'El teléfono debe tener 10 dígitos.';
   return null;
 }
+
+export type ContactErrors = Partial<Record<keyof CustomerFormData, string>>;
+
+/**
+ * Errores por campo (paso 2). La ciudad ya se eligió en el paso 1, así que
+ * aquí no se valida; la dirección solo se exige cuando hay envío.
+ */
+export function validateContactFields(
+  c: CustomerFormData,
+  options: { requiresAddress?: boolean } = {},
+): ContactErrors {
+  const { requiresAddress = true } = options;
+  const e: ContactErrors = {};
+  if (!c.name.trim()) e.name = 'Ingresa tus nombres.';
+  if (!c.lastName.trim()) e.lastName = 'Ingresa tus apellidos.';
+  if (!c.phone.trim()) e.phone = 'Ingresa tu teléfono.';
+  else if (!isValidPhone(c.phone)) e.phone = 'El teléfono debe tener 10 dígitos.';
+  if (!c.email.trim()) e.email = 'Ingresa tu correo.';
+  else if (!isValidEmail(c.email)) e.email = 'El correo no es válido.';
+  if (c.cedula && !isValidCedula(c.cedula)) e.cedula = 'Debe tener 10 dígitos (13 si es RUC).';
+  if (requiresAddress && !c.address.trim()) e.address = 'Ingresa tu dirección.';
+  return e;
+}

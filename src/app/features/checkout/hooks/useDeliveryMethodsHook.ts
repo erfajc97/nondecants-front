@@ -5,7 +5,7 @@ const GYE_CITIES = ['guayaquil', 'durán', 'duran', 'samborondón', 'samborondon
 
 const STATIC_DELIVERY_OPTIONS: DeliveryOption[] = [
   { id: 'entrega-personal', method: 'ENTREGA_PERSONAL', label: 'Entrega personal Plaza Tía (La Joya)', cost: 0, cities: ['guayaquil'] },
-  { id: 'retiro-piwu', method: 'RETIRO_PIWU', label: 'Retiro en Piwu Market (Urdesa)', cost: 2, cities: ['guayaquil'] },
+  { id: 'retiro-piwu', method: 'RETIRO_PIWU', label: 'Retiro en Piwu Market (Urdesa)', cost: 0, cities: ['guayaquil'] },
   { id: 'servientrega-gye', method: 'SERVIENTREGA_GYE', label: 'Servientrega (Guayaquil - Durán - Samborondón)', cost: 3, cities: GYE_CITIES },
   { id: 'servientrega-nacional', method: 'SERVIENTREGA_NACIONAL', label: 'Servientrega Nacional (Provincias)', cost: 6.5, cities: [] },
 ];

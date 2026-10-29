@@ -38,7 +38,7 @@ export default function NewsletterSection() {
       {/* Imagen full-width con overlay y form encima */}
       <div className="relative overflow-hidden mx-auto">
         <img
-          src="/img-subs.png"
+          src="/img-subs.webp"
           alt=""
           className="w-full h-72 sm:h-[400px] lg:h-[450px] object-cover"
           aria-hidden="true"

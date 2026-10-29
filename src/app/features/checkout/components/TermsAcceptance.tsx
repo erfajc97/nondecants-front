@@ -24,7 +24,7 @@ export default function TermsAcceptance({ checked, onChange }: TermsAcceptancePr
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="font-semibold font-semibold text-text underline underline-offset-2 transition-colors hover:text-accent-hover-hover"
+          className="font-semibold text-text underline underline-offset-2 transition-colors hover:text-accent-hover"
         >
           términos y condiciones
         </a>

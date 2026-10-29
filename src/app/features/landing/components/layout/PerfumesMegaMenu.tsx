@@ -17,7 +17,7 @@ interface MegaMenuProps {
   onMouseLeave: () => void;
 }
 
-const FEATURE_FALLBACK = '/banner-catalog.png';
+const FEATURE_FALLBACK = '/banner-catalog.webp';
 
 /**
  * Mega menú (rebranding NönDecants: blanco, tinta y dorado).

@@ -1,48 +1,111 @@
 import AppProviders from '@/app/providers/AppProviders';
 import AuthModalIsland from '@/app/features/auth/AuthModalIsland';
+import OrderPlaced from '@/app/features/order/components/OrderPlaced';
+import { formatCurrency } from '@/app/helpers/formatCurrency';
 import { useCheckoutHook, type BackorderLine } from '../hooks/useCheckoutHook';
 import CheckoutForm from './CheckoutForm';
 import CheckoutOrderSummary from './CheckoutOrderSummary';
+import '../checkout.css';
+
+const WA_PHONE = '+593 99 230 5463';
+const WA_URL = 'https://wa.me/593992305463';
 
 function CheckoutContent() {
-  const checkoutData = useCheckoutHook();
+  const c = useCheckoutHook();
+
+  if (c.placed) {
+    return (
+      <OrderPlaced
+        orderNumber={c.placed.orderNumber}
+        email={c.placed.email}
+        total={c.placed.total}
+        transfer={c.placed.method === 'TRANSFERENCIA'}
+        demo
+      />
+    );
+  }
+
+  // Barra inferior móvil: "Continuar" en los pasos 1 y 2, "Confirmar" en el 3.
+  const barLabel = c.step === 3 ? 'Confirmar' : 'Continuar';
+  const barDisabled = c.step === 1 ? !c.step1Done : c.step === 3 ? !c.canConfirm || c.isPending : false;
+  const onBar = c.step === 1 ? c.continueStep1 : c.step === 2 ? c.continueStep2 : c.requestConfirm;
 
   return (
-    <div className="relative grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-      <div className="min-w-0 rounded-md border border-border bg-surface p-5 md:p-8">
-        <CheckoutForm {...checkoutData} onLogin={checkoutData.openAuth} />
-      </div>
-      <div className="min-w-0 rounded-md border border-border bg-surface p-5 md:p-6 lg:sticky lg:top-6">
-        <CheckoutOrderSummary
-          items={checkoutData.items}
-          subtotal={checkoutData.subtotal}
-          deliveryCost={checkoutData.deliveryCost}
-          total={checkoutData.total}
-          payphoneSurcharge={checkoutData.payphoneSurcharge}
-          couponCode={checkoutData.couponCode}
-          couponDiscount={checkoutData.couponDiscount}
-          couponFreeShipping={checkoutData.couponFreeShipping}
-          couponApplied={checkoutData.couponApplied}
-          couponLoading={checkoutData.couponLoading}
-          couponMessage={checkoutData.couponMessage}
-          onCouponCodeChange={checkoutData.setCouponCode}
-          onApplyCoupon={checkoutData.handleApplyCoupon}
-          onRemoveCoupon={checkoutData.handleRemoveCoupon}
-        />
+    <>
+      <div className="pb-6 pt-8 md:pt-10">
+        <h1 className="font-display text-[clamp(36px,4vw,52px)] leading-none text-text">Finaliza tu compra</h1>
+        <p className="mt-2.5 font-body text-base text-text-soft">Son 3 pasos. Te toma un par de minutos.</p>
+        <p className="mt-1 font-body text-[15px] text-text-muted">
+          ¿Te ayudamos? Escríbenos al{' '}
+          <a href={WA_URL} target="_blank" rel="noopener" className="font-semibold text-text underline underline-offset-4 hover:text-accent-hover">
+            {WA_PHONE}
+          </a>
+        </p>
       </div>
 
-      {/* Registro/inicio de sesión sin salir del checkout (compra guest) */}
-      <AuthModalIsland open={checkoutData.authOpen} onClose={checkoutData.closeAuth} />
+      <div className="relative grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        <CheckoutForm c={c} onLogin={c.openAuth} />
+        <div className="min-w-0 rounded-md border border-border bg-surface p-5 md:p-6 lg:sticky lg:top-24">
+          <CheckoutOrderSummary
+            items={c.items}
+            subtotal={c.subtotal}
+            deliveryCost={c.deliveryCost}
+            total={c.total}
+            payphoneSurcharge={c.payphoneSurcharge}
+            couponCode={c.couponCode}
+            couponDiscount={c.couponDiscount}
+            couponFreeShipping={c.couponFreeShipping}
+            couponApplied={c.couponApplied}
+            couponLoading={c.couponLoading}
+            couponMessage={c.couponMessage}
+            onCouponCodeChange={c.setCouponCode}
+            onApplyCoupon={c.handleApplyCoupon}
+            onRemoveCoupon={c.handleRemoveCoupon}
+            shippingReady={c.step1Done}
+            termsAccepted={c.termsAccepted}
+            onTermsChange={c.setTermsAccepted}
+            canConfirm={c.canConfirm}
+            onConfirm={c.requestConfirm}
+            isPending={c.isPending}
+            missingText={c.missingText}
+          />
+        </div>
 
-      {checkoutData.bajoConfirmOpen && (
-        <BajoPedidoConfirmModal
-          isPending={checkoutData.isPending}
-          items={checkoutData.backorderItems}
-          onConfirm={checkoutData.confirmBajoPedido}
-          onCancel={checkoutData.cancelBajoPedido}
-        />
-      )}
-    </div>
+        {/* Registro/inicio de sesión sin salir del checkout (compra guest) */}
+        <AuthModalIsland open={c.authOpen} onClose={c.closeAuth} />
+
+        {c.bajoConfirmOpen && (
+          <BajoPedidoConfirmModal
+            isPending={c.isPending}
+            items={c.backorderItems}
+            onConfirm={c.confirmBajoPedido}
+            onCancel={c.cancelBajoPedido}
+          />
+        )}
+      </div>
+
+      {/* Móvil: barra fija con el total y el avance (sin barra de navegación ni sello) */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-40 hidden items-center justify-between gap-4 border-t border-border bg-bg px-4 pt-3 shadow-[0_-10px_30px_-18px_rgba(27,25,25,0.35)] max-[820px]:flex"
+        style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }}
+      >
+        <div className="min-w-0">
+          <p className="font-body text-[12.5px] text-text-muted">Total a pagar</p>
+          <p key={c.total} className="ck-total font-display text-[24px] leading-none tabular-nums text-text">
+            {formatCurrency(c.total)}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onBar}
+          disabled={barDisabled}
+          className="h-[54px] min-w-[150px] rounded-sm bg-text px-7 font-body text-[15px] font-semibold text-bg transition-[background-color,transform] duration-200 active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-border disabled:text-text-muted"
+        >
+          {barLabel}
+        </button>
+      </div>
+      <div className="h-20 max-[820px]:block min-[821px]:hidden" aria-hidden="true" />
+    </>
   );
 }
 

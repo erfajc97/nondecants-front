@@ -2,7 +2,8 @@
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "embla-carousel-react": ["./src/app/lib/nativeCarousel.ts"]
     },
     "jsx": "react-jsx",
     "jsxImportSource": "react"

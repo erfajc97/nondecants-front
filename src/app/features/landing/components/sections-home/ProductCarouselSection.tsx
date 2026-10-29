@@ -75,7 +75,8 @@ export default function ProductCarouselSection({
                 <>
                   <RoundArrow direction="prev" onClick={scrollPrev} disabled={!canPrev} label="Anterior" />
                   <RoundArrow direction="next" onClick={scrollNext} disabled={!canNext} label="Siguiente" />
-                  <span className="max-md:hidden"><PillLink href={viewAllHref}>Ver más →</PillLink></span>
+                  {/* En móvil "Ver más →" va arriba a la derecha, junto al título. */}
+                  <PillLink href={viewAllHref}>Ver más →</PillLink>
                 </>
               }
             />
@@ -103,10 +104,10 @@ export default function ProductCarouselSection({
           </>
         )}
 
-        {/* CTA móvil */}
-        {(showCTA || (!isLoading && products.length > 0)) && (
+        {/* CTA final opcional (último carrusel del home, solo móvil). */}
+        {showCTA && !isLoading && (
           <div className="mt-6 text-center min-[821px]:hidden">
-            <PillLink href={viewAllHref}>{showCTA ? "Ver todo el catálogo" : "Ver más →"}</PillLink>
+            <PillLink href={viewAllHref}>Ver todo el catálogo</PillLink>
           </div>
         )}
       </div>

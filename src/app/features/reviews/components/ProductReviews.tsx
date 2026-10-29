@@ -275,7 +275,7 @@ function ProductReviewsContent({ productId, productName }: ProductReviewsProps) 
         </>
       ) : (
         <p className="py-6 text-left font-body text-[15px] text-text-muted">
-          Todavía no hay reseñas de este perfume. Las compras verificadas pueden dejar la primera.
+          Sé el primero en dejar una reseña. Las compras verificadas pueden dejar la primera.
         </p>
       )}
 

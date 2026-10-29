@@ -28,7 +28,7 @@ export const MOCK_TRACKING_STEPS: TrackingStep[] = [
 export const MOCK_TRACKING_ORDER = {
   id: 'ORD-2045Y-50ML',
   name: 'Bourbon EDP',
-  image: '/home-3.png',
+  image: '/home-3.webp',
   status: 'En tránsito' as const,
   progress: 83,
   estimatedDate: '25/08/2026',
@@ -36,10 +36,10 @@ export const MOCK_TRACKING_ORDER = {
 
 // === ORDERS (no entregados) ===
 export const MOCK_PENDING_ORDERS = [
-  { id: 'ORD-2045Y-50ML', name: 'Bourbon EDP', image: '/home-3.png', date: '20 Febrero 2026', price: 285, status: 'En tránsito' },
-  { id: 'ORD-2045Y-50ML', name: 'Bourbon EDP', image: '/home-3.png', date: '20 Febrero 2026', price: 285, status: 'Entregado' },
-  { id: 'ORD-2045Y-50ML', name: 'Bourbon EDP', image: '/home-3.png', date: '20 Febrero 2026', price: 285, status: 'Entregado' },
-  { id: 'ORD-2045Y-50ML', name: 'Bourbon EDP', image: '/home-3.png', date: '20 Febrero 2026', price: 285, status: 'Entregado' },
+  { id: 'ORD-2045Y-50ML', name: 'Bourbon EDP', image: '/home-3.webp', date: '20 Febrero 2026', price: 285, status: 'En tránsito' },
+  { id: 'ORD-2045Y-50ML', name: 'Bourbon EDP', image: '/home-3.webp', date: '20 Febrero 2026', price: 285, status: 'Entregado' },
+  { id: 'ORD-2045Y-50ML', name: 'Bourbon EDP', image: '/home-3.webp', date: '20 Febrero 2026', price: 285, status: 'Entregado' },
+  { id: 'ORD-2045Y-50ML', name: 'Bourbon EDP', image: '/home-3.webp', date: '20 Febrero 2026', price: 285, status: 'Entregado' },
 ];
 
 // === PROFILE ===
@@ -58,7 +58,7 @@ export const MOCK_PREFERENCES = ['Perfumes Árabes', 'Perfumes de Nicho'];
 
 // === PAYMENTS ===
 export const MOCK_PAYMENTS = [
-  { id: '1', name: 'Bourbon EDP', image: '/home-3.png', method: 'efectivo', amount: 340000, date: '4 de Enero 2026', status: 'Pagado' },
-  { id: '2', name: 'Bourbon EDP', image: '/home-3.png', method: 'efectivo', amount: 340000, date: '4 de Enero 2026', status: 'Pagado' },
-  { id: '3', name: 'Bourbon EDP', image: '/home-3.png', method: 'efectivo', amount: 340000, date: '4 de Enero 2026', status: 'Pagado' },
+  { id: '1', name: 'Bourbon EDP', image: '/home-3.webp', method: 'efectivo', amount: 340000, date: '4 de Enero 2026', status: 'Pagado' },
+  { id: '2', name: 'Bourbon EDP', image: '/home-3.webp', method: 'efectivo', amount: 340000, date: '4 de Enero 2026', status: 'Pagado' },
+  { id: '3', name: 'Bourbon EDP', image: '/home-3.webp', method: 'efectivo', amount: 340000, date: '4 de Enero 2026', status: 'Pagado' },
 ];

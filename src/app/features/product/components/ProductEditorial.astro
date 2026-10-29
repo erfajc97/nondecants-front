@@ -55,6 +55,13 @@ const sigParagraphs = (product.signatureDescription ?? '')
   .map((t) => t.trim())
   .filter(Boolean);
 const sigDots = allNotes.slice(0, 6);
+// Imagen de la firma; si no hay, la foto ambientada del producto (2.ª foto o la principal).
+const sigImage =
+  product.signatureImageUrl ||
+  (product.images && product.images.length > 1 ? product.images[1] : undefined) ||
+  product.images?.[0] ||
+  product.image ||
+  '';
 
 // Promesa de autenticidad — quemada en todos los productos
 const TRUST = [
@@ -85,10 +92,10 @@ const prjRings = prj != null ? Math.max(1, Math.round(prj / 2)) : 0;
 {/* ── La firma ── */}
 {part === 'firma' && flags.hasSignature && (
   <section id="p-firma" data-rv class={SEC}>
-    <div class:list={[WRAP, 'grid gap-6 md:gap-[clamp(24px,5vw,80px)]', product.signatureImageUrl ? 'items-center md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]' : 'md:grid-cols-1']}>
-      {product.signatureImageUrl && (
+    <div class:list={[WRAP, 'grid gap-6 md:gap-[clamp(24px,5vw,80px)]', sigImage ? 'items-center md:grid-cols-2' : 'md:grid-cols-1']}>
+      {sigImage && (
         <figure class="pdp-sig relative m-0 aspect-square overflow-hidden rounded-md bg-text md:order-1">
-          <img src={product.signatureImageUrl} alt={product.signatureTitle ?? product.name} class="h-full w-full object-cover" loading="lazy" />
+          <img src={sigImage} alt={product.signatureTitle ?? product.name} class:list={['h-full w-full', product.signatureImageUrl ? 'object-cover' : 'object-contain p-[8%]']} loading="lazy" />
           {sigDots.length > 0 && (
             <figcaption class="absolute bottom-3.5 left-3.5 flex gap-1.5">
               {sigDots.map((n, i) => (
@@ -98,11 +105,11 @@ const prjRings = prj != null ? Math.max(1, Math.round(prj / 2)) : 0;
           )}
         </figure>
       )}
-      <div class:list={[product.signatureImageUrl ? 'md:order-2' : '']}>
+      <div class:list={[sigImage ? 'md:order-2' : '']}>
         <span class="eyebrow k">La firma</span>
-        {product.signatureTitle && (
+        {(product.signatureTitle || product.name) && (
           <h2 class="mb-[18px] mt-2.5 font-display text-[clamp(34px,4.4vw,62px)] font-normal leading-none tracking-[-0.02em] text-text">
-            {product.signatureTitle}
+            {product.signatureTitle || product.name}
           </h2>
         )}
         {sigParagraphs.map((t, i) => (

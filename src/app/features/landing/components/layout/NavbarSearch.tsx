@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
 import { productUrl } from '@/app/helpers/productUrl';
 import type { Product } from '@/app/types/global.types';
+import type { Reason } from '@/app/lib/searchIndex';
 import { minPriceOf, useNavbarSearchHook } from '../../hooks/useNavbarSearchHook';
 import { useDialogBehavior } from './useDialogBehavior';
 import { IconSearch, IconClose, IconPlane } from './NavIcons';
@@ -71,7 +72,7 @@ function useTypingPlaceholder(active: boolean) {
   return { txt, reduced };
 }
 
-function ResultRow({ p, q, i, onNavigate }: { p: Product; q: string; i: number; onNavigate: () => void }) {
+function ResultRow({ p, q, i, onNavigate, reason }: { p: Product; q: string; i: number; onNavigate: () => void; reason?: Reason }) {
   return (
     <a
       href={productUrl(p)}
@@ -97,6 +98,14 @@ function ResultRow({ p, q, i, onNavigate }: { p: Product; q: string; i: number; 
         <b className="truncate font-display text-[19px] font-normal leading-[1.15] text-text">
           <Highlight text={p.name} q={q} />
         </b>
+        {reason && reason.kind !== 'name' && (
+          <span className="flex items-center gap-1.5 font-body text-[12.5px] font-semibold text-accent-hover">
+            {reason.color ? (
+              <i className="inline-block h-2 w-2 rounded-full border border-border" style={{ background: reason.color }} aria-hidden="true" />
+            ) : null}
+            {reason.label}
+          </span>
+        )}
         {p.bajoPedido && (
           <span className="font-body text-[12.5px] font-semibold text-warning">Por encargo · 13–17 días</span>
         )}
@@ -154,7 +163,7 @@ export default function NavbarSearch() {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
-  useEffect(() => setKb(-1), [s.term, open, s.results.length]);
+  useEffect(() => setKb(-1), [s.term, open, s.hits.length]);
 
   const rows = () => Array.from(bodyRef.current?.querySelectorAll<HTMLElement>('[data-sk]') ?? []);
 
@@ -190,8 +199,8 @@ export default function NavbarSearch() {
   };
 
   const trimmed = s.q.trim();
-  const showSkeleton = s.active && s.results.length === 0 && (s.isLoading || s.typing);
-  const noResults = s.active && !s.typing && !s.isLoading && s.results.length === 0;
+  const showSkeleton = s.active && s.hits.length === 0 && s.isLoading;
+  const noResults = s.active && !s.isLoading && s.hits.length === 0;
 
   const panel = (
     <div
@@ -282,18 +291,32 @@ export default function NavbarSearch() {
                   </div>
                 </div>
               )}
-              <div className="pt-4">
-                <SectionTitle>Explora</SectionTitle>
-                <div className="flex flex-wrap gap-2">
-                  {s.brands.map((b, i) => (
-                    <button key={b} onClick={() => pick(b)} className={chipCls} style={{ ['--i' as string]: i }}>
-                      {b}
-                    </button>
-                  ))}
-                  <a href="/catalogo/combos" className={chipCls}>Combos</a>
-                  <a href="/bajo-pedido" className={chipCls}>Bajo pedido</a>
+              {s.mostSearched.length > 0 && (
+                <div className="pt-4">
+                  <SectionTitle>Lo más buscado</SectionTitle>
+                  <div className="flex flex-wrap gap-2">
+                    {s.mostSearched.map((b, i) => (
+                      <button key={b} onClick={() => pick(b)} className={chipCls} style={{ ['--i' as string]: i }}>
+                        {b}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+              {s.noteChips.length > 0 && (
+                <div className="pt-4">
+                  <SectionTitle>Busca por nota</SectionTitle>
+                  <div className="flex flex-wrap gap-2">
+                    {s.noteChips.map((n, i) => (
+                      <button key={n.name} onClick={() => pick(n.name)} className={chipCls} style={{ ['--i' as string]: i }}>
+                        <i className="inline-block h-2.5 w-2.5 rounded-full border border-border" style={{ background: n.color }} aria-hidden="true" />
+                        {n.name}
+                        <span className="text-[12.5px] tabular-nums text-text-muted">{n.count}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               {s.popularProducts.length > 0 && (
                 <div className="pt-4">
                   <SectionTitle>Lo que más se pide</SectionTitle>
@@ -305,10 +328,6 @@ export default function NavbarSearch() {
                 </div>
               )}
             </>
-          )}
-
-          {open && trimmed && !s.active && (
-            <p className="py-6 font-body text-sm text-text-muted">Escribe al menos 2 letras para buscar.</p>
           )}
 
           {showSkeleton && (
@@ -326,18 +345,29 @@ export default function NavbarSearch() {
             </div>
           )}
 
-          {s.active && s.results.length > 0 && (
+          {s.active && s.hits.length > 0 && (
             <>
-              {s.matchingBrands.length > 0 && (
+              {(s.houses.length > 0 || s.notes.length > 0) && (
                 <div className="flex flex-wrap gap-2 pt-4">
-                  {s.matchingBrands.map((b) => (
+                  {s.houses.map((h) => (
                     <a
-                      key={b}
-                      href={`/catalogo/perfumes?search=${encodeURIComponent(b)}`}
+                      key={h.name}
+                      href={`/catalogo/perfumes?search=${encodeURIComponent(h.name)}`}
                       onClick={() => s.saveRecent(s.q)}
                       className="nd-rise inline-flex h-[38px] items-center gap-2 rounded-full border border-text bg-text px-[15px] font-body text-[14.5px] text-bg"
                     >
-                      Casa · {b} <span aria-hidden="true">→</span>
+                      Casa · {h.name} <span className="tabular-nums text-stone">{h.count}</span> <span aria-hidden="true">→</span>
+                    </a>
+                  ))}
+                  {s.notes.map((n) => (
+                    <a
+                      key={n.name}
+                      href={`/catalogo/perfumes?search=${encodeURIComponent(n.name)}`}
+                      onClick={() => s.saveRecent(s.q)}
+                      className="nd-rise inline-flex h-[38px] items-center gap-2 rounded-full border border-text px-[15px] font-body text-[14.5px] text-text"
+                    >
+                      <i className="inline-block h-2.5 w-2.5 rounded-full border border-border" style={{ background: n.color }} aria-hidden="true" />
+                      Nota · {n.name} <span className="tabular-nums text-text-muted">{n.count}</span> <span aria-hidden="true">→</span>
                     </a>
                   ))}
                 </div>
@@ -353,10 +383,11 @@ export default function NavbarSearch() {
                   Perfumes
                 </SectionTitle>
                 <div className="grid gap-0.5">
-                  {s.results.map((p, i) => (
+                  {s.hits.map(({ product: p, reason }, i) => (
                     <ResultRow
                       key={p.id}
                       p={p}
+                      reason={reason}
                       q={s.term}
                       i={i}
                       onNavigate={() => {
@@ -382,7 +413,17 @@ export default function NavbarSearch() {
           {noResults && (
             <div className="grid gap-2.5 pb-1.5 pt-6">
               <p className="font-display text-[28px] leading-tight text-text">No encontramos «{s.term}»</p>
-              <p className="font-body text-sm text-text-muted">Revisa la ortografía o prueba con la marca o una nota.</p>
+              {s.suggestion ? (
+                <p className="font-body text-[15px] text-text-soft">
+                  ¿Quisiste decir{' '}
+                  <button onClick={() => pick(s.suggestion!)} className="font-semibold text-text underline underline-offset-[3px]">
+                    {s.suggestion}
+                  </button>
+                  ?
+                </p>
+              ) : (
+                <p className="font-body text-sm text-text-muted">Revisa la ortografía o prueba con la marca o una nota.</p>
+              )}
               <div className="mt-2 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3.5 gap-y-1.5 rounded-[10px] border border-dashed border-accent bg-gold-light p-4">
                 <span className="grid h-11 w-11 place-items-center rounded-full bg-text text-accent">
                   <IconPlane className="h-5 w-5" />

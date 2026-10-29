@@ -1,237 +1,146 @@
-import { useState } from 'react';
-import {
-  CATALOG_GENDERS,
-  CATALOG_TIME_OF_DAY,
-  CATALOG_CONCENTRATIONS,
-  CATALOG_PROJECTIONS,
-} from '../data';
-import FilterPillGroup from './FilterPillGroup';
-import FilterPriceRange from './FilterPriceRange';
-import {
-  useCategoriesWithMarcasQuery,
-  sortCategoriesByHierarchy,
-} from '@/app/tanstack-queries/categoriesQuery';
-import type { Gender, TimeOfDay, Concentration, Projection } from '@/app/types/global.types';
+import { GENDER_OPTIONS, MOMENTO_OPTIONS, NOTE_OPTIONS, PRICE3_OPTIONS } from '../data';
+import type { CatalogCriteria, FilterOption, FilterSection } from '../types';
+import MomentIcon from './MomentIcon';
 
 interface CatalogFiltersProps {
-  gender: Gender | '';
-  onGenderChange: (v: Gender | '') => void;
-  timeOfDay: TimeOfDay | '';
-  onTimeOfDayChange: (v: TimeOfDay | '') => void;
-  concentration: Concentration | '';
-  onConcentrationChange: (v: Concentration | '') => void;
-  projection: Projection | '';
-  onProjectionChange: (v: Projection | '') => void;
-  minPrice?: number;
-  maxPrice?: number;
-  onPriceRangeChange: (min?: number, max?: number) => void;
-  categoryId?: number;
-  onCategoryChange: (v?: number) => void;
-  marcaId?: number;
-  onMarcaChange: (v?: number) => void;
-  hasActiveFilters: boolean;
-  onClearFilters: () => void;
-  hideCategories?: boolean;
+  criteria: CatalogCriteria;
+  counts: Record<string, number>;
+  casaOptions: FilterOption[];
+  hideCasas?: boolean;
+  onToggle: (section: FilterSection, value: string) => void;
 }
 
-const normalizeText = (s: string) =>
-  s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const TITLE = 'mb-3 font-body text-[12.5px] font-semibold uppercase tracking-[0.12em] text-text';
 
-/** Indicador cuadrado (estilo checkbox de la referencia) para listas de
- *  selección única: la API filtra por UN solo valor de marca/concentración. */
-function CheckRow({
-  label,
-  active,
-  onToggle,
-}: {
-  label: string;
-  active: boolean;
-  onToggle: () => void;
-}) {
+function Check({ className = '' }: { className?: string }) {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M5 12.5l4.5 4.5L19 7" />
+    </svg>
+  );
+}
+
+interface OptionButtonProps {
+  option: FilterOption;
+  selected: boolean;
+  count: number;
+  onPress: () => void;
+  leading?: React.ReactNode;
+  serif?: boolean;
+}
+
+/** Opción en píldora: elegida = negra con check dorado; sin resultados = apagada y no tocable. */
+function OptionPill({ option, selected, count, onPress, leading, serif }: OptionButtonProps) {
+  const off = count === 0 && !selected;
   return (
     <button
       type="button"
-      onClick={onToggle}
-      aria-pressed={active}
-      className="group -mx-1.5 flex min-h-[42px] w-[calc(100%+12px)] items-center gap-3 rounded-md px-1.5 text-left transition-colors hover:bg-bg-alt"
+      onClick={onPress}
+      disabled={off}
+      aria-pressed={selected}
+      className={`inline-flex h-10 items-center gap-2 rounded-full border px-3.5 transition-colors ${
+        selected ? 'border-text bg-text text-white' : 'border-border bg-white text-text hover:border-text'
+      } ${off ? 'pointer-events-none opacity-35' : ''} ${serif ? 'font-display text-[15px]' : 'font-body text-sm font-semibold'}`}
     >
-      <span
-        aria-hidden
-        className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[5px] border-[1.5px] transition-colors ${
-          active ? 'border-text bg-text' : 'border-[#b7b2a9] bg-white'
-        }`}
-      >
-        <svg
-          width="13"
-          height="13"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3.5"
-          className={`text-white transition-transform duration-300 ${active ? 'scale-100' : 'scale-0'}`}
-        >
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-      </span>
-      <span className="font-body text-[15px] text-text">
-        {label}
-      </span>
+      {selected && <Check className="text-accent" />}
+      {leading}
+      {option.label}
+      <span className={`font-body text-[11px] font-medium ${selected ? 'text-white/70' : 'text-text-muted'}`}>{count}</span>
     </button>
   );
 }
 
-export default function CatalogFilters({
-  gender,
-  onGenderChange,
-  timeOfDay,
-  onTimeOfDayChange,
-  concentration,
-  onConcentrationChange,
-  projection,
-  onProjectionChange,
-  maxPrice,
-  onPriceRangeChange,
-  categoryId,
-  onCategoryChange,
-  marcaId,
-  onMarcaChange,
-  hasActiveFilters,
-  onClearFilters,
-  hideCategories,
-}: CatalogFiltersProps) {
-  const { data: categories = [] } = useCategoriesWithMarcasQuery();
-  const filteredCategories = sortCategoriesByHierarchy(
-    categories.filter((c) => c.name.toLowerCase() !== 'all'),
+/** Casa: fila con casilla. */
+function CasaRow({ option, selected, count, onPress }: OptionButtonProps) {
+  const off = count === 0 && !selected;
+  return (
+    <button
+      type="button"
+      onClick={onPress}
+      disabled={off}
+      aria-pressed={selected}
+      className={`flex min-h-10 w-full items-center gap-3 rounded-sm py-1.5 text-left font-body text-sm text-text transition-colors hover:bg-bg-alt ${off ? 'pointer-events-none opacity-35' : ''}`}
+    >
+      <span
+        className={`grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[4px] border ${
+          selected ? 'border-text bg-text text-accent' : 'border-border bg-white'
+        }`}
+      >
+        {selected && <Check />}
+      </span>
+      <span className={`flex-1 ${selected ? 'font-semibold' : ''}`}>{option.label}</span>
+      <span className="text-[11px] text-text-muted">{count}</span>
+    </button>
   );
+}
 
-  // Marcas de la lista: las de la categoría elegida; si no hay categoría,
-  // todas las marcas (dedupe por id).
-  const marcaSource = categoryId
-    ? (filteredCategories.find((c) => Number(c.id) === categoryId)?.marcas ?? [])
-    : filteredCategories.flatMap((c) => c.marcas);
-  const marcas = Array.from(new Map(marcaSource.map((m) => [String(m.id), m])).values());
-
-  // Buscador de marcas (filtra la lista localmente).
-  const [marcaSearch, setMarcaSearch] = useState('');
-  const visibleMarcas = marcaSearch
-    ? marcas.filter((m) => normalizeText(m.name).includes(normalizeText(marcaSearch)))
-    : marcas;
+export default function CatalogFilters({ criteria, counts, casaOptions, hideCasas, onToggle }: CatalogFiltersProps) {
+  const c = (section: FilterSection, value: string) => counts[`${section}:${value}`] ?? 0;
+  const has = (section: FilterSection, value: string) => criteria[section].includes(value);
 
   return (
-    <div>
-      {hasActiveFilters && (
-        <button
-          type="button"
-          onClick={onClearFilters}
-          className="font-body text-sm font-semibold text-text-soft underline underline-offset-[3px] transition-colors hover:text-text"
-        >
-          Limpiar filtros
-        </button>
-      )}
-
-      {/* 1. Categoría — chips (Árabes / Diseñador / Nicho primero) */}
-      {!hideCategories && filteredCategories.length > 0 && (
-        <FilterPillGroup
-          label="1. Categoría"
-          options={filteredCategories.map((c) => ({ value: String(c.id), label: c.name }))}
-          selected={categoryId != null ? [String(categoryId)] : []}
-          onChange={(values) => {
-            const next = values.find((v) => v !== String(categoryId));
-            onCategoryChange(next != null ? Number(next) : undefined);
-          }}
-          singleSelect
-        />
-      )}
-
-      {/* 2. Género — chips */}
-      <FilterPillGroup
-        label="2. Género"
-        options={CATALOG_GENDERS}
-        selected={gender ? [gender] : []}
-        onChange={(values) => {
-          const next = values.find((v) => v !== gender) || '';
-          onGenderChange(next as Gender | '');
-        }}
-        singleSelect
-      />
-
-      {/* 3. Ocasión — chips */}
-      <FilterPillGroup
-        label="3. Ocasión"
-        options={CATALOG_TIME_OF_DAY}
-        selected={timeOfDay ? [timeOfDay] : []}
-        onChange={(values) => {
-          const next = values.find((v) => v !== timeOfDay) || '';
-          onTimeOfDayChange(next as TimeOfDay | '');
-        }}
-        singleSelect
-      />
-
-      {/* 4. Marca — buscador + lista */}
-      {marcas.length > 0 && (
-        <div className="border-b border-border py-4">
-          <p className="mb-3 font-body text-[12.5px] font-bold uppercase tracking-[0.08em] text-text-muted">4. Marca</p>
-          {marcas.length > 5 && (
-            <input
-              type="search"
-              value={marcaSearch}
-              onChange={(e) => setMarcaSearch(e.target.value)}
-              placeholder="Buscar marca…"
-              className="mb-3 h-10 w-full rounded-full border border-border bg-white px-4 font-body text-sm text-text placeholder:text-text-muted focus:border-text focus:outline-none"
-            />
-          )}
-          <div className="grid max-h-56 gap-0.5 overflow-y-auto pr-1">
-            {visibleMarcas.map((m) => (
-              <CheckRow
-                key={m.id}
-                label={m.name}
-                active={marcaId === Number(m.id)}
-                onToggle={() => onMarcaChange(marcaId === Number(m.id) ? undefined : Number(m.id))}
-              />
-            ))}
-            {visibleMarcas.length === 0 && (
-              <p className="font-body text-xs text-text-muted">Sin marcas para “{marcaSearch}”.</p>
-            )}
-          </div>
+    <div className="divide-y divide-border">
+      <section className="py-5">
+        <h3 className={TITLE}>Para</h3>
+        <div className="flex flex-wrap gap-2">
+          {GENDER_OPTIONS.map((o) => (
+            <OptionPill key={o.value} option={o} selected={has('genders', o.value)} count={c('genders', o.value)} onPress={() => onToggle('genders', o.value)} />
+          ))}
         </div>
-      )}
+      </section>
 
-      {/* 5. Concentración — lista */}
-      <div className="border-b border-border py-4">
-        <p className="mb-3 font-body text-[12.5px] font-bold uppercase tracking-[0.08em] text-text-muted">5. Concentración</p>
-        <div className="grid gap-0.5">
-          {CATALOG_CONCENTRATIONS.map((opt) => (
-            <CheckRow
-              key={opt.value}
-              label={opt.label}
-              active={concentration === opt.value}
-              onToggle={() =>
-                onConcentrationChange(concentration === opt.value ? '' : (opt.value as Concentration))
-              }
+      <section className="py-5">
+        <h3 className={TITLE}>Momento</h3>
+        <div className="flex flex-wrap gap-2">
+          {MOMENTO_OPTIONS.map((o) => (
+            <OptionPill
+              key={o.value}
+              option={o}
+              selected={has('momentos', o.value)}
+              count={c('momentos', o.value)}
+              onPress={() => onToggle('momentos', o.value)}
+              leading={<MomentIcon name={o.value} />}
             />
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* 6. Proyección — chips */}
-      <FilterPillGroup
-        label="6. Proyección"
-        options={CATALOG_PROJECTIONS}
-        selected={projection ? [projection] : []}
-        onChange={(values) => {
-          const newVal = values.find((v) => v !== projection) || '';
-          onProjectionChange(newVal as Projection | '');
-        }}
-        singleSelect
-      />
+      <section className="py-5">
+        <h3 className={TITLE}>Precio del 3 ml</h3>
+        <div className="flex flex-wrap gap-2">
+          {PRICE3_OPTIONS.map((o) => (
+            <OptionPill key={o.value} option={o} selected={has('precios', o.value)} count={c('precios', o.value)} onPress={() => onToggle('precios', o.value)} />
+          ))}
+        </div>
+      </section>
 
-      <FilterPriceRange
-        label="Precio máximo"
-        min={0}
-        max={500}
-        value={maxPrice ?? 500}
-        onChange={(val) => onPriceRangeChange(undefined, val < 500 ? val : undefined)}
-      />
+      <section className="py-5">
+        <h3 className={TITLE}>Notas que te gustan</h3>
+        <div className="flex flex-wrap gap-2">
+          {NOTE_OPTIONS.map((o) => (
+            <OptionPill
+              key={o.value}
+              option={o}
+              serif
+              selected={has('notas', o.value)}
+              count={c('notas', o.value)}
+              onPress={() => onToggle('notas', o.value)}
+              leading={<span className="h-2.5 w-2.5 shrink-0 rounded-full border border-black/10" style={{ backgroundColor: o.color }} aria-hidden />}
+            />
+          ))}
+        </div>
+      </section>
+
+      {!hideCasas && casaOptions.length > 0 && (
+        <section className="py-5">
+          <h3 className={TITLE}>Casas</h3>
+          <div className="max-h-[300px] overflow-y-auto pr-1">
+            {casaOptions.map((o) => (
+              <CasaRow key={o.value} option={o} selected={has('casas', o.value)} count={c('casas', o.value)} onPress={() => onToggle('casas', o.value)} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

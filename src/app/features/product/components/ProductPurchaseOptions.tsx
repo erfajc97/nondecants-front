@@ -13,6 +13,7 @@ import { useDeliveryOffsetQuery, useDispatchCutoffQuery } from '@/app/tanstack-q
 import { useProductReviewsQuery } from '@/app/tanstack-queries/reviewsQuery';
 import { PAYMENT_LOGOS } from '@/app/components/paymentLogos';
 import Stars from '@/app/features/reviews/components/Stars';
+import PhosphorIcon, { type PhosphorIconName } from '@/assets/svg/PhosphorIcon';
 import type { Product, ProductVariant } from '@/app/types/global.types';
 
 type SelectedOption =
@@ -69,7 +70,7 @@ const pad2 = (n: number) => String(n).padStart(2, '0');
  * Despacho con cuenta regresiva (prototipo .cd): pulso verde, "Se despacha
  * hoy/mañana", "Llega …", reloj hasta la hora de corte y barra dorada.
  */
-function DispatchCountdown({
+export function DispatchCountdown({
   cutoffHour,
   offsetDays,
   stockLeft,
@@ -128,61 +129,37 @@ function DispatchCountdown({
   );
 }
 
-const ICON_PROPS = {
-  width: 22,
-  height: 22,
-  viewBox: '0 0 24 24',
-  fill: 'none',
-  stroke: 'currentColor',
-  strokeWidth: 1.5,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
-  'aria-hidden': true,
-};
-
-const TRUST = [
-  {
-    t: '100%',
-    l: 'Original y sellado',
-    icon: (
-      <svg {...ICON_PROPS}>
-        <path d="M12 3l2.4 1.6 2.9-.1 1.2 2.6 2.5 1.5-.6 2.8 1.1 2.7-2 2.1-.3 2.9-2.8.8-2.1 2-2.6-1.3-2.7 1.1-2-2.1-2.9-.4-.8-2.8-2-2.1 1.2-2.6-.3-2.9 2.5-1.5L7 4.5l2.9.1z" />
-        <path d="m8.8 12.2 2.3 2.3 4.2-4.6" />
-      </svg>
-    ),
-  },
-  {
-    t: '24–72 h',
-    l: 'Envío a todo Ecuador',
-    icon: (
-      <svg {...ICON_PROPS}>
-        <path d="M3 6.5h11v9H3zM14 9.5h3.8l3.2 3v3h-7z" />
-        <circle cx="7" cy="17.5" r="1.7" />
-        <circle cx="17.5" cy="17.5" r="1.7" />
-      </svg>
-    ),
-  },
-  {
-    t: '3 · 5 · 10',
-    l: 'ml decantados aquí',
-    icon: (
-      <svg {...ICON_PROPS}>
-        <path d="M12 3.5s6 6.2 6 10.5a6 6 0 0 1-12 0c0-4.3 6-10.5 6-10.5z" />
-        <path d="M6 14h12" />
-      </svg>
-    ),
-  },
+/** Fila de confianza (prototipo): íconos Phosphor sólidos de 26 px, un solo color. */
+export const TRUST: { t: string; l: string; icon: PhosphorIconName }[] = [
+  { t: '100%', l: 'Original y sellado', icon: 'sealCheck' },
+  { t: '24–72 h', l: 'Envío a todo Ecuador', icon: 'truck' },
+  { t: '3 · 5 · 10', l: 'ml decantados aquí', icon: 'dropHalf' },
 ];
+
+export function TrustRow({ items }: { items: { t: string; l: string; icon: PhosphorIconName }[] }) {
+  return (
+    <div className="grid grid-cols-3 rounded border border-border text-center font-body text-[12.5px] text-text-muted">
+      {items.map((x, i) => (
+        <div key={x.l} className={`grid justify-items-center gap-0.5 px-1.5 py-3 ${i > 0 ? 'border-l border-border' : ''}`}>
+          <span className="text-text">
+            <PhosphorIcon name={x.icon} className="h-[26px] w-[26px]" />
+          </span>
+          <b className="font-display text-[22px] font-normal leading-none text-accent-hover">{x.t}</b>
+          {x.l}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function ProductPurchaseOptions({
   product,
-  selectedVariant: externalVariant,
   onVariantChange,
 }: ProductPurchaseOptionsProps) {
   // Default selection: full bottle if available, else first available decant
   const [selected, setSelected] = useState<SelectedOption>(() => {
+    // Entra con el primer decant disponible (3 ml); el frasco solo si no hay decants.
     const stock = Number(product.stock ?? 0);
-    if (stock > 0) return { type: 'full' };
     const openMl = Number(product.openBottleMlRemaining ?? 0);
     const totalAvailMl = openMl + stock * Number(product.totalMl ?? 0);
     const firstAvailable = (product.variants ?? [])
@@ -194,13 +171,6 @@ export default function ProductPurchaseOptions({
   const [hasHydrated, setHasHydrated] = useState(false);
 
   const addItem = useCartStore((s) => s.addItem);
-
-  // Sync external variant prop
-  useEffect(() => {
-    if (externalVariant === null) {
-      setSelected({ type: 'full' });
-    }
-  }, [externalVariant]);
 
   // Notify parent when selection changes (for gallery image switching)
   const handleSelectFull = () => {
@@ -226,7 +196,11 @@ export default function ProductPurchaseOptions({
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const variantId = new URLSearchParams(window.location.search).get('variant');
-    if (!variantId) return;
+    if (!variantId) {
+      // Sin ?variant: avisar a la galería del decant con el que entra la ficha.
+      if (selected.type === 'decant') onVariantChange?.(selected.variant);
+      return;
+    }
 
     const variant = (product.variants ?? []).find((v) => String(v.id) === variantId);
     if (variant && !variant.isFullBottle) {
@@ -377,7 +351,7 @@ export default function ProductPurchaseOptions({
     return null;
   };
 
-  const [pendingAction, setPendingAction] = useState<null | 'add' | 'fast'>(null);
+  const [pendingAction, setPendingAction] = useState<null | 'add'>(null);
   // Botón desde el que se disparó la acción pendiente (para las chispas tras el modal).
   const pendingBtn = useRef<HTMLElement | null>(null);
 
@@ -386,17 +360,10 @@ export default function ProductPurchaseOptions({
     if (!item) return;
     addItem(item);
     // Se queda en la ficha: agregar no debería sacar al cliente de lo que está
-    // mirando. Para ir a pagar está "Comprar ahora" y el ícono del carrito.
+    // mirando. Para ir a pagar está el ícono del carrito.
     sonnerResponse(`${product.name} agregado al carrito.`, 'success');
     spritz(btn ?? null, item.image);
     onAddToCartSuccess({ productName: product.name });
-  };
-
-  const proceedFastPurchase = () => {
-    const item = getCartItem();
-    if (!item) return;
-    addItem(item);
-    window.location.href = '/checkout';
   };
 
   /** Tamaños del selector, ya ordenados de menor a mayor ml. */
@@ -458,19 +425,8 @@ export default function ProductPurchaseOptions({
     proceedAdd(btn);
   };
 
-  const handleFastPurchase = () => {
-    if (!canPurchase) return;
-    if (!hasHydrated) { sonnerResponse('Cargando carrito...', 'error'); return; }
-    const item = getCartItem();
-    if (!item) { sonnerResponse('Selecciona una opcion.', 'error'); return; }
-    if (!inStock) { sonnerResponse('No hay stock disponible.', 'error'); return; }
-    if (selectedIsBajoPedido) { setPendingAction('fast'); return; }
-    proceedFastPurchase();
-  };
-
   const confirmBajoPedido = () => {
     if (pendingAction === 'add') proceedAdd(pendingBtn.current);
-    else if (pendingAction === 'fast') proceedFastPurchase();
     pendingBtn.current = null;
     setPendingAction(null);
   };
@@ -561,10 +517,12 @@ export default function ProductPurchaseOptions({
     </svg>
   );
   const btnBase =
-    'pdp-btn relative inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-[3px] font-body font-semibold tracking-[0.01em] transition-[background-color,color,transform] duration-200 active:scale-[0.985]';
+    'pdp-btn relative inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-[3px] font-body font-semibold tracking-[0.01em] transition-[background-color,color,transform] duration-200 active:scale-[0.97]';
 
-  const reviewCount = reviewsData?.count ?? 0;
-  const reviewAvg = reviewsData?.average ?? 0;
+  // Misma fuente y mismo criterio que la sección de reseñas (ProductReviews).
+  const hasReviews = !!reviewsData && reviewsData.count > 0 && (reviewsData.reviews?.length ?? 0) > 0;
+  const reviewCount = hasReviews ? reviewsData!.count : 0;
+  const reviewAvg = hasReviews ? reviewsData!.average : 0;
 
   return (
     <div className="grid gap-4 text-text">
@@ -715,30 +673,22 @@ export default function ProductPurchaseOptions({
       {/* CTAs */}
       <div ref={ctasRef}>
         {canPurchase ? (
-          <div className="grid grid-cols-1 gap-2 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
             <button
               type="button"
               onClick={(e) => handleAddToCart(e.currentTarget)}
               disabled={!inStock}
-              className={`${btnBase} h-[58px] bg-text px-6 text-[15.5px] text-white hover:bg-[#34312f] disabled:cursor-not-allowed disabled:opacity-50`}
+              className={`${btnBase} h-[56px] bg-text px-6 text-[14.5px] text-white hover:bg-[#34312f] disabled:cursor-not-allowed disabled:opacity-50`}
             >
               {addLabel}
             </button>
             <button
               type="button"
               onClick={handleWhatsapp}
-              className={`${btnBase} h-[58px] bg-white px-3 text-[15.5px] text-[#1c8f4a] shadow-[inset_0_0_0_1.5px_#1c8f4a] hover:bg-[#1c8f4a] hover:text-white`}
+              className={`${btnBase} h-[56px] bg-white px-3 text-[14.5px] text-[#1c8f4a] shadow-[inset_0_0_0_1.5px_#1c8f4a] hover:bg-[#1c8f4a] hover:text-white`}
             >
               {waIcon}
               Pedir por WhatsApp
-            </button>
-            <button
-              type="button"
-              onClick={handleFastPurchase}
-              disabled={!inStock}
-              className={`${btnBase} h-[58px] bg-accent px-6 text-[15.5px] text-text hover:bg-[#d4ba70] disabled:cursor-not-allowed disabled:opacity-50 md:col-span-2`}
-            >
-              Comprar ahora
             </button>
           </div>
         ) : (
@@ -749,15 +699,7 @@ export default function ProductPurchaseOptions({
       </div>
 
       {/* Confianza */}
-      <div className="grid grid-cols-3 rounded border border-border text-center font-body text-[12.5px] text-text-muted">
-        {TRUST.map((x, i) => (
-          <div key={x.t} className={`grid justify-items-center gap-0.5 px-1.5 py-3 ${i > 0 ? 'border-l border-border' : ''}`}>
-            <span className="text-accent-hover">{x.icon}</span>
-            <b className="font-display text-[22px] font-normal leading-none text-accent-hover">{x.t}</b>
-            {x.l}
-          </div>
-        ))}
-      </div>
+      <TrustRow items={TRUST} />
 
       {/* Medios de pago */}
       <div className="grid gap-2.5 border-t border-border pt-3.5">
@@ -787,7 +729,7 @@ export default function ProductPurchaseOptions({
       {canPurchase && (
         <div
           aria-hidden={!stickyOn}
-          className={`fixed inset-x-0 bottom-[calc(84px+env(safe-area-inset-bottom,0px))] z-[44] grid grid-cols-[minmax(0,1fr)_58px] gap-2 border-t border-border bg-white px-2.5 py-2 transition-[transform,visibility] duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] md:hidden ${
+          className={`fixed inset-x-0 bottom-[calc(var(--bnav-h,0px)+env(safe-area-inset-bottom,0px))] z-[44] grid grid-cols-[minmax(0,1fr)_58px] gap-2 border-t border-border bg-white px-2.5 py-2 shadow-[0_-8px_24px_-16px_rgba(27,25,25,0.3)] transition-[transform,visibility] duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] md:hidden ${
             stickyOn ? 'visible translate-y-0' : 'invisible translate-y-[calc(100%+120px)]'
           }`}
         >

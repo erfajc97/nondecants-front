@@ -18,7 +18,7 @@ const indexed = await fetchProducts({ limit: 200, page: 1 });
 >
   <div class="bg-bg min-h-screen">
     <div class="border-t border-border"></div>
-    <Catalog client:load bannerTitle="Catálogo" bannerDescription="Explora toda nuestra colección de perfumes" />
+    <Catalog client:load initialQuery={Astro.url.search} />
     <CatalogProductIndex products={indexed.content} />
   </div>
 </PublicLayout>

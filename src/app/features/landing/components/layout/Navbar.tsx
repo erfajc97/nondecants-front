@@ -6,7 +6,7 @@ import AnnouncementBar from './AnnouncementBar';
 import PerfumesMegaMenu from './PerfumesMegaMenu';
 import MobileMenu from './MobileMenu';
 import NavbarSearch from './NavbarSearch';
-import LiquidTabBar from './LiquidTabBar';
+import BottomNav from './BottomNav';
 import CartDrawer from '@/app/features/cart/components/CartDrawer';
 import { useCartStore } from '@/app/store/cart/cartStore';
 import { isLinkActive } from '../../hooks/useNavbarHook';
@@ -37,6 +37,13 @@ export default function Navbar() {
   // coincidir con el HTML del servidor (vacío / sin sesión) o React descarta el SSR.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   const itemCount = mounted ? storedItemCount : 0;
   const isAuthenticated = mounted ? storedIsAuthenticated : false;
 
@@ -89,9 +96,12 @@ export default function Navbar() {
       {/* Barra de avisos — marquee negro, fuera del header sticky */}
       <AnnouncementBar />
 
-      <header className="sticky top-0 z-30 border-b border-border bg-bg/95 text-text backdrop-blur-md">
+      <header
+        data-scrolled={scrolled}
+        className="sticky top-0 z-30 border-b border-border bg-bg/95 text-text backdrop-blur-md transition-shadow duration-300 data-[scrolled=true]:shadow-[0_10px_26px_-18px_rgba(27,25,25,0.35)]"
+      >
         <div className="relative">
-          <div className="mx-auto grid h-[58px] max-w-[1480px] grid-cols-[1fr_auto] items-center gap-1 px-[max(16px,3.4vw)] md:h-[66px] md:grid-cols-[1fr_auto_1fr] md:gap-4 md:px-[min(52px,3.4vw)]">
+          <div className="mx-auto grid h-[58px] max-w-[1480px] grid-cols-[1fr_auto] items-center gap-1 px-[max(16px,3.4vw)] min-[821px]:h-[66px] min-[821px]:grid-cols-[1fr_auto_1fr] min-[821px]:gap-4 min-[821px]:px-[min(52px,3.4vw)]">
             {/* Izquierda: logo */}
             <a href="/" className="block justify-self-start text-text" aria-label="NonDecants — Inicio">
               <img
@@ -99,12 +109,13 @@ export default function Navbar() {
                 alt="NonDecants"
                 width={543}
                 height={127}
-                className="h-6 w-auto md:h-7"
+                className="h-6 w-auto min-[821px]:h-7"
               />
             </a>
 
             {/* Centro: nav desktop */}
-            <nav className="hidden items-center gap-8 md:flex" aria-label="Navegación principal">
+            <nav className="hidden items-center gap-8 min-[821px]:flex" aria-label="Navegación principal">
+              <NavLink label="Inicio" href="/" />
               <MegaTrigger id="perfumes" label="Perfumes" href="/catalogo/perfumes" />
               <NavLink label="Combos" href="/catalogo/combos" />
               <MegaTrigger id="bajoPedido" label="Bajo pedido" href="/bajo-pedido" />
@@ -117,15 +128,9 @@ export default function Navbar() {
               onMouseEnter={() => setOpenDropdown(null)}
             >
               <NavbarSearch />
-              {isAuthenticated ? (
-                <a href="/mi-cuenta" className={`${ib} hidden md:grid`} aria-label="Mi cuenta">
-                  <IconUserCircle />
-                </a>
-              ) : (
-                <button onClick={() => setAuthOpen(true)} className={`${ib} hidden md:grid`} aria-label="Ingresar">
-                  <IconUserCircle />
-                </button>
-              )}
+              <a href="/cuenta" className={`${ib} hidden min-[821px]:grid`} aria-label="Mi cuenta">
+                <IconUserCircle />
+              </a>
               <a
                 href="/carrito"
                 className={ib}
@@ -148,7 +153,7 @@ export default function Navbar() {
                 )}
               </a>
               <button
-                className={`${ib} md:hidden`}
+                className={`${ib} min-[821px]:hidden`}
                 onClick={() => setMobileOpen((o) => !o)}
                 aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'}
                 aria-expanded={mobileOpen}
@@ -183,7 +188,7 @@ export default function Navbar() {
       </header>
 
       {/* Barra flotante inferior (mobile) */}
-      <LiquidTabBar
+      <BottomNav
         pathname={pathname}
         itemCount={itemCount}
         isAuthenticated={isAuthenticated}

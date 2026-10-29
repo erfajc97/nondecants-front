@@ -9,6 +9,15 @@ import DecantExplainerSection from '../../components/sections-home/DecantExplain
 import CombosSection from '../../components/sections-home/CombosSection';
 import MomentsSection from '../../components/sections-home/MomentsSection';
 import PromiseBand from '../../components/sections-home/PromiseBand';
+import FaqSection from '../../components/sections-home/FaqSection';
+
+/** "Antetítulo · Título" → { eyebrow, title }; sin separador usa el antetítulo por defecto. */
+function splitSectionTitle(raw: string, fallbackEyebrow: string) {
+  const [head, ...tail] = raw.split(/\s+[·•]\s+/);
+  return tail.length > 0
+    ? { eyebrow: head.trim(), title: tail.join(' · ').trim() }
+    : { eyebrow: fallbackEyebrow, title: raw.trim() };
+}
 
 function HomeContent() {
   const { sections, sectionsLoading } = useHomeHook();
@@ -19,40 +28,39 @@ function HomeContent() {
     return (
       <div className="bg-bg">
         <ProductCarouselSection title="" products={[]} isLoading />
-        <DecantExplainerSection />
         <ProductCarouselSection title="" products={[]} isLoading />
+        <DecantExplainerSection />
         <ExploreCategoriesSection />
         <BlogCarousel />
       </div>
     );
   }
 
-  // Orden fijo por posición: 1ª sección → "Recién llegados" · 2ª → "Lo que más
-  // se pide" · resto → carruseles al final. Los títulos vienen del admin.
+  // Posición fija: 1ª sección → "Recién llegados · Novedades", 2ª → "Lo que más
+  // se pide · Tienes que probarlos", el resto → carruseles por casa/mundo que
+  // van después de los banners Nicho/Árabes. Los títulos vienen del admin con
+  // el formato "Antetítulo · Título".
   const sorted = [...sections].sort((a, b) => a.order - b.order);
   const [first, second, ...rest] = sorted;
+
+  const renderSection = (section: (typeof sorted)[number], fallbackEyebrow: string) => {
+    const { eyebrow, title } = splitSectionTitle(section.title, fallbackEyebrow);
+    return (
+      <ProductCarouselSection
+        key={section.id}
+        title={title}
+        eyebrow={eyebrow}
+        products={section.products}
+      />
+    );
+  };
 
   return (
     <div className="bg-bg">
       <FeaturedHouseSection />
 
-      {first && (
-        <ProductCarouselSection
-          key={first.id}
-          title={first.title}
-          products={first.products}
-          eyebrow="Recién llegados"
-        />
-      )}
-
-      {second && (
-        <ProductCarouselSection
-          key={second.id}
-          title={second.title}
-          products={second.products}
-          eyebrow="Lo que más se pide"
-        />
-      )}
+      {first && renderSection(first, 'Recién llegados')}
+      {second && renderSection(second, 'Lo que más se pide')}
 
       <DecantExplainerSection />
       <CombosSection />
@@ -61,19 +69,14 @@ function HomeContent() {
 
       <ExploreCategoriesSection />
 
-      {/* El blog cierra después de los productos: cuenta la casa cuando el
-          visitante ya vio lo que se vende. Las valoraciones van justo después. */}
-      <BlogCarousel />
+      {rest.map((section) => renderSection(section, 'Selección de la casa'))}
+
       <VerifiedReviewsSection />
 
-      {rest.map((section, index) => (
-        <ProductCarouselSection
-          key={section.id}
-          title={section.title}
-          products={section.products}
-          showCTA={index === rest.length - 1}
-        />
-      ))}
+      {/* El blog no está en el prototipo; se mantiene entre reseñas y preguntas. */}
+      <BlogCarousel />
+
+      <FaqSection />
     </div>
   );
 }

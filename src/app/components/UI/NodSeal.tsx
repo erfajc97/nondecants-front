@@ -29,10 +29,9 @@ export default function NodSeal({ className = '', size }: NodSealProps) {
         <text
           fontSize="10.5"
           fontWeight="700"
-          letterSpacing="2.6"
           className="fill-accent font-body"
         >
-          <textPath href={`#${pathId}`}>ORIGINAL O NADA ✦ NONDECANTS ✦ ECUADOR ✦</textPath>
+          <textPath href={`#${pathId}`} textLength="290" lengthAdjust="spacing">ORIGINAL O NADA ✦ NONDECANTS ✦ ECUADOR ✦</textPath>
         </text>
       </svg>
       <img src="/favicon.png" alt="" />

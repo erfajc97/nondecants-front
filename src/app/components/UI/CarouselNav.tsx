@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { EmblaCarouselType } from 'embla-carousel';
+import type { NativeCarouselApi as EmblaCarouselType } from '@/app/lib/nativeCarousel';
 
 /** Tween de Embla: el default (25) se siente seco. Más alto = más suave. */
 export const EMBLA_DURATION = 50;

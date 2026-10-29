@@ -17,6 +17,11 @@ export interface CartItem {
   quantity: number;
   comboId?: number;
   comboProducts?: ComboProduct[];
+  /** Combo: ml de cada decant (3 / 5 / 10). El mismo combo en 2 tamaños = 2 líneas
+   *  (variantId = `combo-{id}-{size}`). Línea: "Combo X · {comboDecants} decants de {size} ml". */
+  size?: number;
+  /** Combo: cantidad de decants que trae (suma de cantidades de comboProducts). */
+  comboDecants?: number;
   bajoPedido?: boolean;
   /** Máximo de unidades que se pueden pedir (stock). undefined = sin límite
    *  (ej. frasco completo bajo pedido). Los decants SIEMPRE traen este tope. */

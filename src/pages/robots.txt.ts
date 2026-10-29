@@ -11,6 +11,7 @@ export const GET: APIRoute = () => {
     'Disallow: /carrito/',
     'Disallow: /checkout',
     'Disallow: /checkout/',
+    'Disallow: /cuenta',
     'Disallow: /mi-cuenta',
     'Disallow: /mi-cuenta/',
     'Disallow: /orden/',

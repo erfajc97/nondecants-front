@@ -22,7 +22,7 @@ export default function MobileMenu({ pathname, onClose }: MobileMenuProps) {
   const { data: bajoPedidoCategories = [] } = useBajoPedidoCategoriesQuery();
 
   return (
-    <div className="border-t border-border bg-bg md:hidden max-h-[calc(100dvh-58px)] overflow-y-auto pb-24">
+    <div className="border-t border-border bg-bg min-[821px]:hidden max-h-[calc(100dvh-58px)] overflow-y-auto pb-24">
       <nav className="flex flex-col px-5 pt-3" aria-label="Navegación móvil">
         {NAV_LINKS.map((link) => {
           const active = isLinkActive(link.href, pathname, link.exact);

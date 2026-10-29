@@ -33,6 +33,8 @@ export default defineConfig({
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src'),
+        // M1: carruseles con scroll nativo en lugar de Embla (misma API de uso).
+        'embla-carousel-react': path.resolve(__dirname, 'src/app/lib/nativeCarousel.ts'),
       },
     },
   },

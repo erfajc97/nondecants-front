@@ -1,18 +1,35 @@
-import type { ProductQueryParams, Gender, TimeOfDay, Concentration, Projection } from '@/app/types/global.types';
+export type CategoryKey = 'todos' | 'disenador' | 'nicho' | 'arabes' | 'bajo-pedido';
 
-export interface CatalogFilters {
+/** Secciones del panel (sin Concentración, Proyección ni deslizador). */
+export type FilterSection = 'genders' | 'momentos' | 'precios' | 'notas' | 'casas';
+
+export type SortKey = 'pedidos' | 'menor' | 'mayor' | 'novedades';
+
+export interface CatalogCriteria {
+  category: CategoryKey;
+  genders: string[];
+  momentos: string[];
+  precios: string[];
+  notas: string[];
+  casas: string[];
+  /** Solo llega por enlace (?search=) desde el buscador del header. */
   search: string;
-  inStock: boolean;
-  bajoPedido?: boolean;
-  categoryId?: number;
+  /** Vista de marca: solo productos de esa casa. */
   marcaId?: number;
-  gender: Gender | '';
-  timeOfDay: TimeOfDay | '';
-  concentration: Concentration | '';
-  projection: Projection | '';
-  minPrice?: number;
-  maxPrice?: number;
-  page: number;
-  sortBy: ProductQueryParams['sortBy'];
-  order: 'asc' | 'desc';
+}
+
+export interface FilterOption {
+  value: string;
+  label: string;
+  color?: string;
+}
+
+export interface FilterContext {
+  catKeyById: Map<number, CategoryKey>;
+}
+
+export interface ActiveChip {
+  key: string;
+  label: string;
+  onRemove: () => void;
 }

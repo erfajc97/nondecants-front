@@ -1,4 +1,6 @@
 import CouponField from './CouponField';
+import TermsAcceptance from './TermsAcceptance';
+import Loader from '@/app/components/Loader';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
 import { useCouponStore } from '@/app/store/coupon/couponStore';
 import { lineCouponDiscount } from '@/app/helpers/couponItemDiscount';
@@ -22,6 +24,15 @@ interface CheckoutOrderSummaryProps {
   onApplyCoupon?: () => void;
   onRemoveCoupon?: () => void;
   payphoneSurcharge?: number;
+  /** El envío ya se puede calcular (ciudad o punto de retiro elegido en el paso 1). */
+  shippingReady?: boolean;
+  termsAccepted?: boolean;
+  onTermsChange?: (accepted: boolean) => void;
+  canConfirm?: boolean;
+  onConfirm?: () => void;
+  isPending?: boolean;
+  /** Qué falta para poder confirmar (se muestra bajo el botón deshabilitado). */
+  missingText?: string;
 }
 
 export default function CheckoutOrderSummary({
@@ -39,6 +50,13 @@ export default function CheckoutOrderSummary({
   onApplyCoupon,
   onRemoveCoupon,
   payphoneSurcharge = 0,
+  shippingReady = true,
+  termsAccepted = false,
+  onTermsChange,
+  canConfirm = false,
+  onConfirm,
+  isPending = false,
+  missingText = '',
 }: CheckoutOrderSummaryProps) {
   const removeItem = useCartStore((s) => s.removeItem);
   const updateQty = useCartStore((s) => s.updateQty);
@@ -58,7 +76,7 @@ export default function CheckoutOrderSummary({
 
   return (
     <div className="flex flex-col">
-      <h2 className="mb-4 border-b border-border pb-4 font-body! text-xl font-bold text-text">Tu pedido</h2>
+      <h2 className="mb-4 border-b border-border pb-4 font-display text-[26px] font-normal leading-none text-text">Tu pedido</h2>
 
       {hasBajoPedido && (
         <div className="mb-5 flex items-start gap-2.5 rounded-md bg-gold-light px-4 py-3">
@@ -93,7 +111,7 @@ export default function CheckoutOrderSummary({
                 </div>
                 {item.comboId ? (
                   <p className="mt-1 font-body text-[13px] text-text-muted">
-                    Combo · {item.comboProducts?.length ?? 0} productos
+                    Combo · {item.comboProducts?.length ?? 0} decants{item.ml > 0 && item.ml < 30 ? ` de ${item.ml} ml` : ''}
                   </p>
                 ) : (
                   <p className="mt-1 font-body text-[13px] text-text-muted">
@@ -101,15 +119,11 @@ export default function CheckoutOrderSummary({
                   </p>
                 )}
                 <div className="mt-2 flex items-center justify-between">
-                  {item.comboId ? (
-                    <span className="select-none font-body text-sm text-text-muted">Cant: {item.quantity}</span>
-                  ) : (
-                    <div className="inline-flex items-center rounded-sm border border-border">
-                      <button type="button" aria-label="Disminuir" onClick={() => updateQty(item.variantId, item.quantity - 1)} className="flex h-9 w-9 items-center justify-center text-lg text-text-muted transition-colors hover:text-text">−</button>
-                      <span className="flex h-9 min-w-7 select-none items-center justify-center font-body text-sm tabular-nums text-text">{item.quantity}</span>
-                      <button type="button" aria-label="Aumentar" disabled={item.maxQty != null && item.quantity >= item.maxQty} onClick={() => updateQty(item.variantId, item.quantity + 1)} className="flex h-9 w-9 items-center justify-center text-lg text-text-muted transition-colors hover:text-text disabled:cursor-not-allowed disabled:opacity-40">+</button>
-                    </div>
-                  )}
+                  <div className="inline-flex items-center rounded-sm border border-border">
+                    <button type="button" aria-label="Disminuir" onClick={() => updateQty(item.variantId, item.quantity - 1)} className="flex h-9 w-9 items-center justify-center text-lg text-text-muted transition-colors hover:text-text">−</button>
+                    <span className="flex h-9 min-w-7 select-none items-center justify-center font-body text-sm tabular-nums text-text">{item.quantity}</span>
+                    <button type="button" aria-label="Aumentar" disabled={item.maxQty != null && item.quantity >= item.maxQty} onClick={() => updateQty(item.variantId, item.quantity + 1)} className="flex h-9 w-9 items-center justify-center text-lg text-text-muted transition-colors hover:text-text disabled:cursor-not-allowed disabled:opacity-40">+</button>
+                  </div>
                   <p className="font-body text-[15px] font-bold tabular-nums text-text">{formatCurrency(item.price * item.quantity)}</p>
                 </div>
                 {lineCouponDiscount(item, itemDiscounts) > 0 && (
@@ -170,22 +184,47 @@ export default function CheckoutOrderSummary({
         )}
 
         <div className="flex items-center justify-between text-text">
-          <span>{couponFreeShipping ? 'Envío (gratis)' : 'Envío'}</span>
-          <span className="tabular-nums">{couponFreeShipping ? formatCurrency(0) : formatCurrency(deliveryCost)}</span>
+          <span>Envío</span>
+          {shippingReady ? (
+            <span className="tabular-nums">
+              {couponFreeShipping ? 'Gratis' : deliveryCost === 0 ? 'Gratis' : formatCurrency(deliveryCost)}
+            </span>
+          ) : (
+            <span className="text-text-muted">Se calcula en el paso 1</span>
+          )}
         </div>
 
         {payphoneSurcharge > 0 && (
           <div className="flex items-center justify-between text-text-muted">
-            <span>Recargo Payphone (6%)</span>
+            <span>Recargo de tarjeta (6%)</span>
             <span className="tabular-nums">{formatCurrency(payphoneSurcharge)}</span>
           </div>
         )}
 
         <div className="mt-2 flex items-center justify-between border-t border-border pt-4 text-text">
           <span className="font-body text-lg font-bold">Total</span>
-          <span className="font-body text-xl font-bold tabular-nums">{formatCurrency(total)}</span>
+          <span key={total} className="ck-total font-display text-[26px] font-normal leading-none tabular-nums">
+            {formatCurrency(total)}
+          </span>
         </div>
       </div>
+
+      {onConfirm && (
+        <div className="mt-5 flex flex-col gap-4">
+          <TermsAcceptance checked={termsAccepted} onChange={onTermsChange ?? (() => {})} />
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={!canConfirm || isPending}
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-sm bg-text px-6 font-body text-[15px] font-semibold text-bg transition-[background-color,transform] duration-200 hover:bg-text-soft active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-border disabled:text-text-muted"
+          >
+            {isPending ? <Loader size={18} color="#fff" className="mx-auto" /> : `Confirmar pedido · ${formatCurrency(total)}`}
+          </button>
+          {!canConfirm && missingText && (
+            <p className="text-center font-body text-[13.5px] leading-snug text-text-muted">{missingText}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

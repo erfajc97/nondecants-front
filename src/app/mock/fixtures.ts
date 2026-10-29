@@ -39,25 +39,41 @@ const category = (id: number, name: string, description: string, bajoPedido: boo
   marcas,
 });
 
+// Casas adicionales (sin productos de prueba) para que los banners del home
+// cuenten lo mismo que el prototipo: 25 casas nicho y 11 árabes.
+let extraMarcaId = 20;
+const casas = (names: string[], categoryId: number, bajoPedido: boolean) =>
+  names.map((name) => marca(extraMarcaId++, name, categoryId, bajoPedido));
+
+const NICHO_EXTRA = [
+  'Parfums de Marly', 'Initio', 'Amouage', 'Maison Francis Kurkdjian', 'Byredo', 'Nishane', 'Roja Parfums',
+  'Tom Ford Private', 'Le Labo', 'Frederic Malle', 'Maison Crivelli', 'Kilian', 'Montale', 'Mancera',
+  'Orto Parisi', 'Memo Paris', 'Penhaligons', 'Clive Christian', 'Ex Nihilo', 'Zoologist', 'Nasomatto',
+];
+const ARABE_EXTRA = ['Rasasi', 'Afnan', 'Al Haramain', 'Ajmal', 'Swiss Arabian', 'Nabeel', 'Maison Alhambra', 'Ard Al Zaafaran', 'Paris Corner'];
+
 export const MOCK_CATEGORIES_RAW = [
   category(1, 'Diseñador', 'Los clásicos de las grandes casas.', false, [
     marca(1, 'Dior', 1),
     marca(2, 'Chanel', 1),
     marca(3, 'Armani', 1),
     marca(4, 'Carolina Herrera', 1),
+    marca(9, 'Valentino', 1),
   ]),
   category(2, 'Árabes', 'Intensidad y proyección de Medio Oriente.', false, [
     marca(5, 'Lattafa', 2),
     marca(6, 'Armaf', 2),
+    ...casas(ARABE_EXTRA, 2, false),
   ]),
   category(3, 'Nicho', 'Casas pequeñas, fragancias de autor. Solo bajo pedido.', true, [
     marca(7, 'Creed', 3, true),
     marca(8, 'Xerjoff', 3, true),
+    ...casas(NICHO_EXTRA, 3, true),
   ]),
 ];
 
 // ── Productos ───────────────────────────────────────────────────────
-const IMAGES = ['/sauvage.png', '/chanel.png', '/creed.png', '/gio.png', '/yara.png', '/valentine.png'];
+const IMAGES = ['/sauvage.webp', '/chanel.webp', '/creed.webp', '/gio.webp', '/yara.webp', '/valentine.webp'];
 
 const NOTE_COLORS = ['#E8D8C0', '#C9A87A', '#8A6B4A'];
 const notes = (names: string[]) => names.map((name, i) => ({ name, color: NOTE_COLORS[i % 3] }));
@@ -98,6 +114,9 @@ const SEEDS: Seed[] = [
   { id: 12, name: 'Dior Homme Intense', marcaId: 1, categoryId: 1, price: 145, ml: 100, gender: 'HOMBRE', timeOfDay: 'NOCHE', concentration: 'EAU_DE_PARFUM', projection: 'MODERADA', top: ['Lavanda', 'Pera'], heart: ['Iris', 'Ámbar'], base: ['Vetiver', 'Cedro'], description: 'Polvoriento y elegante. Para ocasiones especiales.', stock: 5, salesCount: 70, discount: 5 },
   { id: 13, name: 'Asad', marcaId: 5, categoryId: 2, price: 48, ml: 100, gender: 'HOMBRE', timeOfDay: 'NOCHE', concentration: 'EAU_DE_PARFUM', projection: 'ALTA', top: ['Pimienta negra', 'Piña', 'Tabaco'], heart: ['Café', 'Iris'], base: ['Vainilla', 'Ámbar', 'Pachulí'], description: 'Oscuro, especiado y muy proyectivo.', stock: 11, salesCount: 80 },
   { id: 14, name: '212 VIP Rosé', marcaId: 4, categoryId: 1, price: 130, ml: 80, gender: 'MUJER', timeOfDay: 'NOCHE', concentration: 'EAU_DE_PARFUM', projection: 'MODERADA', top: ['Champagne rosado', 'Pimienta rosa'], heart: ['Rosa', 'Peonía'], base: ['Almizcle', 'Vainilla'], description: 'Festiva, burbujeante y floral.', stock: 6, salesCount: 50 },
+  { id: 31, name: 'Born in Roma Uomo', marcaId: 9, categoryId: 1, price: 135, ml: 100, gender: 'HOMBRE', timeOfDay: 'NOCHE', concentration: 'EAU_DE_TOILETTE', projection: 'ALTA', top: ['Salvia', 'Jengibre'], heart: ['Vainilla', 'Lavanda'], base: ['Madera ahumada', 'Pachulí'], description: 'Vainilla mineral, moderna y de gran estela.', stock: 8, salesCount: 85 },
+  { id: 32, name: 'Born in Roma Donna', marcaId: 9, categoryId: 1, price: 145, ml: 100, gender: 'MUJER', timeOfDay: 'AMBOS', concentration: 'EAU_DE_PARFUM', projection: 'MODERADA', top: ['Bergamota', 'Pimienta rosa'], heart: ['Jazmín', 'Flor de naranjo'], base: ['Vainilla', 'Ámbar'], description: 'Floral vainillado, luminoso y seguro de sí.', stock: 6, salesCount: 70 },
+  { id: 33, name: 'Voce Viva', marcaId: 9, categoryId: 1, price: 125, ml: 100, gender: 'MUJER', timeOfDay: 'DIA', concentration: 'EAU_DE_PARFUM', projection: 'MODERADA', top: ['Mandarina', 'Bergamota'], heart: ['Gardenia', 'Flor de azahar'], base: ['Vainilla', 'Almizcle'], description: 'Gardenia cremosa con un guiño cítrico.', stock: 9, salesCount: 55 },
 ];
 
 const DECANTS = [
@@ -107,6 +126,24 @@ const DECANTS = [
 ];
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
+
+// Momentos de uso por producto (filtro «Momento» del catálogo; se leen de `occasion`).
+const MOMENTOS: Record<number, string[]> = {
+  1: ['Noche', 'Cita', 'Fiesta'],
+  2: ['Oficina', 'Cita', 'Invierno'],
+  3: ['Oficina', 'Verano'],
+  4: ['Noche', 'Cita', 'Fiesta'],
+  5: ['Verano', 'Cita'],
+  6: ['Invierno', 'Noche', 'Cita'],
+  7: ['Fiesta', 'Noche'],
+  8: ['Oficina', 'Cita'],
+  9: ['Verano', 'Oficina'],
+  10: ['Invierno', 'Noche'],
+  11: ['Oficina', 'Cita'],
+  12: ['Noche', 'Invierno'],
+  13: ['Fiesta', 'Noche', 'Invierno'],
+  14: ['Fiesta', 'Noche', 'Verano'],
+};
 
 function buildProduct(s: Seed) {
   const image = IMAGES[(s.id - 1) % IMAGES.length];
@@ -176,7 +213,7 @@ function buildProduct(s: Seed) {
       { title: 'Notas de fondo', notes: notes(s.base), description: 'La huella que queda.' },
     ],
     mood: ['Elegante', s.projection === 'ALTA' ? 'Intenso' : 'Fresco'],
-    occasion: s.timeOfDay === 'NOCHE' ? ['Noche', 'Eventos'] : ['Día', 'Oficina'],
+    occasion: MOMENTOS[s.id] ?? (s.timeOfDay === 'NOCHE' ? ['Noche', 'Eventos'] : ['Día', 'Oficina']),
     longevity: s.projection === 'ALTA' ? 9 : 7,
     projectionScore: s.projection === 'ALTA' ? 8 : 6,
     signatureTitle: 'La firma',
@@ -197,7 +234,7 @@ function buildProduct(s: Seed) {
     })),
     variations,
     images: [{ id: String(s.id), productId: String(s.id), url: image, key: image, alt: s.name, displayOrder: 0, isActive: true }],
-    createdAt: new Date(Date.parse(NOW) - (20 - s.id) * 86_400_000).toISOString(),
+    createdAt: new Date(Date.parse(NOW) - Math.max(0, 20 - s.id) * 86_400_000).toISOString(),
     updatedAt: NOW,
     _hasStock: hasStock,
   };
@@ -208,46 +245,119 @@ export const MOCK_PRODUCTS_RAW = SEEDS.map(buildProduct);
 // ── Secciones del home / carrito ────────────────────────────────────
 const byIds = (ids: number[]) => ids.map((id) => MOCK_PRODUCTS_RAW.find((p) => p.id === String(id))!);
 
+// Los títulos "Eyebrow · Título" se parten en el front (antetítulo ✦ + título).
+const newest = [...MOCK_PRODUCTS_RAW].sort((x, y) => Date.parse(y.createdAt) - Date.parse(x.createdAt) || y.salesCount - x.salesCount);
+const bestSellers = [...MOCK_PRODUCTS_RAW].sort((x, y) => y.salesCount - x.salesCount);
+const inCategory = (categoryId: number) => bestSellers.filter((p) => p.categoryId === String(categoryId));
+
 export const MOCK_SECTIONS_RAW = [
-  { id: 1, title: 'Los más pedidos', order: 1, placement: 'home', isActive: true, products: byIds([2, 1, 6, 5, 4, 7]), createdAt: NOW, updatedAt: NOW },
-  { id: 2, title: 'Árabes que enamoran', order: 2, placement: 'home', isActive: true, products: byIds([5, 6, 13, 7]), createdAt: NOW, updatedAt: NOW },
+  { id: 1, title: 'Recién llegados · Novedades', order: 1, placement: 'home', isActive: true, products: newest.slice(0, 10), createdAt: NOW, updatedAt: NOW },
+  { id: 2, title: 'Lo que más se pide · Tienes que probarlos', order: 2, placement: 'home', isActive: true, products: bestSellers.slice(0, 10), createdAt: NOW, updatedAt: NOW },
+  { id: 4, title: 'Diseñador · Lo mejor de Valentino', order: 3, placement: 'home', isActive: true, products: bestSellers.filter((p) => p.marcaId === '9'), createdAt: NOW, updatedAt: NOW },
+  { id: 5, title: 'Nicho · Los mejores nichos', order: 4, placement: 'home', isActive: true, products: inCategory(3), createdAt: NOW, updatedAt: NOW },
+  { id: 6, title: 'Árabes · Árabes que rinden', order: 5, placement: 'home', isActive: true, products: inCategory(2), createdAt: NOW, updatedAt: NOW },
   { id: 3, title: 'Completa tu pedido', order: 1, placement: 'cart', isActive: true, products: byIds([3, 11, 12, 14]), createdAt: NOW, updatedAt: NOW },
 ];
 
 // ── Combos ──────────────────────────────────────────────────────────
-const comboProduct = (id: number, productId: number) => ({
-  id: String(id),
-  comboId: '0',
-  productId: String(productId),
-  productVariationId: null,
-  quantity: 1,
-  product: MOCK_PRODUCTS_RAW.find((p) => p.id === String(productId)),
-});
+// Cada combo tiene 3 versiones (3, 5 y 10 ml por perfume). La base es la de 3 ml y
+// `versions` trae las otras dos, como las entrega el backend. "Antes" = suma de los
+// decants de cada perfume en ese tamaño; el precio del combo es un % de ese "antes".
+const COMBO_ML = [3, 5, 10] as const;
+const COMBO_FACTOR: Record<number, number> = { 3: 0.82, 5: 0.868, 10: 0.932 };
 
-const combo = (id: number, name: string, description: string, finalPrice: number, discount: number, productIds: number[], image: string) => ({
-  id: String(id),
-  name,
-  description,
-  imageUrl: image,
-  imageKey: image,
-  finalPrice: finalPrice.toFixed(2),
-  discount: discount.toFixed(2),
-  isActive: true,
-  parentComboId: null,
-  versions: [],
-  comboProducts: productIds.map((pid, i) => ({ ...comboProduct(id * 10 + i, pid), comboId: String(id) })),
-  createdAt: NOW,
-  updatedAt: NOW,
-});
+const decantOf = (productId: number, ml: number) => {
+  const prod = MOCK_PRODUCTS_RAW.find((p) => p.id === String(productId))!;
+  return prod.variations.find((v) => !v.isFullBottle && v.mlSize === ml)!;
+};
+
+const comboVersion = (
+  id: number,
+  name: string,
+  description: string,
+  productIds: number[],
+  image: string,
+  ml: number,
+  parentId: number | null,
+  /** Precios explícitos por perfume y precio final (para ejemplos exactos). */
+  override?: { each: number[]; final: number },
+) => {
+  const variations = productIds.map((pid, i) => {
+    const v = decantOf(pid, ml);
+    return override ? { ...v, price: override.each[i].toFixed(2) } : v;
+  });
+  const before = variations.reduce((sum, v) => sum + Number(v.price), 0);
+  const final = override ? override.final : round2(before * COMBO_FACTOR[ml]);
+  return {
+    id: String(id),
+    name,
+    description,
+    imageUrl: image,
+    imageKey: image,
+    finalPrice: final.toFixed(2),
+    discount: '0.00',
+    isActive: true,
+    parentComboId: parentId == null ? null : String(parentId),
+    versions: [] as unknown[],
+    comboProducts: productIds.map((pid, i) => ({
+      id: String(id * 10 + i),
+      comboId: String(id),
+      productId: String(pid),
+      productVariationId: Number(variations[i].id),
+      quantity: 1,
+      product: MOCK_PRODUCTS_RAW.find((p) => p.id === String(pid)),
+      productVariation: variations[i],
+    })),
+    createdAt: NOW,
+    updatedAt: NOW,
+  };
+};
+
+const combo = (
+  id: number,
+  name: string,
+  description: string,
+  productIds: number[],
+  image: string,
+  overrides?: Record<number, { each: number[]; final: number }>,
+) => {
+  const [base, ...rest] = COMBO_ML.map((ml, i) =>
+    comboVersion(i === 0 ? id : id * 100 + ml, name, description, productIds, image, ml, i === 0 ? null : id, overrides?.[ml]),
+  );
+  return { ...base, versions: rest };
+};
 
 export const MOCK_COMBOS_RAW = [
-  combo(1, 'Trío Árabe', 'Tres árabes icónicos en formato decant para descubrir cuál es el tuyo.', 29, 12, [5, 6, 13], '/yara.png'),
-  combo(2, 'Dúo Diseñador', 'Dos clásicos de las grandes casas, listos para estrenar.', 24, 10, [2, 3], '/chanel.png'),
-  combo(3, 'Noche Intensa', 'Fragancias de noche, proyección alta y rastro memorable.', 32, 15, [1, 12, 13], '/sauvage.png'),
+  combo(1, 'Trío Árabe', 'Tres árabes icónicos en formato decant para descubrir cuál es el tuyo. Dulces, especiados y de gran proyección: una forma fácil de entrar al mundo árabe sin comprometerte con un frasco.', [5, 6, 13], '/yara.webp'),
+  combo(2, 'Dúo Diseñador', 'Dos clásicos de las grandes casas, listos para estrenar.', [2, 3], '/chanel.webp'),
+  combo(3, 'Noche Intensa', 'Fragancias de noche, proyección alta y rastro memorable.', [1, 12, 13], '/sauvage.webp'),
+  combo(4, 'Isla Hawas', 'Cuatro decants para vivir el verano árabe: frescura, dulzor y un rastro que se queda todo el día.', [5, 6, 13, 7], '/valentine.webp', {
+    3: { each: [5.48, 5.48, 5.47, 5.47], final: 17.95 },
+    5: { each: [7.48, 7.48, 7.47, 7.47], final: 25.95 },
+    10: { each: [13.13, 13.13, 13.12, 13.12], final: 48.95 },
+  }),
 ];
 
 // ── Banners ─────────────────────────────────────────────────────────
-const banner = (id: number, type: string, title: string, subtitle: string, image: string, link: string, buttonText: string) => ({
+interface BannerCopy {
+  eyebrow?: string;
+  highlight?: string;
+  paragraph?: string;
+  bgColor?: string;
+  theme?: 'light' | 'dark';
+  showSeal?: boolean;
+}
+
+const banner = (
+  id: number,
+  type: string,
+  title: string,
+  subtitle: string,
+  image: string,
+  link: string,
+  buttonText: string,
+  copy: BannerCopy = {},
+) => ({
   id: String(id),
   title,
   subtitle,
@@ -264,19 +374,55 @@ const banner = (id: number, type: string, title: string, subtitle: string, image
   marcaId: null,
   createdAt: NOW,
   updatedAt: NOW,
+  ...copy,
 });
 
+// 5 slides del prototipo: texto sobre fondo de color + foto (mitad derecha / arriba en móvil).
 export const MOCK_BANNERS_RAW = [
-  banner(1, 'hero', 'Perfumes originales, en tu medida', 'Prueba antes de comprar el frasco completo.', '/home.png', '/catalogo/perfumes', 'Ver perfumes'),
-  banner(2, 'hero', 'Decants desde 3 ml', 'Etiqueta de la casa, autenticidad garantizada.', '/home-2.png', '/decants', 'Conocer decants'),
-  banner(3, 'catalog_perfumes', 'Perfumes', 'Diseñador, árabes y más.', '/banner-catalog.png', '/catalogo/perfumes', ''),
-  banner(4, 'catalog_bajo_pedido', 'Bajo pedido', 'Nichos importados para ti.', '/banner-catalog.png', '/bajo-pedido', ''),
+  banner(1, 'hero', 'El frasco de $270, en 3 ml por $11,75.', 'Prueba antes de comprometerte con el frasco entero.', '/home.webp', '/catalogo/perfumes', 'Ver perfumes', {
+    eyebrow: 'Decants originales',
+    highlight: 'en 3 ml por $11,75.',
+    paragraph: 'Sale de la botella original, sellada y verificada. Pruébalo una semana antes de decidir por el frasco.',
+    bgColor: '#F3ECDA',
+    theme: 'light',
+    showSeal: true,
+  }),
+  banner(2, 'hero', 'Árabes con intensidad que dura todo el día.', 'Proyección alta y estela memorable.', '/home-3.webp', '/catalogo/perfumes', 'Ver árabes', {
+    eyebrow: 'Árabes que rinden',
+    highlight: 'que dura todo el día.',
+    paragraph: 'Lattafa, Armaf y más casas árabes, con decants desde $4,15 para elegir sin arriesgar.',
+    bgColor: '#1B1919',
+    theme: 'dark',
+  }),
+  banner(3, 'hero', 'Los clásicos de diseñador, en la medida que quieras.', 'Decants de 3, 5 y 10 ml.', '/home-5.webp', '/catalogo/perfumes', 'Ver diseñador', {
+    eyebrow: 'Diseñador',
+    highlight: 'en la medida que quieras.',
+    paragraph: 'Dior, Chanel, Valentino y más. Elige 3, 5 o 10 ml y quédate con el frasco cuando lo tengas claro.',
+    bgColor: '#F0EEEA',
+    theme: 'light',
+  }),
+  banner(4, 'hero', 'Casas pequeñas, perfumes de autor.', 'Frascos sellados bajo pedido.', '/home-1.webp', '/bajo-pedido', 'Ver bajo pedido', {
+    eyebrow: 'Nicho',
+    highlight: 'perfumes de autor.',
+    paragraph: 'Frascos sellados que traemos en 13 a 17 días, con pago anticipado.',
+    bgColor: '#2E2C2A',
+    theme: 'dark',
+  }),
+  banner(5, 'hero', 'Tres decants, una sola decisión.', 'Combos NonDecants.', '/home-6.webp', '/catalogo/combos', 'Ver combos', {
+    eyebrow: 'Combos',
+    highlight: 'una sola decisión.',
+    paragraph: 'Decants que se llevan juntos, con descuento. Ideal para regalar o para descubrir tu próximo favorito.',
+    bgColor: '#F3ECDA',
+    theme: 'light',
+  }),
+  banner(6, 'catalog_perfumes', 'Perfumes', 'Diseñador, árabes y más.', '/banner-catalog.webp', '/catalogo/perfumes', ''),
+  banner(7, 'catalog_bajo_pedido', 'Bajo pedido', 'Nichos importados para ti.', '/banner-catalog.webp', '/bajo-pedido', ''),
 ];
 
 // ── Blog, reseñas, ajustes ──────────────────────────────────────────
 export const MOCK_BLOG_RAW = [
-  { id: '1', title: 'Cómo elegir tu primer perfume árabe', slug: 'como-elegir-tu-primer-perfume-arabe', excerpt: 'Guía rápida para entender notas, proyección y duración.', content: '<p>Los perfumes árabes se distinguen por su intensidad y su duración. Empieza por un gourmand suave como <strong>Yara</strong> o por un especiado como <strong>Khamrah</strong>.</p><p>Prueba primero en decant: es la forma más inteligente de decidir.</p>', imageUrl: '/home-3.png', imageKey: null, isPublished: true, position: 0, publishedAt: '2026-09-20T12:00:00.000Z', createdAt: NOW, updatedAt: NOW },
-  { id: '2', title: 'Decant vs. frasco completo', slug: 'decant-vs-frasco-completo', excerpt: 'Cuándo conviene probar y cuándo comprar la botella.', content: '<p>Un decant te deja vivir el perfume una semana antes de comprometerte con 100 ml.</p>', imageUrl: '/home-4.png', imageKey: null, isPublished: true, position: 1, publishedAt: '2026-09-28T12:00:00.000Z', createdAt: NOW, updatedAt: NOW },
+  { id: '1', title: 'Cómo elegir tu primer perfume árabe', slug: 'como-elegir-tu-primer-perfume-arabe', excerpt: 'Guía rápida para entender notas, proyección y duración.', content: '<p>Los perfumes árabes se distinguen por su intensidad y su duración. Empieza por un gourmand suave como <strong>Yara</strong> o por un especiado como <strong>Khamrah</strong>.</p><p>Prueba primero en decant: es la forma más inteligente de decidir.</p>', imageUrl: '/home-3.webp', imageKey: null, isPublished: true, position: 0, publishedAt: '2026-09-20T12:00:00.000Z', createdAt: NOW, updatedAt: NOW },
+  { id: '2', title: 'Decant vs. frasco completo', slug: 'decant-vs-frasco-completo', excerpt: 'Cuándo conviene probar y cuándo comprar la botella.', content: '<p>Un decant te deja vivir el perfume una semana antes de comprometerte con 100 ml.</p>', imageUrl: '/home-4.webp', imageKey: null, isPublished: true, position: 1, publishedAt: '2026-09-28T12:00:00.000Z', createdAt: NOW, updatedAt: NOW },
 ];
 
 export const MOCK_REVIEWS_RAW = [
@@ -287,8 +433,8 @@ export const MOCK_REVIEWS_RAW = [
 ];
 
 export const MOCK_SETTINGS_RAW: Record<string, string> = {
-  announcement_bar: JSON.stringify(['Envíos a todo el Ecuador · Servientrega 24–72h', 'Ambiente de demostración · datos de prueba']),
+  announcement_bar: JSON.stringify(['Envío a todo Ecuador en 24–72 h', 'Código NOD: $5 de descuento', 'Perfumes 100% originales y sellados', 'Decants desde $4,15', 'Asesoría por WhatsApp antes de comprar', 'Ambiente de demostración']),
   delivery_days_offset: '0',
   dispatch_cutoff_hour: '15',
-  free_shipping_threshold: '60',
+  free_shipping_threshold: '0',
 };

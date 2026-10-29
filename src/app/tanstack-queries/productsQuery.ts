@@ -102,6 +102,7 @@ export const mapProduct = (raw: any): Product => {
         }
       : undefined,
     createdAt: raw.createdAt ?? '',
+    salesCount: raw.salesCount != null ? Number(raw.salesCount) : undefined,
     // ── PDP editorial ──
     scentProfileTitle: raw.scentProfileTitle ?? undefined,
     scentSections: Array.isArray(raw.scentSections) ? raw.scentSections : undefined,

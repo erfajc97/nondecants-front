@@ -38,7 +38,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
     setResending(true);
     try {
       await authService.resendVerification(email);
-      sonnerResponse('Email de verificación reenviado.', 'success');
+      sonnerResponse('Correo de verificación reenviado.', 'success');
     } catch {
       sonnerResponse('Error al reenviar. Intenta de nuevo.', 'error');
     } finally {
@@ -66,14 +66,14 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
           disabled={resending}
           className="mx-auto mb-4 block font-body text-sm text-text-soft transition-colors hover:text-accent"
         >
-          {resending ? 'Reenviando...' : '¿No lo recibiste? Reenviar email'}
+          {resending ? 'Reenviando...' : '¿No lo recibiste? Reenviar correo'}
         </button>
         <button
           type="button"
           onClick={onSwitchToLogin}
           className="font-body text-sm text-text transition-colors hover:text-accent"
         >
-          Volver al login
+          Volver a entrar
         </button>
       </div>
     );
@@ -114,12 +114,12 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
 
         {/* Email */}
         <div>
-          <label className={AUTH_LABEL_CLASS}>Email</label>
+          <label className={AUTH_LABEL_CLASS}>Correo</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="tu@email.com"
+            placeholder="tucorreo@ejemplo.com"
             required
             className={AUTH_INPUT_CLASS}
           />
@@ -210,7 +210,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
         <p className="mt-1 text-center font-body text-sm text-text-soft">
           ¿Ya tienes cuenta?{' '}
           <button type="button" onClick={onSwitchToLogin} className="border-b border-text pb-0.5 text-text transition-colors hover:border-accent hover:text-accent">
-            Ingresar
+            Entrar
           </button>
         </p>
       </form>

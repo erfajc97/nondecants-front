@@ -47,7 +47,7 @@ export default function CartDrawerLine({ row, group, index, onSetTotal, onRemove
   const minusDisabled = group === 'immediate' && split;
 
   const variantLabel = isCombo
-    ? `Combo · ${item.comboProducts?.length ?? 0} productos`
+    ? `Combo · ${item.comboProducts?.length ?? 0} decants${item.ml > 0 && item.ml < 30 ? ` de ${item.ml} ml` : ''}`
     : `${item.ml} ml · ${item.ml >= 30 ? 'Botella original' : 'Decant'}`;
 
   const gone = (fn: () => void) => {
@@ -94,26 +94,22 @@ export default function CartDrawerLine({ row, group, index, onSetTotal, onRemove
         {split && !isBajo && (
           <p className="mt-1 font-body text-[12.5px] font-semibold text-warning">El resto va por encargo ↓</p>
         )}
-        {isCombo ? (
-          <p className="mt-2 font-body text-[13px] text-text-muted">Cantidad: {portionQty}</p>
-        ) : (
-          <div className="mt-2 inline-flex items-center rounded-[3px] border border-border">
-            <button onClick={handleMinus} disabled={minusDisabled} className={btn} aria-label={`Una unidad menos de ${item.name}`}>
-              −
-            </button>
-            <span className="min-w-6 select-none text-center font-body text-sm tabular-nums text-text" aria-live="polite">
-              {portionQty}
-            </span>
-            <button
-              onClick={() => !plusDisabled && onSetTotal(item.variantId, total + 1)}
-              disabled={plusDisabled}
-              className={btn}
-              aria-label={`Una unidad más de ${item.name}`}
-            >
-              +
-            </button>
-          </div>
-        )}
+        <div className="mt-2 inline-flex items-center rounded-[3px] border border-border">
+          <button onClick={handleMinus} disabled={minusDisabled} className={btn} aria-label={`Una unidad menos de ${item.name}`}>
+            −
+          </button>
+          <span className="min-w-6 select-none text-center font-body text-sm tabular-nums text-text" aria-live="polite">
+            {portionQty}
+          </span>
+          <button
+            onClick={() => !plusDisabled && onSetTotal(item.variantId, total + 1)}
+            disabled={plusDisabled}
+            className={btn}
+            aria-label={`Una unidad más de ${item.name}`}
+          >
+            +
+          </button>
+        </div>
       </div>
 
       <div className="text-right font-body">

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import axiosInstance from '@/app/config/axiosConfig';
 import { API_ENDPOINTS } from '@/app/api/endpoints';
 
-const ANNOUNCEMENT_DEFAULT = 'Envíos a todo el Ecuador · Servientrega 24–72h';
+const ANNOUNCEMENT_DEFAULT = ['Envío a todo Ecuador en 24–72 h', 'Código NOD: $5 de descuento', 'Perfumes 100% originales y sellados', 'Decants desde $4,15', 'Asesoría por WhatsApp antes de comprar'];
 /** Cuántas veces mínimo debe aparecer el listado en cada pista del marquee
     para que nunca quede un hueco, aun con un solo texto. */
 const MIN_ITEMS_PER_TRACK = 6;
@@ -30,7 +30,7 @@ function parseAnnouncements(raw: unknown): string[] {
  * (Ajustes → Barra superior). Se pausa al pasar el mouse.
  */
 export default function AnnouncementBar() {
-  const [items, setItems] = useState<string[]>([ANNOUNCEMENT_DEFAULT]);
+  const [items, setItems] = useState<string[]>(ANNOUNCEMENT_DEFAULT);
 
   useEffect(() => {
     axiosInstance

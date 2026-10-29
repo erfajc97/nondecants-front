@@ -7,8 +7,8 @@ export const NAV_LINKS = [
   { href: '/catalogo/perfumes',  label: 'Perfumes',           exact: true,  dropdown: true,       dropdownId: 'perfumes' },
   { href: '/catalogo/combos',    label: 'Combos',             exact: true,  dropdown: false,      dropdownId: '' },
   { href: '/bajo-pedido',        label: 'Bajo pedido',        exact: true,  dropdown: true,       dropdownId: 'bajoPedido' },
-  { href: '/blog',               label: 'Blog',               exact: true,  dropdown: false,      dropdownId: '' },
   { href: '/rastrear',           label: 'Rastrear tu pedido', exact: true,  dropdown: false,      dropdownId: '' },
+  { href: '/blog',               label: 'Blog',               exact: true,  dropdown: false,      dropdownId: '' },
 ];
 
 export function isLinkActive(href: string, currentUrl: string, exact: boolean) {

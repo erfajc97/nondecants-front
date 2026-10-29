@@ -31,18 +31,18 @@ export default function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToFor
   return (
     <div>
       {/* Title */}
-      <h2 className="mb-1 text-center font-display text-3xl font-normal text-text">Iniciar sesión</h2>
-      <p className="mb-8 text-center font-body text-sm text-text-soft">Ingresa para comprar con tu cuenta</p>
+      <h2 className="mb-1 text-center font-display text-3xl font-normal text-text">Bienvenido de vuelta</h2>
+      <p className="mb-8 text-center font-body text-sm text-text-soft">Entra para comprar con tu cuenta</p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Email */}
         <div>
-          <label className={AUTH_LABEL_CLASS}>Email</label>
+          <label className={AUTH_LABEL_CLASS}>Correo</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="tu@email.com"
+            placeholder="tucorreo@ejemplo.com"
             required
             className={AUTH_INPUT_CLASS}
           />
@@ -79,14 +79,14 @@ export default function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToFor
               onChange={(e) => setKeepSession(e.target.checked)}
               className="h-4 w-4 accent-accent"
             />
-            <span className="font-body text-xs text-text-soft">Mantenerme conectad@</span>
+            <span className="font-body text-xs text-text-soft">Mantener mi sesión abierta</span>
           </label>
           <button
             type="button"
             onClick={onSwitchToForgot}
             className="font-body text-xs text-text-soft transition-colors hover:text-accent"
           >
-            Olvidé mi contraseña
+            ¿Olvidaste tu contraseña?
           </button>
         </div>
 
@@ -96,7 +96,7 @@ export default function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToFor
           disabled={isPending}
           className={AUTH_SUBMIT_CLASS}
         >
-          {isPending ? <Loader size={18} color="#fff" className="mx-auto" /> : 'Login'}
+          {isPending ? <Loader size={18} color="#fff" className="mx-auto" /> : 'Entrar'}
         </button>
 
         {/* Divider */}

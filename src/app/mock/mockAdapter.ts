@@ -9,6 +9,7 @@ import {
   MOCK_SECTIONS_RAW,
   MOCK_SETTINGS_RAW,
 } from './fixtures';
+import { searchProducts } from '../lib/searchIndex';
 
 /**
  * Adaptador de axios para el ambiente de demostración (VITE_DEMO=true): responde
@@ -41,8 +42,12 @@ const num = (v: unknown): number | undefined => (v === undefined || v === '' || 
 function listProducts(q: Record<string, any>) {
   let rows = MOCK_PRODUCTS_RAW.filter((p) => p.isActive);
 
-  const search = String(q.search ?? '').trim().toLowerCase();
-  if (search) rows = rows.filter((p) => `${p.name} ${p.marca.name}`.toLowerCase().includes(search));
+  const search = String(q.search ?? '').trim();
+  if (search) {
+    // Mismo criterio que el buscador (G1): nombre, marca, notas, ocasión, género, descripción y precio 3 ml.
+    const ids = new Set(searchProducts(rows, search).hits.map((h) => (h.product as { id: unknown }).id));
+    rows = rows.filter((p) => ids.has(p.id));
+  }
   if (q.bajoPedido !== undefined) rows = rows.filter((p) => p.bajoPedido === (String(q.bajoPedido) === 'true'));
   if (q.categoryId) rows = rows.filter((p) => p.categoryId === String(q.categoryId));
   if (q.marcaId) rows = rows.filter((p) => p.marcaId === String(q.marcaId));
@@ -50,6 +55,27 @@ function listProducts(q: Record<string, any>) {
   if (q.timeOfDay) rows = rows.filter((p) => p.timeOfDay === q.timeOfDay);
   if (q.concentration) rows = rows.filter((p) => p.concentration === q.concentration);
   if (q.projection) rows = rows.filter((p) => p.projection === q.projection);
+  // Filtros del catálogo nuevo (valores separados por coma).
+  const list = (v: unknown) => String(v ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+  const nrm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  const marcaIds = list(q.marcaIds);
+  if (marcaIds.length) rows = rows.filter((p) => marcaIds.includes(p.marcaId));
+  const momentos = list(q.momentos).map(nrm);
+  if (momentos.length) rows = rows.filter((p) => p.occasion.some((o) => momentos.includes(nrm(o))));
+  const notes = list(q.notes).map(nrm);
+  if (notes.length)
+    rows = rows.filter((p) => p.scentSections.some((s) => s.notes.some((n) => notes.includes(nrm(n.name)))));
+  const price3 = list(q.price3); // hasta5 | 5a8 | mas8
+  if (price3.length)
+    rows = rows.filter((p) => {
+      const f = p.formats.find((x) => !x.isFullBottle && x.ml === 3);
+      if (!f) return false;
+      return (
+        (price3.includes('hasta5') && f.price <= 5) ||
+        (price3.includes('5a8') && f.price > 5 && f.price <= 8) ||
+        (price3.includes('mas8') && f.price > 8)
+      );
+    });
   if (String(q.inStock) === 'true') rows = rows.filter((p) => p.stock > 0 || p.availableMl > 0);
   if (String(q.hasDiscount) === 'true') rows = rows.filter((p) => Number(p.discount) > 0);
   const min = num(q.minPrice);

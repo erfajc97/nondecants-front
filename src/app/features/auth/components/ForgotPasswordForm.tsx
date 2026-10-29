@@ -16,7 +16,7 @@ export default function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFo
       <p className="mb-8 text-center font-body text-sm text-text-soft">
         {sent
           ? 'Revisa tu bandeja de entrada'
-          : 'Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña'}
+          : 'Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña'}
       </p>
 
       {sent ? (
@@ -28,10 +28,10 @@ export default function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFo
             </svg>
           </div>
           <p className="max-w-xs text-center font-body text-sm text-text-soft">
-            Si el email <span className="text-text">{email}</span> está registrado, recibirás un enlace para restablecer tu contraseña.
+            Si el correo <span className="text-text">{email}</span> está registrado, recibirás un enlace para restablecer tu contraseña.
           </p>
           <button type="button" onClick={onSwitchToLogin} className={AUTH_SUBMIT_CLASS}>
-            Volver al login
+            Volver a entrar
           </button>
         </div>
       ) : (
@@ -63,7 +63,7 @@ export default function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFo
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
-            Volver al login
+            Volver a entrar
           </button>
         </form>
       )}

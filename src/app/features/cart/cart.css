@@ -1,0 +1,20 @@
+/* Carrito lateral: cuenta regresiva de despacho (prototipo). */
+.nd-pulse { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--color-success); flex: none; }
+.nd-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--color-success);
+  animation: nd-pulse 1.6s ease-out infinite;
+}
+.nd-pulse--late { background: var(--color-accent); }
+.nd-pulse--late::after { background: var(--color-accent); }
+@keyframes nd-pulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(3); opacity: 0; }
+}
+.nd-colon { font-style: normal; color: var(--color-accent); padding: 0 1px; animation: nd-blink 1s steps(1) infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .nd-pulse::after, .nd-colon { animation: none; }
+}

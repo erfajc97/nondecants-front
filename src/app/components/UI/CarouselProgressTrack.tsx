@@ -1,5 +1,5 @@
 import { useEffect, useRef, type MouseEvent } from 'react';
-import type { EmblaCarouselType } from 'embla-carousel';
+import type { NativeCarouselApi as EmblaCarouselType } from '@/app/lib/nativeCarousel';
 
 interface CarouselProgressTrackProps {
   /** Progreso 0–1 del recorrido (scrollProgress de Embla). Fallback si no hay api. */

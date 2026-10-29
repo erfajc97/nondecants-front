@@ -8,7 +8,9 @@ import { splitCartStock, getSplit } from '@/app/helpers/cartStockSplit';
 import { sonnerResponse } from '@/app/helpers/sonnerResponse';
 import axiosInstance from '@/app/config/axiosConfig';
 import { API_ENDPOINTS } from '@/app/api/endpoints';
-import { normalizeCustomerField, validateContact } from '../validators';
+import { normalizeCustomerField, validateContactFields } from '../validators';
+import { DEMO_ENABLED } from '@/app/lib/mock';
+import { ECUADOR_PROVINCES, ALL_CANTONS } from '@/app/data/ecuadorLocations';
 import { isPickupMethod, PICKUP_METHODS, type DeliveryMode } from '../components/DeliverySection';
 import type { CustomerFormData, PaymentMethod, DeliveryMethod } from '../types';
 import { useCouponHook } from './useCouponHook';
@@ -72,8 +74,27 @@ export interface BackorderLine {
   bajo: number;
 }
 
+/** Provincia a la que pertenece un cantón (para el envío; vacío si no se encuentra). */
+function provinceOfCanton(city: string): string {
+  const c = city.trim().toLowerCase();
+  return ECUADOR_PROVINCES.find((p) => p.cantons.some((k) => k.toLowerCase() === c))?.name ?? '';
+}
+
+export interface PlacedOrder {
+  orderNumber: string;
+  email: string;
+  total: number;
+  method: PaymentMethod;
+}
+
 export function useCheckoutHook() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  // Pedido simulado del ambiente de demostración (pantalla "¡Pedido recibido!").
+  const [placed, setPlaced] = useState<PlacedOrder | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  // Se activa al intentar continuar con datos incompletos: muestra errores y hace temblar.
+  const [showErrors, setShowErrors] = useState(false);
+  const [shakeTick, setShakeTick] = useState(0);
   const [customer, setCustomer] = useState<CustomerFormData>(buildInitialCustomer);
   const savedPrefs = loadPrefs();
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod | null>(getInitialDeliveryMethod(savedPrefs));
@@ -161,7 +182,9 @@ export function useCheckoutHook() {
   const items    = useCartStore((s) => s.items);
   const subtotal = useCartStore((s) => s.total());
 
-  const { methods: deliveryOptions, isLoading: deliveryLoading } = useDeliveryMethodsHook(customer.city);
+  const { methods: deliveryOptions, isLoading: deliveryLoading } = useDeliveryMethodsHook(
+    deliveryMode === 'pickup' ? 'Guayaquil' : customer.city,
+  );
 
   // La ciudad se elige DESPUÉS del método: si la nueva ciudad no admite el
   // método ya marcado, se limpia (antes se borraba con cualquier cambio de
@@ -219,30 +242,91 @@ export function useCheckoutHook() {
     });
   };
 
-  const handleNextStep = () => {
-    const contactError = validateContact(customer, {
-      requiresAddress: deliveryMode !== 'pickup',
-    });
-    if (contactError) {
-      sonnerResponse(contactError, 'error');
+  // ── Paso 1: entrega ─────────────────────────────────────────────────
+  const isPickup = deliveryMode === 'pickup';
+
+  // Envío: la ciudad define el método y el costo ($3 Guayaquil/Durán/Samborondón,
+  // $6,50 resto). Quita la selección si cambia a una ciudad que no admite el método.
+  // La ciudad debe ser un cantón de la lista (el buscador deja escribir texto libre).
+  const cityIsValid = ALL_CANTONS.some((k) => k.toLowerCase() === customer.city.trim().toLowerCase());
+
+  const setCity = (city: string) => {
+    setCustomer((prev) => ({ ...prev, city, province: provinceOfCanton(city) || prev.province }));
+  };
+
+  useEffect(() => {
+    if (deliveryMode !== 'shipping') return;
+    if (!cityIsValid) {
+      if (deliveryMethod) setDeliveryMethod(null);
       return;
     }
-    if (!deliveryMethod) {
-      sonnerResponse('Selecciona un método de entrega.', 'error');
-      return;
-    }
+    const ship = deliveryOptions.find((m) => !PICKUP_METHODS.includes(m.method));
+    if (ship && ship.method !== deliveryMethod) setDeliveryMethod(ship.method);
+  }, [deliveryMode, customer.city, cityIsValid, deliveryOptions]);
+
+  const step1Done = deliveryMethod != null && (isPickup || cityIsValid);
+
+  // ── Paso 2: datos ───────────────────────────────────────────────────
+  const contactErrors = validateContactFields(customer, { requiresAddress: !isPickup });
+  const step2Done = Object.keys(contactErrors).length === 0;
+
+  const continueStep1 = () => {
+    if (!step1Done) return;
     if (items.length === 0) {
       sonnerResponse('Tu carrito está vacío.', 'error');
       return;
     }
-    // Save preferences for next time
+    setShowErrors(false);
+    setStep(2);
+  };
+
+  const continueStep2 = () => {
+    if (!step2Done) {
+      setShowErrors(true);
+      setShakeTick((t) => t + 1);
+      return;
+    }
+    // Guarda preferencias para la próxima compra
     savePrefs({
       phone: customer.phone,
       city: customer.city,
       address: customer.address,
       deliveryMethod: deliveryMethod ?? undefined,
     });
-    setStep(2);
+    setShowErrors(false);
+    setStep(3);
+  };
+
+  // ── Confirmación ────────────────────────────────────────────────────
+  const canConfirm =
+    step1Done &&
+    step2Done &&
+    paymentMethod != null &&
+    termsAccepted &&
+    items.length > 0 &&
+    (paymentMethod !== 'TRANSFERENCIA' || receiptFile != null);
+
+  const missing: string[] = [];
+  if (!step1Done) missing.push(isPickup ? 'elegir el punto de retiro' : 'elegir tu ciudad');
+  if (!step2Done) missing.push('completar tus datos');
+  if (!paymentMethod) missing.push('elegir cómo pagar');
+  else if (paymentMethod === 'TRANSFERENCIA' && !receiptFile) missing.push('subir tu comprobante');
+  if (!termsAccepted) missing.push('aceptar los términos');
+  const missingText = missing.length ? `Para confirmar falta: ${missing.join(', ')}.` : '';
+
+  /** Pedido simulado: en la demo no se llama a la API. */
+  const simulatePlaced = () => {
+    setIsPending(true);
+    window.setTimeout(() => {
+      setPlaced({
+        orderNumber: 'ND-48213',
+        email: customer.email,
+        total,
+        method: paymentMethod ?? 'TRANSFERENCIA',
+      });
+      setIsPending(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 700);
   };
 
   const handleSubmit = async () => {
@@ -250,6 +334,7 @@ export function useCheckoutHook() {
       sonnerResponse('Selecciona un método de pago.', 'error');
       return;
     }
+    if (DEMO_ENABLED) return simulatePlaced();
 
     setIsPending(true);
 
@@ -305,7 +390,7 @@ export function useCheckoutHook() {
         customerName: `${customer.name} ${customer.lastName}`.trim(),
         customerEmail: customer.email,
         customerPhone: customer.phone,
-        shippingCity: customer.city,
+        shippingCity: customer.city || (isPickup ? 'Guayaquil' : ''),
         shippingAddress: customer.address,
         customerCedula: customer.cedula || undefined,
         shippingProvince: customer.province || undefined,
@@ -349,6 +434,7 @@ export function useCheckoutHook() {
   };
 
   const handleTransferSubmit = async (receiptFile: File) => {
+    if (DEMO_ENABLED) return simulatePlaced();
     setIsPending(true);
     try {
       // Save profile in background
@@ -399,7 +485,7 @@ export function useCheckoutHook() {
         customerName: `${customer.name} ${customer.lastName}`.trim(),
         customerEmail: customer.email,
         customerPhone: customer.phone,
-        shippingCity: customer.city,
+        shippingCity: customer.city || (isPickup ? 'Guayaquil' : ''),
         shippingAddress: customer.address,
         customerCedula: customer.cedula || undefined,
         shippingProvince: customer.province || undefined,
@@ -444,40 +530,26 @@ export function useCheckoutHook() {
   };
 
   // Gate de confirmación: si hay bajo pedido, pedir confirmación antes de enviar
-  const requestSubmit = () => {
-    if (!paymentMethod) {
-      sonnerResponse('Selecciona un método de pago.', 'error');
-      return;
+  const runConfirm = () => {
+    if (paymentMethod === 'TRANSFERENCIA') {
+      if (receiptFile) handleTransferSubmit(receiptFile);
+    } else {
+      handleSubmit();
     }
-    if (!termsAccepted) {
-      sonnerResponse('Debes aceptar los términos y condiciones.', 'error');
-      return;
-    }
+  };
+
+  const requestConfirm = () => {
+    if (!canConfirm) return;
     if (hasBajoPedido) {
       setBajoConfirm({ kind: 'submit' });
       return;
     }
-    handleSubmit();
-  };
-
-  const requestTransferSubmit = (file: File) => {
-    if (!termsAccepted) {
-      sonnerResponse('Debes aceptar los términos y condiciones.', 'error');
-      return;
-    }
-    if (hasBajoPedido) {
-      setBajoConfirm({ kind: 'transfer', file });
-      return;
-    }
-    handleTransferSubmit(file);
+    runConfirm();
   };
 
   const confirmBajoPedido = () => {
-    const pending = bajoConfirm;
     setBajoConfirm(null);
-    if (!pending) return;
-    if (pending.kind === 'submit') handleSubmit();
-    else handleTransferSubmit(pending.file);
+    runConfirm();
   };
 
   const cancelBajoPedido = () => setBajoConfirm(null);
@@ -511,7 +583,6 @@ export function useCheckoutHook() {
     setPaymentMethod,
     termsAccepted,
     setTermsAccepted,
-    handleNextStep,
     deliveryMode,
     setDeliveryMode,
     isAuthenticated,
@@ -522,8 +593,22 @@ export function useCheckoutHook() {
     savedAddresses,
     selectedAddressId,
     handleSelectAddress,
-    handleSubmit: requestSubmit,
-    handleTransferSubmit: requestTransferSubmit,
+    requestConfirm,
+    // Pasos
+    isPickup,
+    setCity,
+    step1Done,
+    step2Done,
+    contactErrors,
+    showErrors,
+    shakeTick,
+    continueStep1,
+    continueStep2,
+    canConfirm,
+    missingText,
+    receiptFile,
+    setReceiptFile,
+    placed,
     // Confirmación bajo pedido
     hasBajoPedido,
     backorderItems,

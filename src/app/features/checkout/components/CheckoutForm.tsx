@@ -1,163 +1,84 @@
-import Loader from '@/app/components/Loader';
-import CheckoutStepTabs from './CheckoutStepTabs';
-import ContactSection from './ContactSection';
+import CheckoutStepCard from './CheckoutStepCard';
 import AddressSection from './AddressSection';
-import DeliverySection, { type DeliveryMode } from './DeliverySection';
+import DeliverySection, { PICKUP_PLACES } from './DeliverySection';
 import PaymentSection from './PaymentSection';
-import TransferBankInfoStep from './TransferBankInfoStep';
-import TermsAcceptance from './TermsAcceptance';
-import { validateContact } from '../validators';
-import { BTN_PRIMARY } from '../classes';
-import type { CustomerFormData, DeliveryMethod, PaymentMethod, DeliveryOption } from '../types';
-import type { Address } from '@/app/features/profile/types';
+import type { useCheckoutHook } from '../hooks/useCheckoutHook';
+
+type CheckoutState = ReturnType<typeof useCheckoutHook>;
 
 interface CheckoutFormProps {
-  step: 1 | 2 | 3;
-  setStep: (step: 1 | 2 | 3) => void;
-  customer: CustomerFormData;
-  deliveryMethod: DeliveryMethod | null;
-  paymentMethod: PaymentMethod | null;
-  deliveryOptions: DeliveryOption[];
-  deliveryLoading: boolean;
-  isPending: boolean;
-  total: number;
-  handleCustomerChange: (field: keyof CustomerFormData, value: string) => void;
-  setDeliveryMethod: (val: DeliveryMethod) => void;
-  setPaymentMethod: (val: PaymentMethod) => void;
-  termsAccepted: boolean;
-  setTermsAccepted: (val: boolean) => void;
-  handleNextStep: () => void;
-  handleSubmit: () => void;
-  handleTransferSubmit: (receiptFile: File) => void;
-  deliveryMode: DeliveryMode;
-  setDeliveryMode: (mode: DeliveryMode) => void;
-  isAuthenticated: boolean;
+  c: CheckoutState;
   onLogin: () => void;
-  /** Direcciones guardadas del usuario (REQ-062); vacío si es guest. */
-  savedAddresses: Address[];
-  selectedAddressId: string | null;
-  handleSelectAddress: (id: string | null) => void;
 }
 
-export default function CheckoutForm({
-  step,
-  setStep,
-  customer,
-  deliveryMethod,
-  paymentMethod,
-  deliveryOptions,
-  deliveryLoading,
-  isPending,
-  total,
-  handleCustomerChange,
-  setDeliveryMethod,
-  setPaymentMethod,
-  termsAccepted,
-  setTermsAccepted,
-  handleNextStep,
-  handleSubmit,
-  handleTransferSubmit,
-  deliveryMode,
-  setDeliveryMode,
-  isAuthenticated,
-  onLogin,
-  savedAddresses,
-  selectedAddressId,
-  handleSelectAddress,
-}: CheckoutFormProps) {
+/** Los 3 pasos del checkout como acordeón numerado (sin stepper). */
+export default function CheckoutForm({ c, onLogin }: CheckoutFormProps) {
+  const { step, setStep } = c;
 
-  // El paso 1 solo avanza con los datos completos y un método de entrega
-  // elegido: hasta entonces el botón queda deshabilitado.
-  // El modo manda sobre los campos: al marcar "retiro" la dirección sobra
-  // aunque todavía no se haya elegido el punto concreto.
-  const isPickup = deliveryMode === 'pickup';
-  const contactError = validateContact(customer, { requiresAddress: !isPickup });
-  const canContinue = contactError === null && deliveryMethod !== null;
-
-  const onFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (step === 1) handleNextStep();
-    else if (step === 2) {
-      if (paymentMethod === 'TRANSFERENCIA') {
-        setStep(3);
-      } else {
-        handleSubmit();
-      }
-    }
-  };
+  const step1Summary = c.isPickup
+    ? (c.deliveryMethod && PICKUP_PLACES[c.deliveryMethod]?.name) || 'Retiro en Guayaquil'
+    : c.customer.city
+      ? `Servientrega a ${c.customer.city}`
+      : '';
+  const step2Summary = [`${c.customer.name} ${c.customer.lastName}`.trim(), c.customer.phone].filter(Boolean).join(' · ');
 
   return (
-    <form className="flex flex-col gap-7" onSubmit={onFormSubmit}>
-      {step !== 3 && <CheckoutStepTabs step={step} setStep={setStep} />}
-
-      {step === 1 && (
-        <>
-          <DeliverySection
-            options={deliveryOptions}
-            isLoading={deliveryLoading}
-            selected={deliveryMethod}
-            onSelect={setDeliveryMethod}
-            mode={deliveryMode}
-            onModeChange={setDeliveryMode}
-          />
-          <ContactSection
-            customer={customer}
-            onChange={handleCustomerChange}
-            isAuthenticated={isAuthenticated}
-            onLogin={onLogin}
-          />
-          <AddressSection
-            customer={customer}
-            onChange={handleCustomerChange}
-            isPickup={isPickup}
-            savedAddresses={savedAddresses}
-            selectedAddressId={selectedAddressId}
-            onSelectAddress={handleSelectAddress}
-          />
-          <div className="mt-2">
-            <button type="submit" disabled={!canContinue} className={BTN_PRIMARY}>
-              Continuar
-              <span aria-hidden="true">→</span>
-            </button>
-            {!canContinue && (
-              <p className="mt-2.5 font-body text-sm text-text-muted">
-                {contactError ?? 'Selecciona un método de entrega.'}
-              </p>
-            )}
-          </div>
-        </>
-      )}
-
-      {step === 2 && (
-        <>
-          <PaymentSection selected={paymentMethod} onSelect={setPaymentMethod} />
-          <TermsAcceptance checked={termsAccepted} onChange={setTermsAccepted} />
-          <button
-            type="submit"
-            disabled={isPending || !paymentMethod || !termsAccepted}
-            className={`${BTN_PRIMARY} mt-2`}
-          >
-            {isPending ? (
-              <Loader size={18} color="#fff" className="mx-auto" />
-            ) : paymentMethod === 'TRANSFERENCIA' ? (
-              'Ver datos bancarios'
-            ) : (
-              'Confirmar pedido'
-            )}
-          </button>
-        </>
-      )}
-
-      {step === 3 && (
-        <TransferBankInfoStep
-          total={total}
-          isPending={isPending}
-          termsAccepted={termsAccepted}
-          onTermsChange={setTermsAccepted}
-          onConfirm={handleTransferSubmit}
-          onBack={() => setStep(2)}
+    <div className="flex min-w-0 flex-col gap-3.5">
+      <CheckoutStepCard
+        n={1}
+        title="¿Cómo quieres recibir tu pedido?"
+        open={step === 1}
+        done={c.step1Done && step > 1}
+        summary={step1Summary}
+        onEdit={() => setStep(1)}
+      >
+        <DeliverySection
+          options={c.deliveryOptions}
+          selected={c.deliveryMethod}
+          onSelect={c.setDeliveryMethod}
+          mode={c.deliveryMode}
+          onModeChange={c.setDeliveryMode}
+          city={c.customer.city}
+          onCityChange={c.setCity}
+          shippingCost={c.deliveryCost}
+          canContinue={c.step1Done}
+          onContinue={c.continueStep1}
         />
-      )}
-    </form>
+      </CheckoutStepCard>
+
+      <CheckoutStepCard
+        n={2}
+        title="Tus datos"
+        open={step === 2}
+        done={c.step2Done && step > 2}
+        summary={step2Summary}
+        onEdit={c.step1Done ? () => setStep(2) : undefined}
+      >
+        <AddressSection
+          customer={c.customer}
+          onChange={c.handleCustomerChange}
+          isPickup={c.isPickup}
+          errors={c.contactErrors}
+          showErrors={c.showErrors}
+          shakeTick={c.shakeTick}
+          isAuthenticated={c.isAuthenticated}
+          onLogin={onLogin}
+          savedAddresses={c.savedAddresses}
+          selectedAddressId={c.selectedAddressId}
+          onSelectAddress={c.handleSelectAddress}
+          onContinue={c.continueStep2}
+        />
+      </CheckoutStepCard>
+
+      <CheckoutStepCard n={3} title="¿Cómo quieres pagar?" open={step === 3} done={false}>
+        <PaymentSection
+          selected={c.paymentMethod}
+          onSelect={c.setPaymentMethod}
+          total={c.total}
+          receiptFile={c.receiptFile}
+          onReceiptChange={c.setReceiptFile}
+        />
+      </CheckoutStepCard>
+    </div>
   );
 }

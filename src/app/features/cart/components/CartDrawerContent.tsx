@@ -5,7 +5,8 @@ import type { Product } from '@/app/types/global.types';
 import { useCartPageHook } from '../hooks/useCartPageHook';
 import CartSuggestion from './CartSuggestion';
 import CartDrawerLine from './CartDrawerLine';
-import FreeShippingBar from './FreeShippingBar';
+import CartUpsell3ml from './CartUpsell3ml';
+import CartDispatchCountdown from './CartDispatchCountdown';
 
 interface CartDrawerContentProps {
   onClose: () => void;
@@ -24,8 +25,6 @@ export default function CartDrawerContent({ onClose, onCheckout }: CartDrawerCon
   const hasCartProducts = cartSections.some((s) => (s.products ?? []).length > 0);
   const sections = hasCartProducts ? cartSections : homeSections;
 
-  const sectionTitle = sections[0]?.title || 'Completa tu pedido';
-
   const suggestions = useMemo(() => {
     const inCart = new Set(cart.items.map((i) => String(i.productId)));
     const seen = new Set<string>();
@@ -37,7 +36,7 @@ export default function CartDrawerContent({ onClose, onCheckout }: CartDrawerCon
         out.push(p);
       }
     }
-    return out.slice(0, 4);
+    return out;
   }, [sections, cart.items]);
 
   const btnMain =
@@ -117,15 +116,10 @@ export default function CartDrawerContent({ onClose, onCheckout }: CartDrawerCon
             Los productos por encargo los importamos especialmente para ti y llegan en 13 a 17 días.
           </p>
         )}
-        <Suggestions title={sectionTitle} max={3} />
+        <CartUpsell3ml candidates={[...homeSections, ...cartSections].flatMap((s) => s.products ?? [])} />
       </div>
 
       <div className="grid gap-2.5 border-t border-border px-5 pb-[calc(16px+env(safe-area-inset-bottom,0px))] pt-4">
-        <FreeShippingBar
-          subtotal={cart.afterDiscount}
-          threshold={cart.freeShippingThreshold}
-          unlocked={cart.qualifiesFreeShipping}
-        />
         {cart.couponDiscount > 0 && (
           <div className="flex justify-between font-body text-[15px] text-text-soft">
             <span>Cupón</span>
@@ -139,6 +133,7 @@ export default function CartDrawerContent({ onClose, onCheckout }: CartDrawerCon
         <p className="text-center font-body text-[12.5px] text-text-muted">
           El envío y el cupón se calculan en el siguiente paso.
         </p>
+        <CartDispatchCountdown cutoffHour={cart.cutoffHour} />
         <button onClick={onCheckout} className={btnMain}>
           Ir a pagar <span aria-hidden="true">→</span>
         </button>
@@ -148,9 +143,6 @@ export default function CartDrawerContent({ onClose, onCheckout }: CartDrawerCon
         >
           Seguir comprando
         </button>
-        <a href="/carrito" className="justify-self-center font-body text-[12.5px] text-text-muted underline underline-offset-4 hover:text-text">
-          Ver carrito completo
-        </a>
       </div>
     </>
   );

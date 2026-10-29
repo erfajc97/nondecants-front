@@ -75,6 +75,8 @@ export interface Product {
   /** Casa del perfume: la ficha la muestra sobre el título y enlaza a su catálogo. */
   marca?: { id: number; name: string; slug?: string };
   createdAt: string;
+  /** Unidades vendidas: orden «Más pedidos» del catálogo. */
+  salesCount?: number;
   // ── PDP editorial ──
   scentProfileTitle?: string;
   scentSections?: { title: string; notes: { name: string; color: string }[]; description: string }[];
@@ -97,6 +99,18 @@ export interface Banner {
   mobileImageUrl?: string;
   link?: string;
   buttonText?: string;
+  /** Antetítulo con ✦ sobre el título (slides con texto). */
+  eyebrow?: string;
+  /** Parte final del título que se pinta en dorado itálico. */
+  highlight?: string;
+  /** Párrafo bajo el título. */
+  paragraph?: string;
+  /** Color de fondo de la mitad de texto (CSS, p. ej. "#F3ECDA"). */
+  bgColor?: string;
+  /** Tema del slide: "light" = fondo claro (texto oscuro), "dark" = fondo oscuro. */
+  theme?: 'light' | 'dark';
+  /** Pinta el sello NöD sobre la foto (slide 1 del prototipo). */
+  showSeal?: boolean;
   type?: 'hero' | 'category' | 'brand' | 'navbar' | 'catalog_perfumes' | 'catalog_bajo_pedido';
   isActive?: boolean;
   isVisible?: boolean;

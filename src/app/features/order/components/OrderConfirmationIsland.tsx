@@ -5,6 +5,7 @@ import { API_ENDPOINTS } from '@/app/api/endpoints';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
 import { sonnerResponse } from '@/app/helpers/sonnerResponse';
 import GoogleReviewOptIn from './GoogleReviewOptIn';
+import OrderPlaced from './OrderPlaced';
 
 type Status = 'loading' | 'paid' | 'failed' | 'transfer';
 
@@ -116,59 +117,17 @@ function OrderConfirmationContent() {
 
   const isTransfer = status === 'transfer';
 
+  // Transferencia: el comprobante ya se subió en el checkout.
   return (
-    <div className="mx-auto my-5 grid max-w-[640px] justify-items-center gap-3.5 rounded-md border border-border bg-surface p-7 text-center md:p-14">
-      <GoogleReviewOptIn
-        orderId={order?.id || order?.orderNumber}
+    <>
+      <OrderPlaced
+        orderNumber={order?.orderNumber}
         email={order?.customerEmail}
+        total={!isTransfer ? order?.total : undefined}
+        transfer={isTransfer}
       />
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success text-bg">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-      </div>
-
-      <h1 className="font-display text-[clamp(34px,4vw,48px)] leading-none text-text">
-        {isTransfer ? '¡Orden registrada!' : '¡Pago exitoso!'}
-      </h1>
-
-      {order?.orderNumber && (
-        <p className="font-body text-[17px] text-text-soft">
-          Orden: <span className="font-bold text-text">{order.orderNumber}</span>
-        </p>
-      )}
-
-      {!isTransfer && order?.total ? (
-        <p className="font-body text-[17px] text-text-soft">
-          Total pagado: <span className="font-bold tabular-nums text-text">{formatCurrency(order.total)}</span>
-        </p>
-      ) : null}
-
-      {/* Transfer: receipt already uploaded during checkout */}
-      {isTransfer && (
-        <div className="w-full max-w-md">
-          <div className="flex items-center gap-3 rounded-md bg-gold-light px-4 py-4 text-left">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-success">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
-            </svg>
-            <p className="font-body text-[15px] text-text-soft">Comprobante enviado. Te notificaremos cuando confirmemos tu pago.</p>
-          </div>
-        </div>
-      )}
-
-      <p className="mt-1 max-w-[44ch] font-body text-[15px] text-text-muted">
-        Te enviaremos los detalles a <span className="font-semibold text-text">{order?.customerEmail || 'tu correo'}</span>.
-      </p>
-
-      <div className="mt-4 flex w-full max-w-md flex-col gap-3 sm:flex-row">
-        <a href="/mi-cuenta" className="inline-flex h-[52px] items-center justify-center rounded-sm bg-text px-7 font-body text-[14.5px] font-semibold text-bg transition-colors hover:bg-text-soft flex-1">
-          Ver mi pedido
-        </a>
-        <a href="/catalogo/perfumes" className="inline-flex h-[52px] flex-1 items-center justify-center rounded-sm border-[1.5px] border-text px-7 font-body text-[14.5px] font-semibold text-text transition-colors hover:bg-bg-alt">
-          Seguir comprando
-        </a>
-      </div>
-    </div>
+      <GoogleReviewOptIn orderId={order?.id || order?.orderNumber} email={order?.customerEmail} />
+    </>
   );
 }
 

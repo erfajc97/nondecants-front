@@ -1,349 +1,249 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useProductsQuery } from '@/app/tanstack-queries/productsQuery';
 import { useRawCategoriesQuery } from '@/app/tanstack-queries/categoriesQuery';
-import type { CatalogFilters } from '../types';
-import type { Gender, TimeOfDay, Concentration, Projection } from '@/app/types/global.types';
+import { GENDER_OPTIONS, LEGACY_MOMENTO, MOMENTO_OPTIONS, NOTE_OPTIONS, PRICE3_OPTIONS } from '../data';
+import { countWith, filterProducts, keyFromName, norm, price3Of, sortProducts } from '../filtering';
+import type {
+  ActiveChip,
+  CatalogCriteria,
+  CategoryKey,
+  FilterContext,
+  FilterOption,
+  FilterSection,
+  SortKey,
+} from '../types';
 
 export interface UseCatalogHookProps {
-  tipo?: 'perfumes' | 'combos';
-  bajoPedido?: boolean;
-  initialCategoryId?: number;
-  initialMarcaId?: number;
+  /** Categoría por defecto de la página (p. ej. /bajo-pedido). La URL manda sobre ella. */
+  initialCategory?: CategoryKey;
+  /** `Astro.url.search` — así servidor y cliente arrancan con el mismo estado. */
+  initialQuery?: string;
 }
 
-// Productos por página: 12 en desktop (3 filas del grid de 4) y 10 en móvil
-// (5 filas de 2). En ambos casos la última fila queda completa.
-const DESKTOP_LIMIT = 12;
-const MOBILE_LIMIT = 10;
-/** Vista marca: máximo 3 filas (4×3 desktop, 2×3 móvil) + «Ver más». */
-const BRAND_DESKTOP_LIMIT = 12;
-const BRAND_MOBILE_LIMIT = 6;
-const DESKTOP_QUERY = '(min-width: 768px)';
+const PAGE_SIZE = 24;
 
-const defaultFilters: CatalogFilters = {
-  search: '',
-  inStock: false,
-  gender: '',
-  timeOfDay: '',
-  concentration: '',
-  projection: '',
-  page: 1,
-  sortBy: 'createdAt',
-  order: 'desc',
-};
+const slugify = (s: string) => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-/**
- * REQ-058 — URLs legibles con slugs: `?categoria=arabes&marca=giorgio-armani`.
- * Se ACEPTAN los formatos viejo (`category=3&marca=3`, IDs numéricos) y nuevo
- * (`categoria=<slug>&marca=<slug>`); la API sigue recibiendo IDs — el slug se
- * resuelve a id en front con las categorías/marcas ya cargadas, y la URL se
- * reescribe con slugs vía history.replaceState.
- */
-const normalizeSlug = (s: string) =>
-  s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+interface Selections {
+  genders: string[];
+  momentos: string[];
+  precios: string[];
+  notas: string[];
+  casas: string[];
+  search: string;
+}
 
-const matchesSlug = (item: { name: string; slug: string }, value: string) => {
-  const v = normalizeSlug(value);
-  return normalizeSlug(item.slug) === v || normalizeSlug(item.name) === v.replace(/-/g, ' ');
-};
+const EMPTY: Selections = { genders: [], momentos: [], precios: [], notas: [], casas: [], search: '' };
 
-function getUrlParams() {
-  if (typeof window === 'undefined') return {};
-  const params = new URLSearchParams(window.location.search);
-  const categoryParam = params.get('category');
-  const marcaParam = params.get('marca');
+function parseQuery(qs: string) {
+  const p = new URLSearchParams(qs);
   return {
-    // Formato viejo: IDs numéricos (los menús aún pueden generarlos).
-    categoryId: categoryParam && /^\d+$/.test(categoryParam) ? Number(categoryParam) : undefined,
-    marcaId: marcaParam && /^\d+$/.test(marcaParam) ? Number(marcaParam) : undefined,
-    // Formato nuevo: slugs. `marca` también acepta slug (además de id legado).
-    categorySlug: params.get('categoria') ?? undefined,
-    marcaSlug: marcaParam && !/^\d+$/.test(marcaParam) ? marcaParam : undefined,
-    search: params.get('search') ?? undefined,
-    // Atajos del home ("Empieza por el momento"): ?momento=DIA|NOCHE
-    timeOfDay: ['DIA', 'NOCHE'].includes(params.get('momento') ?? '')
-      ? (params.get('momento') as 'DIA' | 'NOCHE')
-      : undefined,
+    categoria: p.get('categoria'),
+    legacyCategoryId: /^\d+$/.test(p.get('category') ?? '') ? Number(p.get('category')) : undefined,
+    marca: p.get('marca'),
+    search: p.get('search') ?? '',
+    momento: p.get('momento') ?? '',
   };
 }
 
-export function useCatalogHook({ tipo, bajoPedido, initialCategoryId, initialMarcaId }: UseCatalogHookProps = {}) {
-  const urlParams = getUrlParams();
-  const catId = initialCategoryId ?? urlParams.categoryId;
-  const subId = initialMarcaId ?? urlParams.marcaId;
+export function useCatalogHook({ initialCategory, initialQuery }: UseCatalogHookProps = {}) {
+  const [q] = useState(() =>
+    parseQuery(initialQuery ?? (typeof window !== 'undefined' ? window.location.search : '')),
+  );
 
-  const [filters, setFilters] = useState<CatalogFilters>({
-    ...defaultFilters,
-    search: urlParams.search ?? '',
-    timeOfDay: urlParams.timeOfDay ?? defaultFilters.timeOfDay,
-    categoryId: catId,
-    marcaId: subId,
-  });
-  const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
-  const [debouncedMaxPrice, setDebouncedMaxPrice] = useState(filters.maxPrice);
-
-  // Slugs pendientes de resolver (llegan por URL; se resuelven a IDs cuando
-  // cargan las categorías). Con IDs numéricos no hay nada pendiente.
-  const [pendingSlugs] = useState(() => ({
-    categoria: initialCategoryId == null ? urlParams.categorySlug : undefined,
-    marca: initialMarcaId == null && urlParams.marcaId == null ? urlParams.marcaSlug : undefined,
+  const [category, setCategoryState] = useState<CategoryKey>(
+    (q.categoria ? keyFromName(q.categoria) : undefined) ?? initialCategory ?? 'todos',
+  );
+  const [pendingCategoryId, setPendingCategoryId] = useState(q.legacyCategoryId);
+  const [selections, setSelections] = useState<Selections>(() => ({
+    ...EMPTY,
+    search: q.search,
+    momentos: LEGACY_MOMENTO[q.momento] ? [LEGACY_MOMENTO[q.momento]] : [],
   }));
-  const [slugsResolved, setSlugsResolved] = useState(!pendingSlugs.categoria && !pendingSlugs.marca);
+  const [marcaParam, setMarcaParam] = useState<string | undefined>(q.marca ?? undefined);
+  const [sort, setSortState] = useState<SortKey>('pedidos');
+  const [visible, setVisible] = useState(PAGE_SIZE);
 
   const { data: rawCategories = [] } = useRawCategoriesQuery();
+  const productsQuery = useProductsQuery({ queryParams: { page: 1, limit: 200 } });
+  const all = useMemo(() => productsQuery.data?.content ?? [], [productsQuery.data]);
 
-  // Resolver slugs de la URL → IDs (una sola vez, al cargar las categorías).
-  useEffect(() => {
-    if (slugsResolved || rawCategories.length === 0) return;
-    let categoryId: number | undefined;
-    let marcaId: number | undefined;
-    if (pendingSlugs.categoria) {
-      const cat = rawCategories.find((c) => matchesSlug(c, pendingSlugs.categoria!));
-      if (cat) categoryId = Number(cat.id);
+  // Categoría (id) → clave del catálogo, por nombre normalizado (no depende de IDs por entorno).
+  const ctx = useMemo<FilterContext>(() => {
+    const catKeyById = new Map<number, CategoryKey>();
+    for (const c of rawCategories) {
+      const key = keyFromName(c.name);
+      if (key) catKeyById.set(Number(c.id), key);
     }
-    if (pendingSlugs.marca) {
-      const pool = categoryId != null
-        ? rawCategories.filter((c) => Number(c.id) === categoryId)
-        : rawCategories;
-      for (const c of pool) {
-        const m = c.marcas.find((marca) => matchesSlug(marca, pendingSlugs.marca!));
-        if (m) {
-          marcaId = Number(m.id);
-          // Marca sola (sin categoría en la URL): se filtra solo por marca,
-          // igual que el formato viejo `?marca=3`.
-          if (pendingSlugs.categoria && categoryId == null) categoryId = Number(c.id);
-          break;
+    return { catKeyById };
+  }, [rawCategories]);
+
+  // Enlaces viejos `?category=<id>` → clave.
+  useEffect(() => {
+    if (pendingCategoryId == null || rawCategories.length === 0) return;
+    const key = ctx.catKeyById.get(pendingCategoryId);
+    if (key) setCategoryState(key);
+    setPendingCategoryId(undefined);
+  }, [pendingCategoryId, rawCategories, ctx]);
+
+  // Marca de la URL (id o slug) → casa real.
+  const marcaPending = marcaParam != null && rawCategories.length === 0;
+  const marca = useMemo(() => {
+    if (marcaParam == null) return undefined;
+    for (const c of rawCategories) {
+      for (const m of c.marcas) {
+        const v = norm(marcaParam);
+        if (
+          String(m.id) === marcaParam ||
+          norm(m.slug ?? '') === v ||
+          slugify(m.name) === slugify(marcaParam)
+        ) {
+          return {
+            id: Number(m.id),
+            name: m.name as string,
+            slug: (m.slug as string | null) || slugify(m.name),
+            categoryId: Number(c.id),
+            categoryName: c.name as string,
+            categoryKey: keyFromName(c.name),
+          };
         }
       }
     }
-    setFilters((f) => ({
-      ...f,
-      categoryId: categoryId ?? f.categoryId,
-      marcaId: marcaId ?? f.marcaId,
-      page: 1,
-    }));
-    setSlugsResolved(true);
-  }, [slugsResolved, rawCategories, pendingSlugs]);
+    return undefined;
+  }, [marcaParam, rawCategories]);
 
-  // Reescribir la URL con slugs legibles al cambiar categoría/marca (o cuando
-  // llega en formato viejo con IDs). Conserva los demás params (search, etc.).
+  const isBrandView = !!marca;
+
+  const criteria = useMemo<CatalogCriteria>(
+    () => ({ category: marca ? 'todos' : category, ...selections, marcaId: marca?.id }),
+    [category, selections, marca],
+  );
+
+  // URL legible: ?categoria=arabes&marca=creed (conserva el resto de parámetros).
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (!slugsResolved || rawCategories.length === 0) return;
-    const cat = filters.categoryId != null
-      ? rawCategories.find((c) => Number(c.id) === filters.categoryId)
-      : undefined;
-    const marca = filters.marcaId != null
-      ? rawCategories.flatMap((c) => c.marcas).find((m) => Number(m.id) === filters.marcaId)
-      : undefined;
     const params = new URLSearchParams(window.location.search);
     params.delete('category');
-    if (cat) params.set('categoria', cat.slug);
+    params.delete('momento');
+    if (category !== 'todos') params.set('categoria', category);
     else params.delete('categoria');
     if (marca) params.set('marca', marca.slug);
-    else params.delete('marca');
-    // El filtro "con descuento" se retiró del panel: se limpia el parámetro
-    // viejo para que un enlace guardado no deje el catálogo filtrado sin forma
-    // de quitarlo.
-    params.delete('descuento');
+    else if (!marcaPending) params.delete('marca');
+    if (selections.search) params.set('search', selections.search);
+    else params.delete('search');
     const qs = params.toString();
     window.history.replaceState(null, '', qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
-  }, [filters.categoryId, filters.marcaId, rawCategories, slugsResolved]);
+  }, [category, marca, marcaPending, selections.search]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(filters.search), 300);
-    return () => clearTimeout(timer);
-  }, [filters.search]);
+  const results = useMemo(() => sortProducts(filterProducts(all, criteria, ctx), sort), [all, criteria, ctx, sort]);
+  const shown = useMemo(() => results.slice(0, visible), [results, visible]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedMaxPrice(filters.maxPrice), 300);
-    return () => clearTimeout(timer);
-  }, [filters.maxPrice]);
+  // Conteos por opción: «cuántos quedarían si se elige».
+  const casaOptions = useMemo<FilterOption[]>(() => {
+    const seen = new Map<number, string>();
+    for (const p of all) if (p.marcaId != null && p.marca?.name) seen.set(p.marcaId, p.marca.name);
+    return [...seen.entries()]
+      .map(([id, label]) => ({ value: String(id), label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [all]);
 
-  // El tamaño de página sigue al ancho de pantalla; si el usuario gira el
-  // teléfono o cambia el tamaño de la ventana, se vuelve a la primera página
-  // para no quedar en una página que ya no existe.
-  const [limit, setLimit] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia(DESKTOP_QUERY).matches
-      ? DESKTOP_LIMIT
-      : MOBILE_LIMIT,
-  );
-  const [brandChunks, setBrandChunks] = useState(1);
-
-  useEffect(() => {
-    const mq = window.matchMedia(DESKTOP_QUERY);
-    const sync = () => {
-      const next = mq.matches ? DESKTOP_LIMIT : MOBILE_LIMIT;
-      setLimit((prev) => {
-        if (prev !== next) setFilters((f) => ({ ...f, page: 1 }));
-        return next;
-      });
+  const counts = useMemo(() => {
+    const out: Record<string, number> = {};
+    const add = (section: FilterSection, opts: FilterOption[]) => {
+      for (const o of opts) out[`${section}:${o.value}`] = countWith(all, criteria, ctx, section, o.value);
     };
-    sync();
-    mq.addEventListener('change', sync);
-    return () => mq.removeEventListener('change', sync);
+    add('genders', GENDER_OPTIONS);
+    add('momentos', MOMENTO_OPTIONS);
+    add('precios', PRICE3_OPTIONS);
+    add('notas', NOTE_OPTIONS);
+    add('casas', casaOptions);
+    return out;
+  }, [all, criteria, ctx, casaOptions]);
+
+  const categoryCounts = useMemo(() => {
+    const keys: CategoryKey[] = ['todos', 'disenador', 'nicho', 'arabes', 'bajo-pedido'];
+    const base = { ...criteria, marcaId: undefined };
+    return Object.fromEntries(keys.map((k) => [k, countWith(all, base, ctx, 'category', k)])) as Record<CategoryKey, number>;
+  }, [all, criteria, ctx]);
+
+  const setCategory = useCallback((key: CategoryKey) => {
+    setCategoryState(key);
+    setMarcaParam(undefined);
+    setVisible(PAGE_SIZE);
   }, []);
 
-  // El flag de la página (bajoPedido={true} en /bajo-pedido, ={false} en
-  // /catalogo/perfumes) SIEMPRE se respeta, incluso al navegar a una casa
-  // (marca) o categoría. Así la sección "Bajo Pedido" muestra solo bajo
-  // pedido y "Perfumes" solo stock, en cualquier nivel de navegación.
-  const isBrandView = filters.marcaId != null && slugsResolved;
-  const brandPageSize = limit === DESKTOP_LIMIT ? BRAND_DESKTOP_LIMIT : BRAND_MOBILE_LIMIT;
-
-  useEffect(() => {
-    setBrandChunks(1);
-  }, [
-    filters.marcaId,
-    filters.categoryId,
-    filters.gender,
-    filters.timeOfDay,
-    filters.concentration,
-    filters.projection,
-    debouncedSearch,
-    debouncedMaxPrice,
-  ]);
-
-  const queryParams = {
-    page: isBrandView ? 1 : filters.page,
-    limit: isBrandView ? brandPageSize * brandChunks : limit,
-    search: debouncedSearch || undefined,
-    inStock: filters.inStock || undefined,
-    bajoPedido,
-    categoryId: filters.categoryId,
-    marcaId: filters.marcaId,
-    gender: filters.gender || undefined,
-    timeOfDay: filters.timeOfDay || undefined,
-    concentration: filters.concentration || undefined,
-    projection: filters.projection || undefined,
-    minPrice: filters.minPrice,
-    maxPrice: debouncedMaxPrice,
-    sortBy: filters.sortBy,
-    sortOrder: filters.order?.toUpperCase() as 'ASC' | 'DESC',
-  };
-
-  const { data, isLoading, isFetching } = useProductsQuery({ queryParams });
-
-  const products = data?.content ?? [];
-  const pagination = data?.pagination;
-  const hasMore = isBrandView && (pagination?.total ?? 0) > products.length;
-  const loadMore = useCallback(() => {
-    setBrandChunks((chunks) => chunks + 1);
+  const toggle = useCallback((section: FilterSection, value: string) => {
+    setSelections((s) => {
+      const cur = s[section];
+      return { ...s, [section]: cur.includes(value) ? cur.filter((v) => v !== value) : [...cur, value] };
+    });
+    setVisible(PAGE_SIZE);
   }, []);
-
-  const showBrandBackorder = bajoPedido === false && filters.marcaId != null && slugsResolved;
-  const brandBackorderQuery = useProductsQuery({
-    queryParams: {
-      page: 1,
-      limit: DESKTOP_LIMIT,
-      marcaId: filters.marcaId,
-      bajoPedido: true,
-      sortBy: 'createdAt',
-      sortOrder: 'DESC',
-    },
-    enabled: showBrandBackorder,
-  });
-
-  const setSearch = useCallback((search: string) => {
-    setFilters((f) => ({ ...f, search, page: 1 }));
-  }, []);
-
-  const setInStock = useCallback((inStock: boolean) => {
-    setFilters((f) => ({ ...f, inStock, page: 1 }));
-  }, []);
-
-  const setGender = useCallback((gender: Gender | '') => {
-    setFilters((f) => ({ ...f, gender, page: 1 }));
-  }, []);
-
-  const setTimeOfDay = useCallback((timeOfDay: TimeOfDay | '') => {
-    setFilters((f) => ({ ...f, timeOfDay, page: 1 }));
-  }, []);
-
-  const setConcentration = useCallback((concentration: Concentration | '') => {
-    setFilters((f) => ({ ...f, concentration, page: 1 }));
-  }, []);
-
-  const setProjection = useCallback((projection: Projection | '') => {
-    setFilters((f) => ({ ...f, projection, page: 1 }));
-  }, []);
-
-  const setPriceRange = useCallback((minPrice?: number, maxPrice?: number) => {
-    setFilters((f) => ({ ...f, minPrice, maxPrice, page: 1 }));
-  }, []);
-
-  const setCategoryId = useCallback((categoryId?: number) => {
-    setFilters((f) => ({ ...f, categoryId, marcaId: undefined, page: 1 }));
-  }, []);
-
-  const setMarcaId = useCallback((marcaId?: number) => {
-    setFilters((f) => ({ ...f, marcaId, page: 1 }));
-  }, []);
-
-  const setPage = useCallback((page: number) => {
-    setFilters((f) => ({ ...f, page }));
-  }, []);
-
-  const setSort = useCallback((sortValue: string) => {
-    const [sortBy, order] = sortValue.split(':') as [
-      CatalogFilters['sortBy'],
-      CatalogFilters['order'],
-    ];
-    setFilters((f) => ({
-      ...f,
-      sortBy: sortBy || 'createdAt',
-      order: order || 'desc',
-      page: 1,
-    }));
-  }, []);
-
-  const sortValue = `${filters.sortBy}:${filters.order}`;
 
   const clearFilters = useCallback(() => {
-    setFilters({
-      ...defaultFilters,
-      categoryId: initialCategoryId,
-      marcaId: initialMarcaId,
-    });
-  }, [initialCategoryId, initialMarcaId]);
+    setSelections(EMPTY);
+    setVisible(PAGE_SIZE);
+  }, []);
 
-  const hasActiveFilters = !!(
-    filters.search || filters.gender ||
-    filters.timeOfDay || filters.concentration || filters.projection ||
-    filters.minPrice || filters.maxPrice ||
-    (filters.categoryId && filters.categoryId !== catId)
-  );
+  const setSort = useCallback((s: SortKey) => setSortState(s), []);
+  const loadMore = useCallback(() => setVisible((v) => v + PAGE_SIZE), []);
+  const selectMarca = useCallback((slug?: string) => {
+    setMarcaParam(slug);
+    setVisible(PAGE_SIZE);
+  }, []);
+
+  const labelOf = (opts: FilterOption[], v: string) => opts.find((o) => o.value === v)?.label ?? v;
+  const chips: ActiveChip[] = [
+    ...selections.genders.map((v) => ({ key: `genders:${v}`, label: labelOf(GENDER_OPTIONS, v), onRemove: () => toggle('genders', v) })),
+    ...selections.momentos.map((v) => ({ key: `momentos:${v}`, label: labelOf(MOMENTO_OPTIONS, v), onRemove: () => toggle('momentos', v) })),
+    ...selections.precios.map((v) => ({ key: `precios:${v}`, label: `3 ml · ${labelOf(PRICE3_OPTIONS, v)}`, onRemove: () => toggle('precios', v) })),
+    ...selections.notas.map((v) => ({ key: `notas:${v}`, label: labelOf(NOTE_OPTIONS, v), onRemove: () => toggle('notas', v) })),
+    ...selections.casas.map((v) => ({ key: `casas:${v}`, label: labelOf(casaOptions, v), onRemove: () => toggle('casas', v) })),
+  ];
+  if (selections.search)
+    chips.push({
+      key: 'search',
+      label: `“${selections.search}”`,
+      onRemove: () => setSelections((s) => ({ ...s, search: '' })),
+    });
+
+  // Datos de la vista de marca (K12).
+  const brandProducts = useMemo(() => (marca ? all.filter((p) => p.marcaId === marca.id) : []), [all, marca]);
+  const brandFrom3ml = useMemo(() => {
+    const prices = brandProducts.map(price3Of).filter((n): n is number => n != null);
+    return prices.length ? Math.min(...prices) : null;
+  }, [brandProducts]);
+  const otherHouses = useMemo(() => {
+    if (!marca) return [];
+    const cat = rawCategories.find((c) => Number(c.id) === marca.categoryId);
+    return (cat?.marcas ?? [])
+      .filter((m) => Number(m.id) !== marca.id && m.isActive !== false)
+      .map((m) => ({ id: Number(m.id), name: m.name as string, slug: (m.slug as string | null) || slugify(m.name) }));
+  }, [marca, rawCategories]);
 
   return {
-    filters,
-    products,
-    pagination,
-    isLoading,
-    isFetching,
-    sortValue,
-    hasActiveFilters,
-    isBrandView,
-    hasMore,
+    category: marca ? 'todos' : category,
+    criteria,
+    chips,
+    activeCount: chips.length,
+    total: results.length,
+    shown,
+    hasMore: results.length > shown.length,
     loadMore,
-    showBrandBackorder,
-    brandBackorderProducts: brandBackorderQuery.data?.content ?? [],
-    brandBackorderTotal: brandBackorderQuery.data?.pagination?.total ?? 0,
-    brandBackorderLoading: brandBackorderQuery.isLoading,
-    brandBackorderFetching: brandBackorderQuery.isFetching,
-    selectedMarca: filters.marcaId != null
-      ? rawCategories.flatMap((c) => c.marcas).find((m) => Number(m.id) === filters.marcaId)
-      : undefined,
-    setSearch,
-    setInStock,
-    setGender,
-    setTimeOfDay,
-    setConcentration,
-    setProjection,
-    setPriceRange,
-    setCategoryId,
-    setMarcaId,
+    isLoading: productsQuery.isLoading || marcaPending,
+    sort,
     setSort,
-    setPage,
+    setCategory,
+    toggle,
     clearFilters,
+    counts,
+    categoryCounts,
+    casaOptions,
+    hasData: all.length > 0,
+    isBrandView,
+    marca,
+    brandFrom3ml,
+    otherHouses,
+    selectMarca,
   };
 }

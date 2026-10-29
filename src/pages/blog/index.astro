@@ -14,7 +14,7 @@ const fmtDate = (d?: string | null) =>
 const excerptOf = (p: { excerpt?: string | null; content?: string | null }) =>
   p.excerpt || (p.content ? p.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '');
 
-const FALLBACK = '/banner-catalog.png';
+const FALLBACK = '/banner-catalog.webp';
 ---
 
 <PublicLayout

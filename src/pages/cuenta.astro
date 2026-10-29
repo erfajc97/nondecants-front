@@ -1,0 +1,8 @@
+---
+import PublicLayout from '@/layouts/PublicLayout.astro';
+import AccountPage from '@/app/features/auth/components/AccountPage';
+---
+
+<PublicLayout title="Mi cuenta — NonDecants" description="Entra o crea tu cuenta de NonDecants." robots="noindex,nofollow">
+  <AccountPage client:load />
+</PublicLayout>

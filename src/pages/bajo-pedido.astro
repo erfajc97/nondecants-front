@@ -12,13 +12,13 @@ const indexed = await fetchProducts({ limit: 200, page: 1, bajoPedido: true });
 
 <PublicLayout
   title="Perfumes por encargo en Ecuador | NonDecants"
-  description="Traemos el perfume que no se vende en Ecuador. Rarezas árabes, nicho y diseñador. Entrega en 13–17 días."
+  description="Frascos sellados que traemos en 13 a 17 días, con pago anticipado. Rarezas árabes, nicho y diseñador."
   canonical="/bajo-pedido"
   robots={robots}
 >
   <div class="bg-bg min-h-screen">
     <div class="border-t border-border"></div>
-    <Catalog client:load bajoPedido={true} bannerSlot="catalog_bajo_pedido" bannerTitle="Bajo Pedido" bannerDescription="Perfumes exclusivos disponibles bajo pedido" />
+    <Catalog client:load initialCategory="bajo-pedido" initialQuery={Astro.url.search} />
     <CatalogProductIndex products={indexed.content} title="Referencias bajo pedido" />
   </div>
 </PublicLayout>

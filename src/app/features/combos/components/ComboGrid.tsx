@@ -7,7 +7,9 @@ interface ComboGridProps {
   isLoading: boolean;
 }
 
-export default function ComboGrid({ combos, isLoading }: ComboGridProps) {
+export default function ComboGrid({ combos: all, isLoading }: ComboGridProps) {
+  // Las versiones (3/5/10 ml) viven dentro de su combo base: no van como tarjetas aparte.
+  const combos = all.filter((c) => !c.parentComboId);
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16 md:py-32">

@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/app/features/landing/components/layout/Navbar';
 import CheckoutIsland from '@/app/features/checkout/components/Checkout';
 
 export const prerender = false; // Checkout requires client side checking or SSR, Astro defaults to SSG
@@ -7,21 +8,19 @@ export const prerender = false; // Checkout requires client side checking or SSR
 
 <BaseLayout title="Checkout — NonDecants" description="Finaliza tu compra de forma segura" robots="noindex,nofollow">
   <div class="flex min-h-screen flex-col bg-bg-alt">
-    <header class="border-b border-border bg-bg">
-      <div class="mx-auto flex h-[66px] w-full max-w-[1480px] items-center justify-between px-4 md:px-[clamp(16px,3.4vw,52px)]">
-        <a href="/" aria-label="NönDecants — Inicio">
-          <img src="/logonondecants.png" alt="NönDecants" width={543} height={127} class="h-7 w-auto" />
-        </a>
-        <a href="/carrito" class="font-body text-[15px] font-semibold text-text underline underline-offset-4">Volver al carrito</a>
-      </div>
-    </header>
+    <!-- K-7: header normal del sitio (logo, menú, íconos) -->
+    <Navbar client:load />
 
     <main class="mx-auto w-full max-w-[1480px] flex-1 px-4 pb-12 md:px-[clamp(16px,3.4vw,52px)] md:pb-20">
-      <div class="pb-5 pt-7">
-        <h1 class="font-display text-[clamp(36px,4vw,52px)] leading-none text-text">Finalizar compra</h1>
-        <p class="mt-2 font-body text-base text-text-muted">Compra sin crear cuenta. Solo te tomará un par de minutos.</p>
-      </div>
       <CheckoutIsland client:load />
     </main>
   </div>
 </BaseLayout>
+
+<!-- K-6: en el checkout no hay sello flotante ni barra de navegación inferior -->
+<style is:global>
+  .fseal,
+  nav[aria-label='Navegación móvil'] {
+    display: none !important;
+  }
+</style>

@@ -7,7 +7,7 @@ import CatalogProductIndex from '@/app/features/catalog/components/CatalogProduc
 import { fetchProducts } from '@/app/tanstack-queries/productsQuery';
 
 const robots = Astro.url.search ? 'noindex,follow' : 'index,follow';
-const indexed = await fetchProducts({ limit: 200, page: 1, bajoPedido: false });
+const indexed = await fetchProducts({ limit: 200, page: 1 });
 ---
 
 <PublicLayout
@@ -18,7 +18,7 @@ const indexed = await fetchProducts({ limit: 200, page: 1, bajoPedido: false });
 >
   <div class="bg-bg min-h-screen">
     <div class="border-t border-border"></div>
-    <Catalog client:load tipo="perfumes" bajoPedido={false} bannerSlot="catalog_perfumes" bannerTitle="Perfumes" bannerDescription="Aquí encontrarás todos los perfumes de Marcas" />
+    <Catalog client:load initialQuery={Astro.url.search} />
     <CatalogProductIndex products={indexed.content} title="Todas las fragancias" />
   </div>
 </PublicLayout>
