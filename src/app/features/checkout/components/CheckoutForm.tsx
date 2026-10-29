@@ -7,6 +7,7 @@ import PaymentSection from './PaymentSection';
 import TransferBankInfoStep from './TransferBankInfoStep';
 import TermsAcceptance from './TermsAcceptance';
 import { validateContact } from '../validators';
+import { BTN_PRIMARY } from '../classes';
 import type { CustomerFormData, DeliveryMethod, PaymentMethod, DeliveryOption } from '../types';
 import type { Address } from '@/app/features/profile/types';
 
@@ -86,7 +87,7 @@ export default function CheckoutForm({
   };
 
   return (
-    <form className="flex flex-col gap-6" onSubmit={onFormSubmit}>
+    <form className="flex flex-col gap-7" onSubmit={onFormSubmit}>
       {step !== 3 && <CheckoutStepTabs step={step} setStep={setStep} />}
 
       {step === 1 && (
@@ -114,19 +115,12 @@ export default function CheckoutForm({
             onSelectAddress={handleSelectAddress}
           />
           <div className="mt-2">
-            {/* El marco dorado solo cuando el paso se puede dar: en gris sería
-                una invitación a un botón que no responde. */}
-            <button
-              type="submit"
-              disabled={!canContinue}
-              className={`w-full bg-text py-4 font-body text-xs font-medium uppercase tracking-[0.2em] text-bg transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:bg-text/40 disabled:hover:bg-text/40 ${
-                canContinue ? 'gold-frame' : ''
-              }`}
-            >
+            <button type="submit" disabled={!canContinue} className={BTN_PRIMARY}>
               Continuar
+              <span aria-hidden="true">→</span>
             </button>
             {!canContinue && (
-              <p className="mt-2 font-body text-[11px] text-text-muted">
+              <p className="mt-2.5 font-body text-sm text-text-muted">
                 {contactError ?? 'Selecciona un método de entrega.'}
               </p>
             )}
@@ -141,9 +135,7 @@ export default function CheckoutForm({
           <button
             type="submit"
             disabled={isPending || !paymentMethod || !termsAccepted}
-            className={`mt-2 w-full bg-text py-4 font-body text-xs font-medium uppercase tracking-[0.2em] text-bg transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50 ${
-              !isPending && paymentMethod && termsAccepted ? 'gold-frame' : ''
-            }`}
+            className={`${BTN_PRIMARY} mt-2`}
           >
             {isPending ? (
               <Loader size={18} color="#fff" className="mx-auto" />

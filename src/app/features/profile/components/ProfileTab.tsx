@@ -15,7 +15,7 @@ const INPUT_RO =
   'w-full border border-border bg-bg-alt px-3.5 py-3 font-body text-sm text-text-soft cursor-default';
 const SELECT =
   'w-full cursor-pointer appearance-none border border-border bg-surface px-3.5 py-3 font-body text-sm text-text focus:border-text focus:outline-none transition-colors';
-const LABEL = 'mb-2 block font-body text-[10px] uppercase tracking-[0.18em] text-text-muted';
+const LABEL = 'mb-2 block font-body text-[13px] font-semibold text-text-muted';
 
 export default function ProfileTab() {
   const user = useAuthStore((s) => s.user);
@@ -145,7 +145,7 @@ export default function ProfileTab() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-display text-2xl font-light text-text">Mi perfil</h2>
+        <h2 className="font-display text-2xl font-normal text-text">Mi perfil</h2>
         <p className="mt-1 font-body text-sm text-text-soft">Administra tu información personal y de envío</p>
       </div>
 
@@ -163,7 +163,7 @@ export default function ProfileTab() {
               <button
                 onClick={() => user.email && resendVerification(user.email)}
                 disabled={isResending}
-                className="bg-text px-4 py-2 font-body text-[11px] uppercase tracking-[0.16em] text-bg transition-colors hover:bg-accent disabled:opacity-50"
+                className="rounded-[3px] bg-text px-4 py-2 font-body text-[13px] font-semibold text-bg transition-colors hover:bg-text-soft disabled:opacity-50"
               >
                 {isResending ? <Loader size={14} color="#fff" /> : 'Reenviar correo'}
               </button>
@@ -289,7 +289,7 @@ export default function ProfileTab() {
             <button
               onClick={handleChangePassword}
               disabled={isChangingPwd}
-              className="border border-text px-8 py-3 font-body text-xs uppercase tracking-[0.2em] text-text transition-colors hover:bg-text hover:text-bg disabled:opacity-50"
+              className="border border-text px-8 py-3 font-body text-[14.5px] font-semibold tracking-[0.01em] text-text transition-colors hover:bg-text hover:text-bg disabled:opacity-50"
             >
               {isChangingPwd ? <Loader size={16} /> : 'Cambiar contraseña'}
             </button>
@@ -302,14 +302,14 @@ export default function ProfileTab() {
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="bg-text px-8 py-3.5 font-body text-xs font-medium uppercase tracking-[0.2em] text-bg transition-colors hover:bg-accent disabled:opacity-50"
+          className="rounded-[3px] bg-text px-8 py-3.5 font-body text-[14.5px] font-semibold tracking-[0.01em] text-bg transition-colors hover:bg-text-soft disabled:opacity-50"
         >
           {isSaving ? <Loader size={16} color="#fff" /> : 'Guardar cambios'}
         </button>
         <button
           onClick={() => logout()}
           disabled={isLoggingOut}
-          className="border border-border px-8 py-3.5 font-body text-xs uppercase tracking-[0.2em] text-text-soft transition-colors hover:border-text hover:text-text disabled:opacity-50"
+          className="border border-border px-8 py-3.5 font-body text-[14.5px] font-semibold tracking-[0.01em] text-text-soft transition-colors hover:border-text hover:text-text disabled:opacity-50"
         >
           {isLoggingOut ? <Loader size={16} /> : 'Cerrar sesión'}
         </button>

@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { flyToCart } from '@/app/helpers/flyToCart';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
-import DeliveryEta from '@/app/components/UI/DeliveryEta';
-import TrustIcons from '@/app/components/UI/TrustIcons';
 import { productUrl } from '@/app/helpers/productUrl';
 import { useCartStore } from '@/app/store/cart/cartStore';
 import { sonnerResponse } from '@/app/helpers/sonnerResponse';
-import { DEFAULT_DISPATCH_CUTOFF_HOUR } from '@/app/helpers/deliveryWindow';
+import {
+  BACKORDER_LABEL,
+  DEFAULT_DISPATCH_CUTOFF_HOUR,
+  deliveryRangeShort,
+} from '@/app/helpers/deliveryWindow';
 import { useDeliveryOffsetQuery, useDispatchCutoffQuery } from '@/app/tanstack-queries/settingsQuery';
-import PaymentMethodIcons from '@/app/components/PaymentMethodIcons';
+import { useProductReviewsQuery } from '@/app/tanstack-queries/reviewsQuery';
+import { PAYMENT_LOGOS } from '@/app/components/paymentLogos';
+import Stars from '@/app/features/reviews/components/Stars';
 import type { Product, ProductVariant } from '@/app/types/global.types';
 
 type SelectedOption =
@@ -22,6 +27,153 @@ interface ProductPurchaseOptionsProps {
   onVariantChange?: (variant: ProductVariant | null) => void;
 }
 
+const TZ = 'America/Guayaquil';
+const CARD_BRANDS = ['Payphone', 'Visa', 'Mastercard', 'Diners Club', 'Discover'];
+
+/**
+ * ► PUNTO ÚNICO DE "AÑADIR AL CARRITO CON ÉXITO".
+ * Se llama justo después de `addItem(...)`, desde "Añadir" y desde la barra
+ * fija móvil. Acá se engancha el drawer del carrito (abrirlo, etc.).
+ */
+function onAddToCartSuccess(_ctx: { productName: string }) {
+  // TODO(carrito): abrir el drawer del carrito aquí.
+}
+
+/** Chispas + miniatura que vuela al carrito (prototipo). */
+function spritz(btn: HTMLElement | null, thumb?: string) {
+  if (!btn || typeof window === 'undefined') return;
+  if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    btn.classList.remove('pdp-pop');
+    void btn.offsetWidth;
+    btn.classList.add('pdp-pop');
+  }
+  flyToCart(btn, thumb);
+}
+
+/** Fecha corta en Ecuador "mié 4 nov", sumando `days` desde hoy. */
+function shortDateIn(days: number) {
+  return new Date(Date.now() + days * 86_400_000)
+    .toLocaleDateString('es-EC', { weekday: 'short', day: 'numeric', month: 'short', timeZone: TZ })
+    .replace('.', '');
+}
+
+/** Segundos transcurridos del día en Ecuador (UTC-5, sin horario de verano). */
+function ecuadorSecondsOfDay(now = Date.now()) {
+  const s = (now / 1000 - 5 * 3600) % 86400;
+  return s < 0 ? s + 86400 : s;
+}
+
+const pad2 = (n: number) => String(n).padStart(2, '0');
+
+/**
+ * Despacho con cuenta regresiva (prototipo .cd): pulso verde, "Se despacha
+ * hoy/mañana", "Llega …", reloj hasta la hora de corte y barra dorada.
+ */
+function DispatchCountdown({
+  cutoffHour,
+  offsetDays,
+  stockLeft,
+}: {
+  cutoffHour: number;
+  offsetDays: number;
+  stockLeft: number | null;
+}) {
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    setNow(Date.now());
+    const t = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(t);
+  }, []);
+
+  // Antes de montar (SSR/hidratación) no hay reloj: se pinta solo la línea de llegada.
+  const sec = now != null ? ecuadorSecondsOfDay(now) : null;
+  const h = sec != null ? sec / 3600 : 0;
+  const late = sec != null && h >= cutoffHour;
+  const left = sec != null ? Math.max(0, (late ? 24 + cutoffHour : cutoffHour) * 3600 - sec) : 0;
+  const pct = late ? Math.min(1, (h - cutoffHour) / 24) : Math.min(1, h / cutoffHour);
+  const hh = Math.floor(left / 3600);
+  const mm = Math.floor((left % 3600) / 60);
+  const ss = Math.floor(left % 60);
+
+  return (
+    <div className={`grid gap-2 border-y border-border py-3.5 ${late ? 'pdp-late' : ''}`}>
+      <div className="flex items-center gap-2.5 font-body text-[15px]">
+        <span className="pdp-pulse" aria-hidden />
+        <b className="font-semibold">{late ? 'Se despacha mañana' : 'Se despacha hoy'}</b>
+        <span className="ml-auto text-[13.5px] text-text-muted">
+          Llega {deliveryRangeShort(offsetDays, cutoffHour)}
+        </span>
+      </div>
+      {sec != null && (
+        <>
+          <div className="flex flex-wrap items-baseline gap-2.5 font-body text-sm text-text-muted">
+            <span>Pide en las próximas</span>
+            <strong className="font-display text-[26px] font-normal leading-none tracking-[0.02em] text-text max-md:text-[23px]">
+              {pad2(hh)}
+              <i className="pdp-colon">:</i>
+              {pad2(mm)}
+              <i className="pdp-colon">:</i>
+              <span className="text-accent-hover">{pad2(ss)}</span>
+            </strong>
+            {stockLeft != null && stockLeft <= 12 && (
+              <em className="ml-auto text-[13px] font-semibold not-italic text-error">Quedan {stockLeft}</em>
+            )}
+          </div>
+          <div className="pdp-cd-bar" aria-hidden>
+            <i style={{ ['--p' as string]: late ? 1 : pct }} />
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+const ICON_PROPS = {
+  width: 22,
+  height: 22,
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.5,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+  'aria-hidden': true,
+};
+
+const TRUST = [
+  {
+    t: '100%',
+    l: 'Original y sellado',
+    icon: (
+      <svg {...ICON_PROPS}>
+        <path d="M12 3l2.4 1.6 2.9-.1 1.2 2.6 2.5 1.5-.6 2.8 1.1 2.7-2 2.1-.3 2.9-2.8.8-2.1 2-2.6-1.3-2.7 1.1-2-2.1-2.9-.4-.8-2.8-2-2.1 1.2-2.6-.3-2.9 2.5-1.5L7 4.5l2.9.1z" />
+        <path d="m8.8 12.2 2.3 2.3 4.2-4.6" />
+      </svg>
+    ),
+  },
+  {
+    t: '24–72 h',
+    l: 'Envío a todo Ecuador',
+    icon: (
+      <svg {...ICON_PROPS}>
+        <path d="M3 6.5h11v9H3zM14 9.5h3.8l3.2 3v3h-7z" />
+        <circle cx="7" cy="17.5" r="1.7" />
+        <circle cx="17.5" cy="17.5" r="1.7" />
+      </svg>
+    ),
+  },
+  {
+    t: '3 · 5 · 10',
+    l: 'ml decantados aquí',
+    icon: (
+      <svg {...ICON_PROPS}>
+        <path d="M12 3.5s6 6.2 6 10.5a6 6 0 0 1-12 0c0-4.3 6-10.5 6-10.5z" />
+        <path d="M6 14h12" />
+      </svg>
+    ),
+  },
+];
+
 export default function ProductPurchaseOptions({
   product,
   selectedVariant: externalVariant,
@@ -34,7 +186,7 @@ export default function ProductPurchaseOptions({
     const openMl = Number(product.openBottleMlRemaining ?? 0);
     const totalAvailMl = openMl + stock * Number(product.totalMl ?? 0);
     const firstAvailable = (product.variants ?? [])
-      .filter(v => !v.isFullBottle && v.ml <= totalAvailMl)
+      .filter((v) => !v.isFullBottle && v.ml <= totalAvailMl)
       .sort((a, b) => a.ml - b.ml)[0];
     if (firstAvailable) return { type: 'decant', variant: firstAvailable };
     return { type: 'full' };
@@ -92,6 +244,7 @@ export default function ProductPurchaseOptions({
   // Días extra de entrega configurados en el admin (setting opcional).
   const { data: deliveryOffset = 0 } = useDeliveryOffsetQuery();
   const { data: cutoffHour = DEFAULT_DISPATCH_CUTOFF_HOUR } = useDispatchCutoffQuery();
+  const { data: reviewsData } = useProductReviewsQuery(product.id);
 
   // Number(): los decimales llegan como string desde el backend; sin esto las
   // sumas de ml concatenan y la disponibilidad sale mal.
@@ -103,7 +256,7 @@ export default function ProductPurchaseOptions({
   // Siempre de menor a mayor: el orden en que llegan del backend depende del id
   // de creación y dejaba tarjetas salteadas (10 ml antes que 3 ml).
   const byMl = (a: ProductVariant, b: ProductVariant) => a.ml - b.ml;
-  const decants = variants.filter(v => !v.isFullBottle).sort(byMl);
+  const decants = variants.filter((v) => !v.isFullBottle).sort(byMl);
   // Presentaciones selladas cargadas como variante (REQ-056). El backend crea
   // además una variante espejo del frasco del producto: esa no se pinta dos
   // veces, ya es la tarjeta principal.
@@ -122,6 +275,7 @@ export default function ProductPurchaseOptions({
   const discount = product.discount ?? 0;
   const hasDiscount = discount > 0;
   const discountedPrice = hasDiscount ? currentPrice * (1 - discount / 100) : currentPrice;
+  const savings = currentPrice - discountedPrice;
 
   // Stock — use available ml to determine what's purchasable
   const openMl = Number(product.openBottleMlRemaining ?? 0);
@@ -154,13 +308,12 @@ export default function ProductPurchaseOptions({
     ? canBuyFullBottle
     : selectedSealed
       ? selectedSealed.price > 0
-      : selectedDecant ? canBuyDecant(selectedDecant.ml) : false;
+      : selectedDecant
+        ? canBuyDecant(selectedDecant.ml)
+        : false;
 
-  const hasImmediateStock = fullBottleStock > 0 || availableMl > 0;
-  const statusLabel = hasImmediateStock
-    ? 'En stock'
-    : canBuyFullBottle || isBajoPedidoFlag ? 'Bajo pedido' : 'Agotado';
-  const statusIsBad = statusLabel === 'Agotado';
+  // Estado de la opción elegida (como el prototipo): agotado / bajo pedido / en stock.
+  const statusLabel = !inStock ? 'Agotado' : selectedIsBajoPedido ? 'Bajo pedido' : 'En stock';
 
   const getCartItem = () => {
     if (isFullSelected) {
@@ -225,14 +378,18 @@ export default function ProductPurchaseOptions({
   };
 
   const [pendingAction, setPendingAction] = useState<null | 'add' | 'fast'>(null);
+  // Botón desde el que se disparó la acción pendiente (para las chispas tras el modal).
+  const pendingBtn = useRef<HTMLElement | null>(null);
 
-  const proceedAdd = () => {
+  const proceedAdd = (btn?: HTMLElement | null) => {
     const item = getCartItem();
     if (!item) return;
     addItem(item);
     // Se queda en la ficha: agregar no debería sacar al cliente de lo que está
     // mirando. Para ir a pagar está "Comprar ahora" y el ícono del carrito.
     sonnerResponse(`${product.name} agregado al carrito.`, 'success');
+    spritz(btn ?? null, item.image);
+    onAddToCartSuccess({ productName: product.name });
   };
 
   const proceedFastPurchase = () => {
@@ -242,21 +399,18 @@ export default function ProductPurchaseOptions({
     window.location.href = '/checkout';
   };
 
-  /** Tarjetas del selector, ya ordenadas de menor a mayor ml. */
-  const formatCards = [
+  /** Tamaños del selector, ya ordenados de menor a mayor ml. */
+  const sizeTiles = [
     ...(fullBottlePrice > 0
       ? [
           {
             key: 'full',
             ml: fullBottleMl,
-            // "Disponible" en vez de "Sellada": lo que el cliente necesita saber
-            // es que ese frasco se puede llevar hoy.
-            type: fullBottleStock > 0 ? 'Disponible' : 'Bajo pedido',
-            price: fullBottlePrice,
+            isFull: true,
+            status: fullIsBackorder ? 'order' : '',
             active: isFullSelected,
             disabled: !canBuyFullBottle,
-            // El frasco completo lleva el marco dorado para que resalte.
-            highlight: true,
+            level: 1,
             onClick: canBuyFullBottle ? handleSelectFull : undefined,
           },
         ]
@@ -264,11 +418,11 @@ export default function ProductPurchaseOptions({
     ...sealedExtras.map((v) => ({
       key: v.id,
       ml: v.ml,
-      type: sealedIsBackorder(v) ? 'Bajo pedido' : 'Disponible',
-      price: v.price,
+      isFull: true,
+      status: sealedIsBackorder(v) ? 'order' : '',
       active: selectedSealed?.id === v.id,
       disabled: false,
-      highlight: true,
+      level: 1,
       onClick: () => {
         setSelected({ type: 'sealed', variant: v });
         onVariantChange?.(v);
@@ -279,28 +433,29 @@ export default function ProductPurchaseOptions({
       return {
         key: v.id,
         ml: v.ml,
+        isFull: false,
         // Un decant sin ml suficientes no se puede servir (hay que abrir un
-        // frasco): la tarjeta dice por qué en vez de quedar muda.
-        type: available ? 'Decant' : 'Sin stock',
-        price: v.price,
+        // frasco): el tile dice por qué en vez de quedar mudo.
+        status: available ? '' : 'out',
         active: selectedDecant?.id === v.id,
         disabled: !available,
-        highlight: false,
+        level: Math.min(1, v.ml / 10),
         onClick: available ? () => handleSelectDecant(v) : undefined,
       };
     }),
   ].sort((a, b) => a.ml - b.ml);
+  const multiSealed = sizeTiles.filter((t) => t.isFull).length > 1;
 
   const canPurchase = product.isPurchasable !== false;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (btn?: HTMLElement | null) => {
     if (!canPurchase) return;
     if (!hasHydrated) { sonnerResponse('Cargando carrito...', 'error'); return; }
     const item = getCartItem();
     if (!item) { sonnerResponse('Selecciona una opcion.', 'error'); return; }
     if (!inStock) { sonnerResponse('No hay stock disponible.', 'error'); return; }
-    if (selectedIsBajoPedido) { setPendingAction('add'); return; }
-    proceedAdd();
+    if (selectedIsBajoPedido) { pendingBtn.current = btn ?? null; setPendingAction('add'); return; }
+    proceedAdd(btn);
   };
 
   const handleFastPurchase = () => {
@@ -314,8 +469,9 @@ export default function ProductPurchaseOptions({
   };
 
   const confirmBajoPedido = () => {
-    if (pendingAction === 'add') proceedAdd();
+    if (pendingAction === 'add') proceedAdd(pendingBtn.current);
     else if (pendingAction === 'fast') proceedFastPurchase();
+    pendingBtn.current = null;
     setPendingAction(null);
   };
 
@@ -328,140 +484,352 @@ export default function ProductPurchaseOptions({
     window.open(`https://wa.me/593992305463?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
-  const detailTags = [
-    product.gender && { label: 'Género', value: product.gender === 'HOMBRE' ? 'Hombre' : product.gender === 'MUJER' ? 'Mujer' : 'Unisex' },
-    product.concentration && { label: 'Concentración', value: product.concentration.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).replace('De ', 'de ') },
-    product.timeOfDay && { label: 'Hora', value: product.timeOfDay === 'DIA' ? 'Día' : 'Noche' },
-    product.projection && { label: 'Proyección', value: product.projection === 'DISCRETA' ? 'Discreta' : product.projection === 'MODERADA' ? 'Moderada' : 'Alta' },
-  ].filter(Boolean) as { label: string; value: string }[];
+  // ── Presentación ───────────────────────────────────────────────────────
+  const selectedMl = isFullSelected ? fullBottleMl : (selectedSealed?.ml ?? selectedDecant?.ml ?? 0);
+  const selectedIsFull = isFullSelected || !!selectedSealed;
+  const sizeLabel = `${selectedIsFull ? 'Frasco' : 'Decant'} ${selectedMl} ml`;
+  const stockLeft =
+    selectedDecant && selectedDecant.ml > 0 ? Math.floor(availableMl / selectedDecant.ml) : null;
+
+  const chips = [
+    product.gender && (product.gender === 'HOMBRE' ? 'Hombre' : product.gender === 'MUJER' ? 'Mujer' : 'Unisex'),
+    product.concentration &&
+      product.concentration
+        .replace(/_/g, ' ')
+        .toLowerCase()
+        .replace(/\b\w/g, (c) => c.toUpperCase())
+        .replace(' De ', ' de '),
+    product.timeOfDay && (product.timeOfDay === 'DIA' ? 'Día' : 'Noche'),
+    product.projection &&
+      (product.projection === 'DISCRETA'
+        ? 'Proyección discreta'
+        : product.projection === 'MODERADA'
+          ? 'Proyección moderada'
+          : 'Proyección alta'),
+  ].filter(Boolean) as string[];
+
+  const addLabel = !inStock
+    ? 'Agotado'
+    : `${selectedIsBajoPedido && (isFullSelected || selectedSealed) ? 'Pedir frasco' : 'Agregar al carrito'} · ${formatCurrency(discountedPrice)}`;
+
+  // Favorito: solo local (no hay lista de deseos en el back todavía).
+  const favKey = `nd:fav:${product.id}`;
+  const [fav, setFav] = useState(false);
+  const [favPop, setFavPop] = useState(false);
+  useEffect(() => {
+    try {
+      setFav(localStorage.getItem(favKey) === '1');
+    } catch {
+      /* sin almacenamiento */
+    }
+  }, [favKey]);
+  const toggleFav = () => {
+    const next = !fav;
+    setFav(next);
+    setFavPop(true);
+    window.setTimeout(() => setFavPop(false), 520);
+    try {
+      if (next) localStorage.setItem(favKey, '1');
+      else localStorage.removeItem(favKey);
+    } catch {
+      /* sin almacenamiento */
+    }
+  };
+
+  // Barra fija móvil: aparece cuando los CTAs del flujo salen por arriba.
+  const ctasRef = useRef<HTMLDivElement>(null);
+  const [stickyOn, setStickyOn] = useState(false);
+  useEffect(() => {
+    const node = ctasRef.current;
+    if (!node || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([en]) => {
+      setStickyOn(!en.isIntersecting && en.boundingClientRect.top < 0);
+    });
+    io.observe(node);
+    return () => io.disconnect();
+  }, [canPurchase]);
+
+  // Fechas de llegada bajo pedido, solo en cliente (dependen de "hoy").
+  const [backorderDates, setBackorderDates] = useState<string | null>(null);
+  useEffect(() => {
+    setBackorderDates(`${shortDateIn(13)} y el ${shortDateIn(17)}`);
+  }, []);
+
+  const waIcon = (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M11.996 2C6.474 2 2 6.474 2 11.996C2 13.921 2.548 15.717 3.511 17.25L2.146 22.18L7.204 20.852C8.683 21.688 10.297 22.158 11.996 22.158C17.518 22.158 22 17.684 22 12.162C22 6.64 17.518 2.166 11.996 2.166V2ZM17.152 16.315C16.94 16.91 16.1 17.433 15.441 17.545C14.945 17.625 14.284 17.682 11.838 16.669C8.91 15.452 7.027 12.441 6.884 12.253C6.741 12.064 5.72 10.71 5.72 9.31C5.72 7.91 6.442 7.238 6.741 6.93C6.983 6.681 7.404 6.551 7.82 6.551C7.962 6.551 8.089 6.558 8.199 6.564C8.484 6.577 8.627 6.602 8.814 7.051C9.05 7.618 9.623 9.022 9.693 9.172C9.764 9.322 9.851 9.531 9.742 9.742C9.643 9.941 9.551 10.035 9.408 10.203C9.266 10.372 9.13 10.493 8.979 10.672C8.847 10.832 8.694 10.992 8.865 11.282C9.036 11.571 9.625 12.532 10.489 13.303C11.603 14.298 12.51 14.611 12.83 14.743C13.151 14.875 13.34 14.856 13.568 14.613C13.797 14.368 14.441 13.621 14.713 13.313C14.985 13.003 15.241 13.041 15.526 13.144C15.811 13.248 17.324 13.996 17.625 14.145C17.925 14.295 18.125 14.369 18.196 14.494C18.267 14.618 18.267 15.308 17.965 15.939L17.152 16.315Z" />
+    </svg>
+  );
+  const btnBase =
+    'pdp-btn relative inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-[3px] font-body font-semibold tracking-[0.01em] transition-[background-color,color,transform] duration-200 active:scale-[0.985]';
+
+  const reviewCount = reviewsData?.count ?? 0;
+  const reviewAvg = reviewsData?.average ?? 0;
 
   return (
-    <div className="flex flex-col gap-4 text-text">
-      {/* Title */}
-      <div>
-        {detailTags.length > 0 && (
-          <span className="font-body text-[10px] uppercase tracking-[0.22em] text-text-muted">
-            {detailTags.map((t) => t.value).join(' · ')}
-          </span>
-        )}
-        {/* La casa, sobre el nombre y enlazada a su catálogo: es lo primero que
-            busca quien ya conoce la marca. */}
-        {product.marca?.name && (
+    <div className="grid gap-4 text-text">
+      {/* Marca + favorito */}
+      <div className="flex items-center justify-between font-body text-sm text-text-muted">
+        {product.marca?.name ? (
           <a
             href={`/catalogo/perfumes?marca=${product.marca.slug || product.marca.id}`}
-            className="mt-2 block w-fit font-body text-xs uppercase tracking-[0.2em] text-text transition-colors hover:text-accent"
+            className="text-left font-body text-[15px] font-semibold text-text transition-colors hover:underline hover:underline-offset-[3px]"
           >
-            {product.marca.name}
+            {product.marca.name}{' '}
+            <span className="text-[13.5px] font-normal text-accent-hover">· ver todos sus perfumes →</span>
           </a>
+        ) : (
+          <span />
         )}
-        <div className="mt-1.5 flex items-start justify-between gap-3">
-          <h1 className="font-display text-3xl font-light leading-[0.98] tracking-[-0.025em] text-text md:text-4xl">{product.name}</h1>
-          <button className="mt-1 shrink-0 text-text-muted transition-colors hover:text-accent" aria-label="Favorito">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
-              <path d="M12 20s-7-4.5-9-9.5C1.5 6.5 4.5 4 7.5 5 9 5.5 12 8 12 8s3-2.5 4.5-3c3-1 6 1.5 4.5 6.5-2 5-9 9.5-9 9.5z" />
-            </svg>
-          </button>
+        <button
+          type="button"
+          onClick={toggleFav}
+          aria-pressed={fav}
+          aria-label="Guardar en favoritos"
+          className={`pdp-fav shrink-0 text-text-muted transition-colors hover:text-text ${favPop ? 'pop' : ''}`}
+        >
+          <svg className="h0" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden>
+            <path d="M12 20s-7-4.5-9-9.5C1.5 6.5 4.5 4 7.5 5 9 5.5 12 8 12 8s3-2.5 4.5-3c3-1 6 1.5 4.5 6.5-2 5-9 9.5-9 9.5z" />
+          </svg>
+          <svg className="h1" width="23" height="23" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <path d="M12 20s-7-4.5-9-9.5C1.5 6.5 4.5 4 7.5 5 9 5.5 12 8 12 8s3-2.5 4.5-3c3-1 6 1.5 4.5 6.5-2 5-9 9.5-9 9.5z" />
+          </svg>
+        </button>
+      </div>
+
+      <h1 className="font-display text-[clamp(38px,4vw,56px)] font-normal leading-none tracking-[-0.02em] text-text">
+        {product.name}
+      </h1>
+
+      {/* Valoración → ancla a las reseñas */}
+      <a href="#p-rev" className="inline-flex w-fit items-center gap-2 font-body text-[13.5px] text-text-soft">
+        {reviewCount > 0 ? (
+          <>
+            <Stars rating={reviewAvg} />
+            <u className="underline-offset-[3px]">
+              {reviewAvg.toFixed(1).replace('.', ',')} · {reviewCount} {reviewCount === 1 ? 'reseña' : 'reseñas'}
+            </u>
+          </>
+        ) : (
+          <u className="underline-offset-[3px]">Sé el primero en dejar una reseña</u>
+        )}
+      </a>
+
+      {chips.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {chips.map((c) => (
+            <span key={c} className="rounded-full bg-bg-alt px-2.5 py-[5px] font-body text-[12.5px] text-text-soft">
+              {c}
+            </span>
+          ))}
         </div>
-        <div className="mt-2">
-          <span className={`font-body text-[11px] uppercase tracking-[0.16em] ${statusIsBad ? 'text-error' : 'text-text-muted'}`}>
+      )}
+
+      {product.description && (
+        <p className="font-body text-base leading-normal text-text-soft">{product.description}</p>
+      )}
+
+      {/* Selector de tamaño */}
+      <div>
+        <div className="mb-2 flex items-center justify-between font-body text-sm font-semibold">
+          <span>1. Elige tu tamaño</span>
+          <span
+            className={`flex items-center gap-2 text-sm font-semibold before:h-2 before:w-2 before:rounded-full before:bg-current before:content-[''] ${
+              statusLabel === 'En stock' ? 'text-success' : 'text-warning'
+            }`}
+          >
             {statusLabel}
           </span>
         </div>
-      </div>
-
-      {/* Selector de formato */}
-      <div>
-        <p className="eyebrow mb-2.5">Selecciona tu formato</p>
-        {/* Tarjetas cuadradas y compactas (tamaño fijo, no se estiran) */}
         {/* Un solo listado ordenado de menor a mayor ml, sin importar si es
             decant o frasco: así el cliente lee la escala de un vistazo. */}
-        <div className="flex flex-wrap gap-2">
-          {formatCards.map((card) => (
-            <SizeCard
-              key={card.key}
-              ml={card.ml}
-              type={card.type}
-              price={card.price}
-              discount={discount}
-              active={card.active}
-              disabled={card.disabled}
-              highlight={card.highlight}
-              onClick={card.onClick}
-            />
+        <div
+          role="group"
+          aria-label="Tamaño"
+          className="grid gap-1"
+          style={{ gridTemplateColumns: `repeat(${Math.min(Math.max(sizeTiles.length, 1), 5)}, minmax(0, 1fr))` }}
+        >
+          {sizeTiles.map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={t.onClick}
+              disabled={t.disabled}
+              aria-pressed={t.active}
+              style={{ ['--lv' as string]: t.level }}
+              className={`size-tile flex h-[54px] flex-col items-center justify-center rounded-[3px] border font-body leading-[1.15] transition-[border-color,background-color] duration-200 active:scale-[0.97] ${
+                t.active
+                  ? 'border-text bg-text text-white'
+                  : t.disabled
+                    ? 'cursor-not-allowed border-border text-text-muted/60 line-through'
+                    : `border-border text-text hover:border-text-muted/50 ${t.status === 'order' ? 'border-dashed' : ''}`
+              }`}
+            >
+              <b className="text-[15px] font-bold">
+                {t.isFull ? (multiSealed ? `Frasco ${t.ml}` : 'Frasco') : `${t.ml} ml`}
+              </b>
+              {t.status === 'order' && (
+                <small className={`text-[13px] ${t.active ? 'text-accent' : 'text-warning'}`}>Bajo pedido</small>
+              )}
+              {t.status === 'out' && <small className="text-[13px]">Agotado</small>}
+            </button>
           ))}
         </div>
       </div>
 
-      <div className="overflow-x-hidden border-y border-border bg-bg-alt/60 px-4 py-3.5 -mx-4">
-        <DeliveryEta
-          variant={selectedIsBajoPedido ? 'backorder' : 'immediate'}
-          offsetDays={deliveryOffset}
-          cutoffHour={cutoffHour}
-        />
-        <div className="mt-3.5 border-t border-border/80 pt-3.5">
-          <TrustIcons />
+      {/* Precio + ahorro */}
+      <div>
+        <div className="font-body text-[32px] font-bold leading-none">
+          <span key={`${selected.type}-${selectedMl}`} className="pdp-tick">
+            {formatCurrency(discountedPrice)}
+          </span>
+          <small className="ml-2 text-sm font-normal text-text-muted">{sizeLabel}</small>
         </div>
+        {hasDiscount && (
+          <p className="mt-2 flex flex-wrap items-center gap-x-2.5 font-body text-[13.5px] text-text-muted">
+            <s>{formatCurrency(currentPrice)}</s>
+            <span className="rounded-full bg-gold-light px-2 py-0.5 text-xs font-semibold text-accent-hover">
+              Ahorras {formatCurrency(savings)} · -{Math.round(discount)}%
+            </span>
+          </p>
+        )}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 flex flex-col gap-2 border-t border-border bg-bg/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm md:static md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
-        {canPurchase ? (
-          <>
-        <button
-          onClick={handleAddToCart}
-          /* Marco dorado en loop en el CTA de añadir. */
-          className="gold-frame flex w-full items-center justify-center gap-2 bg-text py-3.5 font-body text-xs font-medium uppercase tracking-[0.2em] text-bg transition-colors hover:bg-accent"
-        >
-          Añadir — {formatCurrency(discountedPrice)}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M5 12h14M14 6l6 6-6 6" /></svg>
-        </button>
-        <div className="flex gap-2">
-          <button
-            onClick={handleFastPurchase}
-            className="flex-1 border border-border py-3 font-body text-xs uppercase tracking-[0.2em] text-text transition-colors hover:border-text"
-          >
-            Comprar ahora
-          </button>
-          <button
-            onClick={handleWhatsapp}
-            className="flex h-[42px] w-[42px] shrink-0 items-center justify-center bg-green-700 text-white transition-colors hover:bg-green-600"
-            title="Consultar por WhatsApp"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M11.996 2C6.474 2 2 6.474 2 11.996C2 13.921 2.548 15.717 3.511 17.25L2.146 22.18L7.204 20.852C8.683 21.688 10.297 22.158 11.996 22.158C17.518 22.158 22 17.684 22 12.162C22 6.64 17.518 2.166 11.996 2.166V2ZM17.152 16.315C16.94 16.91 16.1 17.433 15.441 17.545C14.945 17.625 14.284 17.682 11.838 16.669C8.91 15.452 7.027 12.441 6.884 12.253C6.741 12.064 5.72 10.71 5.72 9.31C5.72 7.91 6.442 7.238 6.741 6.93C6.983 6.681 7.404 6.551 7.82 6.551C7.962 6.551 8.089 6.558 8.199 6.564C8.484 6.577 8.627 6.602 8.814 7.051C9.05 7.618 9.623 9.022 9.693 9.172C9.764 9.322 9.851 9.531 9.742 9.742C9.643 9.941 9.551 10.035 9.408 10.203C9.266 10.372 9.13 10.493 8.979 10.672C8.847 10.832 8.694 10.992 8.865 11.282C9.036 11.571 9.625 12.532 10.489 13.303C11.603 14.298 12.51 14.611 12.83 14.743C13.151 14.875 13.34 14.856 13.568 14.613C13.797 14.368 14.441 13.621 14.713 13.313C14.985 13.003 15.241 13.041 15.526 13.144C15.811 13.248 17.324 13.996 17.625 14.145C17.925 14.295 18.125 14.369 18.196 14.494C18.267 14.618 18.267 15.308 17.965 15.939L17.152 16.315Z" />
-            </svg>
-          </button>
+      {/* Despacho / bajo pedido */}
+      {!inStock ? (
+        <div className="border-y border-border py-3.5 font-body text-[15px]">
+          <b className="font-semibold text-warning">Sin stock por ahora</b>
         </div>
-          </>
+      ) : selectedIsBajoPedido ? (
+        <div className="border-y border-border py-3.5 font-body text-[15px]">
+          <b className="font-semibold text-warning">Bajo pedido</b>
+          <br />
+          <span className="text-text-soft">
+            {backorderDates ? `Llega entre el ${backorderDates}` : `Llega en ${BACKORDER_LABEL}`}
+          </span>
+        </div>
+      ) : (
+        <DispatchCountdown cutoffHour={cutoffHour} offsetDays={deliveryOffset} stockLeft={stockLeft} />
+      )}
+
+      {/* CTAs */}
+      <div ref={ctasRef}>
+        {canPurchase ? (
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+            <button
+              type="button"
+              onClick={(e) => handleAddToCart(e.currentTarget)}
+              disabled={!inStock}
+              className={`${btnBase} h-[58px] bg-text px-6 text-[15.5px] text-white hover:bg-[#34312f] disabled:cursor-not-allowed disabled:opacity-50`}
+            >
+              {addLabel}
+            </button>
+            <button
+              type="button"
+              onClick={handleWhatsapp}
+              className={`${btnBase} h-[58px] bg-white px-3 text-[15.5px] text-[#1c8f4a] shadow-[inset_0_0_0_1.5px_#1c8f4a] hover:bg-[#1c8f4a] hover:text-white`}
+            >
+              {waIcon}
+              Pedir por WhatsApp
+            </button>
+            <button
+              type="button"
+              onClick={handleFastPurchase}
+              disabled={!inStock}
+              className={`${btnBase} h-[58px] bg-accent px-6 text-[15.5px] text-text hover:bg-[#d4ba70] disabled:cursor-not-allowed disabled:opacity-50 md:col-span-2`}
+            >
+              Comprar ahora
+            </button>
+          </div>
         ) : (
-          <p className="border border-border bg-bg-alt px-4 py-3.5 text-center font-body text-xs uppercase tracking-[0.18em] text-text-muted">
+          <p className="rounded-[3px] border border-border bg-bg-alt px-4 py-3.5 text-center font-body text-sm font-semibold text-text-muted">
             No disponible para compra
           </p>
         )}
       </div>
 
-      {/* Pago — medios aceptados */}
-      <div className="border-t border-border pt-4">
-        <span className="eyebrow">Pago</span>
-        <PaymentMethodIcons className="mt-2.5" />
+      {/* Confianza */}
+      <div className="grid grid-cols-3 rounded border border-border text-center font-body text-[12.5px] text-text-muted">
+        {TRUST.map((x, i) => (
+          <div key={x.t} className={`grid justify-items-center gap-0.5 px-1.5 py-3 ${i > 0 ? 'border-l border-border' : ''}`}>
+            <span className="text-accent-hover">{x.icon}</span>
+            <b className="font-display text-[22px] font-normal leading-none text-accent-hover">{x.t}</b>
+            {x.l}
+          </div>
+        ))}
       </div>
+
+      {/* Medios de pago */}
+      <div className="grid gap-2.5 border-t border-border pt-3.5">
+        {[
+          ['Tarjeta vía Payphone', PAYMENT_LOGOS.filter((l) => CARD_BRANDS.includes(l.alt))],
+          ['Transferencia o depósito', PAYMENT_LOGOS.filter((l) => !CARD_BRANDS.includes(l.alt))],
+        ].map(([label, logos]) => (
+          <div key={label as string} className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span className="min-w-[150px] font-body text-xs text-text-muted">{label as string}</span>
+            <span className="inline-flex flex-wrap items-center gap-1.5">
+              {(logos as typeof PAYMENT_LOGOS).map((logo) => (
+                <img
+                  key={logo.alt}
+                  src={logo.src}
+                  alt={logo.alt}
+                  title={logo.alt}
+                  loading="lazy"
+                  className={`${logo.cls} w-auto object-contain`}
+                />
+              ))}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Móvil: barra fija sobre la navegación inferior, visible al pasar los CTAs. */}
+      {canPurchase && (
+        <div
+          aria-hidden={!stickyOn}
+          className={`fixed inset-x-0 bottom-[calc(84px+env(safe-area-inset-bottom,0px))] z-[44] grid grid-cols-[minmax(0,1fr)_58px] gap-2 border-t border-border bg-white px-2.5 py-2 transition-[transform,visibility] duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] md:hidden ${
+            stickyOn ? 'visible translate-y-0' : 'invisible translate-y-[calc(100%+120px)]'
+          }`}
+        >
+          <button
+            type="button"
+            tabIndex={stickyOn ? 0 : -1}
+            onClick={(e) => handleAddToCart(e.currentTarget)}
+            disabled={!inStock}
+            className={`${btnBase} h-[52px] bg-text px-3 text-sm text-white disabled:opacity-50`}
+          >
+            {!inStock ? 'Agotado' : `${selectedIsBajoPedido && selectedIsFull ? 'Pedir' : 'Agregar'} · ${formatCurrency(discountedPrice)}`}
+          </button>
+          <button
+            type="button"
+            tabIndex={stickyOn ? 0 : -1}
+            onClick={handleWhatsapp}
+            title="Consultar por WhatsApp"
+            aria-label="Pedir por WhatsApp"
+            className={`${btnBase} h-[52px] bg-white px-0 text-[#1c8f4a] shadow-[inset_0_0_0_1.5px_#1c8f4a]`}
+          >
+            {waIcon}
+          </button>
+        </div>
+      )}
 
       {pendingAction !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setPendingAction(null)}>
-          <div className="flex w-full max-w-md flex-col gap-4 border border-border bg-surface p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="flex w-full max-w-md flex-col gap-4 rounded-sm border border-border bg-surface p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start gap-3">
-              <span className="mt-2 h-[7px] w-[7px] shrink-0 rounded-full bg-accent" />
+              <span className="mt-2 h-[7px] w-[7px] shrink-0 rounded-full bg-warning" />
               <div>
-                <h3 className="font-display text-xl text-text">Producto bajo pedido</h3>
+                <h3 className="font-display text-2xl text-text">Producto bajo pedido</h3>
                 <p className="mt-1 font-body text-sm leading-relaxed text-text-soft">
                   Este producto se importa bajo pedido. Tras confirmar el pago, la entrega estimada es de <span className="text-text">13–17 días</span>. ¿Deseas continuar?
                 </p>
               </div>
             </div>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setPendingAction(null)} className="border border-border px-5 py-2.5 font-body text-xs uppercase tracking-[0.16em] text-text-soft hover:border-text hover:text-text">
+              <button onClick={() => setPendingAction(null)} className="rounded-[3px] border border-border px-5 py-2.5 font-body text-sm font-semibold text-text-soft hover:border-text hover:text-text">
                 Cancelar
               </button>
-              <button onClick={confirmBajoPedido} className="bg-text px-5 py-2.5 font-body text-xs uppercase tracking-[0.16em] text-bg hover:bg-accent">
+              <button onClick={confirmBajoPedido} className="rounded-[3px] bg-text px-5 py-2.5 font-body text-sm font-semibold text-white hover:bg-[#34312f]">
                 Continuar
               </button>
             </div>
@@ -469,61 +837,5 @@ export default function ProductPurchaseOptions({
         </div>
       )}
     </div>
-  );
-}
-
-/* Tarjeta de formato (ml + tipo + precio) — estilo editorial Noir.
-   Con descuento muestra el % en la esquina y el precio ya rebajado. */
-function SizeCard({ ml, type, price, discount = 0, active, disabled, highlight, onClick }: {
-  ml: number;
-  type: string;
-  price: number;
-  discount?: number;
-  active: boolean;
-  disabled?: boolean;
-  /** Marco dorado en loop: distingue el frasco completo del resto de formatos. */
-  highlight?: boolean;
-  onClick?: () => void;
-}) {
-  const hasDiscount = discount > 0;
-  const finalPrice = hasDiscount ? price * (1 - discount / 100) : price;
-
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      /* Bloque centrado y compacto: tipografía más grande, sin huecos muertos */
-      className={`relative flex aspect-square w-26 flex-col items-start justify-center gap-1.5 p-3 text-left transition-all ${
-        highlight && !disabled ? 'gold-frame' : ''
-      } ${
-        disabled
-          ? 'cursor-not-allowed border border-border opacity-40'
-          : active
-            ? 'bg-text text-bg'
-            : 'border border-border text-text hover:border-text'
-      }`}
-    >
-      {hasDiscount && (
-        <span className="absolute right-0 top-0 bg-accent px-1.5 py-px font-body text-[9px] font-medium tracking-wide text-bg">
-          -{discount}%
-        </span>
-      )}
-
-      {/* El tipo va arriba: primero qué es, después cuánto trae */}
-      <span className={`font-body text-[9px] uppercase leading-none tracking-[0.14em] ${active ? 'text-bg/70' : 'text-text-muted'}`}>
-        {type}
-      </span>
-      <span className="font-display text-2xl leading-none">
-        {ml}<span className="ml-1 font-body text-[11px] opacity-70">ml</span>
-      </span>
-      <span className="flex flex-col gap-0.5">
-        {hasDiscount && (
-          <span className={`font-body text-[10px] leading-none line-through ${active ? 'text-bg/60' : 'text-text-muted'}`}>
-            {formatCurrency(price)}
-          </span>
-        )}
-        <span className="font-body text-[13px] leading-none">{formatCurrency(finalPrice)}</span>
-      </span>
-    </button>
   );
 }

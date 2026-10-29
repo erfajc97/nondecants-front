@@ -42,22 +42,22 @@ const FALLBACK = '/banner-catalog.png';
 >
   <article class="bg-bg">
     <div class="mx-auto max-w-3xl px-6 pb-4 pt-8 md:pt-20">
-      <a href="/blog" class="font-body text-[11px] uppercase tracking-[0.18em] text-text-muted transition-colors hover:text-text">
+      <a href="/blog" class="font-body text-[13px] font-semibold text-text-muted transition-colors hover:text-text">
         ← Blog
       </a>
       <div class="mt-10 text-center">
-        <span class="font-body text-[10px] uppercase tracking-[0.22em] text-text-muted">
+        <span class="font-body text-[13px] text-text-muted">
           Blog{date ? ` · ${date}` : ''}
         </span>
-        <h1 class="mt-4 font-display text-4xl font-light leading-tight tracking-[-0.02em] text-text md:text-6xl">
+        <h1 class="mt-4 font-display text-4xl font-normal leading-tight tracking-[-0.02em] text-text md:text-6xl">
           {post.title}
         </h1>
       </div>
     </div>
 
     {post.imageUrl && (
-      <div class="mx-auto max-w-5xl px-6 md:px-14">
-        <img src={post.imageUrl} alt={post.title} class="aspect-[16/9] w-full object-cover" />
+      <div class="mx-auto max-w-5xl px-[max(16px,3.4vw)]">
+        <img src={post.imageUrl} alt={post.title} class="aspect-[16/9] w-full rounded-[4px] object-cover" />
       </div>
     )}
 
@@ -71,27 +71,27 @@ const FALLBACK = '/banner-catalog.png';
   </article>
 
   {otherPosts.length > 0 && (
-    <section class="bg-bg px-6 pb-12 md:px-14 md:pb-24">
+    <section class="bg-bg px-[max(16px,3.4vw)] pb-12 md:pb-24">
       <div class="mb-6 border-t border-border pt-6 md:mb-10 md:pt-8">
-        <span class="font-body text-[10px] uppercase tracking-[0.24em] text-text-soft">— Más del blog</span>
+        <span class="font-body text-[13px] text-text-soft">Más del blog</span>
       </div>
       <div class="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
         {otherPosts.slice(0, 3).map((p) => (
           <a href={`/blog/${p.slug}`} class="group/card flex flex-col">
-            <div class="aspect-[4/3] overflow-hidden bg-surface-raised">
+            <div class="aspect-[4/3] overflow-hidden rounded-[4px] bg-bg-alt">
               <img
                 src={p.imageUrl || FALLBACK}
                 alt={p.title}
                 loading="lazy"
-                class="h-full w-full object-cover transition-transform duration-700 group-hover/card:scale-[1.03]"
+                class="h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/card:scale-[1.04]"
               />
             </div>
             {fmtDate(p.publishedAt || p.createdAt) && (
-              <span class="mt-4 font-body text-[10px] uppercase tracking-[0.22em] text-text-muted">
+              <span class="mt-4 font-body text-[13px] text-text-muted">
                 {fmtDate(p.publishedAt || p.createdAt)}
               </span>
             )}
-            <h3 class="mt-2 font-display text-xl font-light leading-tight text-text">{p.title}</h3>
+            <h3 class="mt-2 font-display text-xl font-normal leading-tight text-text">{p.title}</h3>
           </a>
         ))}
       </div>

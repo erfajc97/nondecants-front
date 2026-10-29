@@ -13,7 +13,7 @@ export default function ProductGrid({ products, isLoading, isFetching, hideEmpty
   if (isLoading) {
     // 8 = LIMIT del catálogo: el grid ya ocupa su altura final al cargar.
     return (
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-[18px] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 8 }, (_, i) => (
           <ProductCardSkeleton key={i} />
         ))}
@@ -25,7 +25,8 @@ export default function ProductGrid({ products, isLoading, isFetching, hideEmpty
     if (hideEmpty) return null;
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center md:py-20">
-        <p className="font-body text-sm text-text-muted">
+        <p className="font-display text-[28px] text-text">Sin resultados</p>
+        <p className="mt-2 font-body text-sm text-text-muted">
           No se encontraron productos con esos filtros.
         </p>
       </div>
@@ -34,7 +35,7 @@ export default function ProductGrid({ products, isLoading, isFetching, hideEmpty
 
   return (
     <div
-      className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 transition-opacity ${
+      className={`grid grid-cols-2 gap-2.5 sm:gap-[18px] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 transition-opacity ${
         isFetching ? 'opacity-60' : 'opacity-100'
       }`}
     >

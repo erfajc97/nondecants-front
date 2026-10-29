@@ -17,12 +17,12 @@ const combos = await fetchActiveCombos();
     <h1 class="sr-only">Combos de perfumes originales en Ecuador</h1>
     <CombosSection client:load />
     {combos.length > 0 && (
-      <nav class="border-t border-border px-6 py-10 md:px-14" aria-label="Índice de combos">
-        <h2 class="font-display text-2xl font-light text-text">Todos los combos</h2>
+      <nav class="mx-auto max-w-[1480px] border-t border-border px-4 py-10 md:px-[clamp(16px,3.4vw,52px)]" aria-label="Índice de combos">
+        <h2 class="font-display text-2xl text-text">Todos los combos</h2>
         <ul class="mt-4 flex flex-wrap gap-x-6 gap-y-2">
           {combos.map((combo) => (
             <li>
-              <a href={`/combo/${combo.id}`} class="font-body text-[13px] text-text-soft hover:text-text">
+              <a href={`/combo/${combo.id}`} class="font-body text-sm text-text-soft underline-offset-4 hover:text-text hover:underline">
                 {combo.name}
               </a>
             </li>

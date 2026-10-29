@@ -16,7 +16,7 @@ interface CartPageSummaryProps {
   couponDiscount: number;
   freeShippingThreshold: number;
   qualifiesFreeShipping: boolean;
-  remainingForFreeShipping: number;
+  remainingForFreeShipping?: number;
 }
 
 export default function CartPageSummary({
@@ -35,10 +35,10 @@ export default function CartPageSummary({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="bg-bg-alt p-7 md:p-8">
-        <span className="eyebrow">— Resumen</span>
+      <div className="rounded-md border border-border bg-surface">
+        <h2 className="border-b border-border px-5 py-4 font-body! text-xl font-bold text-text">Resumen</h2>
 
-        <div className="mt-6">
+        <div className="px-5 pt-5">
           <FreeShippingBar
             subtotal={afterDiscount}
             threshold={freeShippingThreshold}
@@ -46,43 +46,43 @@ export default function CartPageSummary({
           />
         </div>
 
-        <div className="flex flex-col gap-3 font-body text-sm">
+        <div className="flex flex-col gap-2.5 px-5 font-body text-[15px]">
           {immediateCount > 0 && (
             <div className="flex items-center justify-between">
-              <span className="text-text-soft">Subtotal — en stock</span>
-              <span className="text-text">{formatCurrency(immediateSubtotal)}</span>
+              <span className="text-text-soft">Subtotal · en stock</span>
+              <span className="tabular-nums text-text">{formatCurrency(immediateSubtotal)}</span>
             </div>
           )}
           {bajoCount > 0 && (
             <div className="flex items-center justify-between">
-              <span className="italic text-text-soft">Subtotal — bajo pedido</span>
-              <span className="text-text">{formatCurrency(bajoSubtotal)}</span>
+              <span className="text-warning">Subtotal · bajo pedido</span>
+              <span className="tabular-nums text-text">{formatCurrency(bajoSubtotal)}</span>
             </div>
           )}
           {couponDiscount > 0 && (
             <div className="flex items-center justify-between">
               <span className="text-text-soft">Cupón</span>
-              <span className="text-success">-{formatCurrency(couponDiscount)}</span>
+              <span className="tabular-nums text-success">-{formatCurrency(couponDiscount)}</span>
             </div>
           )}
           <div className="flex items-center justify-between">
             <span className="text-text-muted">Envío estimado · Servientrega</span>
-            <span className={qualifiesFreeShipping ? 'text-success' : 'text-text-muted'}>
-              {qualifiesFreeShipping ? 'GRATIS' : formatCurrency(shipping)}
+            <span className={`tabular-nums ${qualifiesFreeShipping ? 'font-semibold text-success' : 'text-text-muted'}`}>
+              {qualifiesFreeShipping ? 'Gratis' : formatCurrency(shipping)}
             </span>
           </div>
         </div>
 
-        <div className="mt-6 flex items-end justify-between border-t border-border pt-5">
-          <span className="font-body text-[11px] uppercase tracking-[0.18em] text-text">Total</span>
-          <span className="font-display text-3xl font-light text-text">{formatCurrency(total)}</span>
+        <div className="mx-5 mt-4 flex items-center justify-between border-t border-border pt-4">
+          <span className="font-body text-lg font-bold text-text">Total</span>
+          <span className="font-body text-xl font-bold tabular-nums text-text">{formatCurrency(total)}</span>
         </div>
-        <p className="mt-2 font-display text-sm italic text-text-muted">
-          Envío e impuestos finales se confirman en el pago.
+        <p className="mt-1.5 px-5 font-body text-[13px] text-text-muted">
+          El envío y el recargo por tarjeta se confirman en el pago.
         </p>
 
         {coupon.hasNonComboItems && (
-          <div className="mt-6">
+          <div className="mt-5 px-5">
             <CouponField
               couponCode={coupon.couponCode}
               couponDiscount={coupon.couponDiscount}
@@ -97,19 +97,27 @@ export default function CartPageSummary({
           </div>
         )}
 
-        <a
-          href="/checkout"
-          className="gold-frame mt-6 flex w-full items-center justify-between gap-2 bg-text px-6 py-4 font-body text-xs font-medium uppercase tracking-[0.2em] text-bg transition-colors hover:bg-accent"
-        >
-          <span>Pagar — {formatCurrency(total)}</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M5 12h14M14 6l6 6-6 6" /></svg>
-        </a>
+        <div className="px-5 pt-5">
+          <a
+            href="/checkout"
+            className="flex h-[52px] w-full items-center justify-center gap-2.5 rounded-sm bg-text px-7 font-body text-[14.5px] font-semibold text-bg transition-colors hover:bg-text-soft"
+          >
+            <span>Ir a pagar · {formatCurrency(total)}</span>
+            <span aria-hidden="true">→</span>
+          </a>
+          <a
+            href="/catalogo/perfumes"
+            className="mt-3 block text-center font-body text-[13px] font-semibold text-text-muted underline underline-offset-4 transition-colors hover:text-text"
+          >
+            Seguir comprando
+          </a>
+        </div>
 
-        <div className="mt-6">
+        <div className="mt-5 px-5">
           <PaymentMethodIcons />
         </div>
 
-        <div className="mt-6">
+        <div className="mt-5 border-t border-border px-5 py-5">
           <TrustIcons />
         </div>
       </div>

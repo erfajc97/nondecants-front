@@ -6,14 +6,16 @@ import OrderConfirmationIsland from '@/app/features/order/components/OrderConfir
 ---
 
 <BaseLayout title="Confirmación de orden — NonDecants" robots="noindex,nofollow">
-  <div class="flex min-h-screen flex-col bg-bg pt-6">
-    <header class="flex w-full items-center justify-center py-6">
-      <a href="/" aria-label="NönDecants — Inicio">
-        <img src="/logonondecants.png" alt="NönDecants" width={543} height={127} class="h-9 w-auto md:h-11" />
-      </a>
+  <div class="flex min-h-screen flex-col bg-bg-alt">
+    <header class="border-b border-border bg-bg">
+      <div class="mx-auto flex h-[66px] w-full max-w-[1480px] items-center justify-center px-4">
+        <a href="/" aria-label="NönDecants — Inicio">
+          <img src="/logonondecants.png" alt="NönDecants" width={543} height={127} class="h-7 w-auto" />
+        </a>
+      </div>
     </header>
 
-    <main class="mx-auto w-full max-w-2xl flex-1 px-6 pb-12 sm:px-6 md:pb-20">
+    <main class="mx-auto w-full max-w-2xl flex-1 px-4 pb-12 pt-6 md:pb-20">
       <OrderConfirmationIsland client:load />
     </main>
   </div>

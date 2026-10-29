@@ -1,6 +1,8 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import Navbar from '@/app/features/landing/components/layout/Navbar';
+import WhatsAppBand from '@/app/features/landing/components/layout/WhatsAppBand.astro';
+import FloatingSeal from '@/app/features/landing/components/layout/FloatingSeal';
 import Footer from '@/app/features/landing/components/layout/Footer.astro';
 import { organizationJsonLd } from '@/app/helpers/seoMeta';
 
@@ -46,5 +48,7 @@ const {
   </main>
   <!-- El respiro para la tab bar mobile (fixed) vive dentro del footer, que es
        el último bloque de la página. -->
+  <WhatsAppBand />
   <Footer />
+  <FloatingSeal client:idle />
 </BaseLayout>

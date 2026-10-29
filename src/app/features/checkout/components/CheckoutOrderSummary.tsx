@@ -58,32 +58,32 @@ export default function CheckoutOrderSummary({
 
   return (
     <div className="flex flex-col">
-      <h2 className="mb-6 font-display text-3xl font-light text-text">Tu pedido</h2>
+      <h2 className="mb-4 border-b border-border pb-4 font-body! text-xl font-bold text-text">Tu pedido</h2>
 
       {hasBajoPedido && (
-        <div className="mb-5 flex items-start gap-2 border-l-2 border-accent bg-bg-alt px-3 py-2.5">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0 text-accent">
+        <div className="mb-5 flex items-start gap-2.5 rounded-md bg-gold-light px-4 py-3">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0 text-warning">
             <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
-          <p className="text-xs leading-snug text-text-soft">
-            Tu pedido incluye productos <span className="text-text">bajo pedido</span>. Plazo: 13–17 días tras confirmación del pago.
+          <p className="text-sm leading-snug text-text-soft">
+            Tu pedido incluye productos <span className="font-semibold text-warning">bajo pedido</span>. Plazo: 13–17 días tras confirmación del pago.
           </p>
         </div>
       )}
 
       {/* Cart Items */}
-      <div className="flex flex-col gap-5 mb-8 flex-1">
+      <div className="mb-6 flex flex-1 flex-col divide-y divide-border">
         {items.length === 0 ? (
           <p className="text-sm text-text-muted">No hay productos en tu carrito.</p>
         ) : (
           items.map((item) => (
-            <div key={item.variantId} className="flex gap-4 items-center">
-              <div className="flex h-24 w-20 shrink-0 items-center justify-center overflow-hidden border border-border bg-bg-alt">
-                <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+            <div key={item.variantId} className="flex items-start gap-3.5 py-4 first:pt-0">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-sm border border-border bg-surface">
+                <img src={item.image} alt={item.name} className={`h-full w-full ${item.comboId ? 'object-cover' : 'object-contain p-1.5'}`} />
               </div>
               <div className="flex-1">
                 <div className="flex items-start justify-between">
-                  <h3 className="pr-4 font-display text-base font-light leading-snug text-text">{item.name}</h3>
+                  <h3 className="pr-4 font-display text-[17px] leading-tight text-text">{item.name}</h3>
                   <button onClick={() => removeItem(item.variantId)} className="text-text-muted hover:text-error transition-colors" aria-label="Eliminar producto">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="3 6 5 6 21 6" />
@@ -92,37 +92,37 @@ export default function CheckoutOrderSummary({
                   </button>
                 </div>
                 {item.comboId ? (
-                  <div className="mt-1.5 inline-block border border-border px-2 py-0.5 font-body text-[10px] uppercase tracking-[0.14em] text-text-muted">
+                  <p className="mt-1 font-body text-[13px] text-text-muted">
                     Combo · {item.comboProducts?.length ?? 0} productos
-                  </div>
+                  </p>
                 ) : (
-                  <div className="mt-1.5 inline-block border border-border px-2 py-0.5 font-body text-[10px] uppercase tracking-[0.14em] text-text-muted">
-                    {item.ml}ml {item.ml >= 30 ? 'Botella original' : 'Decant'}
-                  </div>
+                  <p className="mt-1 font-body text-[13px] text-text-muted">
+                    {item.ml}ml · {item.ml >= 30 ? 'Botella original' : 'Decant'}
+                  </p>
                 )}
-                <div className="flex items-center justify-between mt-2">
+                <div className="mt-2 flex items-center justify-between">
                   {item.comboId ? (
-                    <span className="select-none font-body text-sm text-text">Cant: {item.quantity}</span>
+                    <span className="select-none font-body text-sm text-text-muted">Cant: {item.quantity}</span>
                   ) : (
-                    <div className="flex items-center">
-                      <button type="button" onClick={() => updateQty(item.variantId, item.quantity - 1)} className="flex h-7 w-7 items-center justify-center border border-border text-text-muted transition-colors hover:text-text">−</button>
-                      <span className="flex h-7 w-8 select-none items-center justify-center border-y border-border font-body text-sm text-text">{item.quantity}</span>
-                      <button type="button" disabled={item.maxQty != null && item.quantity >= item.maxQty} onClick={() => updateQty(item.variantId, item.quantity + 1)} className="flex h-7 w-7 items-center justify-center border border-border text-text-muted transition-colors hover:text-text disabled:cursor-not-allowed disabled:opacity-40">+</button>
+                    <div className="inline-flex items-center rounded-sm border border-border">
+                      <button type="button" aria-label="Disminuir" onClick={() => updateQty(item.variantId, item.quantity - 1)} className="flex h-9 w-9 items-center justify-center text-lg text-text-muted transition-colors hover:text-text">−</button>
+                      <span className="flex h-9 min-w-7 select-none items-center justify-center font-body text-sm tabular-nums text-text">{item.quantity}</span>
+                      <button type="button" aria-label="Aumentar" disabled={item.maxQty != null && item.quantity >= item.maxQty} onClick={() => updateQty(item.variantId, item.quantity + 1)} className="flex h-9 w-9 items-center justify-center text-lg text-text-muted transition-colors hover:text-text disabled:cursor-not-allowed disabled:opacity-40">+</button>
                     </div>
                   )}
-                  <p className="font-body text-sm text-text">{formatCurrency(item.price * item.quantity)}</p>
+                  <p className="font-body text-[15px] font-bold tabular-nums text-text">{formatCurrency(item.price * item.quantity)}</p>
                 </div>
                 {lineCouponDiscount(item, itemDiscounts) > 0 && (
-                  <p className="mt-1 text-right font-body text-[11px] text-accent">
+                  <p className="mt-1 text-right font-body text-[13px] font-semibold text-success">
                     Cupón −{formatCurrency(lineCouponDiscount(item, itemDiscounts))}
                   </p>
                 )}
 
                 {/* Cuándo llega esta línea */}
-                <p className="mt-2 flex items-center gap-1.5 font-body text-[11px] text-text-soft">
+                <p className="mt-2 flex items-center gap-1.5 font-body text-[13px] text-text-soft">
                   <span
-                    className={`h-[5px] w-[5px] shrink-0 rounded-full ${
-                      getSplit(splits, item).bajo > 0 ? 'bg-accent' : 'bg-text-muted'
+                    className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                      getSplit(splits, item).bajo > 0 ? 'bg-warning' : 'bg-success'
                     }`}
                   />
                   {lineDeliveryLabel(getSplit(splits, item), deliveryOffset, cutoffHour)}
@@ -134,7 +134,7 @@ export default function CheckoutOrderSummary({
 
         {/* Resumen global de tiempos de entrega */}
         {items.length > 0 && (
-          <p className="border-t border-border pt-4 font-body text-[12px] leading-relaxed text-text-soft">
+          <p className="pt-4 font-body text-sm leading-relaxed text-text-soft">
             {orderDeliveryLabel(items.map((i) => getSplit(splits, i)), deliveryOffset, cutoffHour)}
           </p>
         )}
@@ -156,38 +156,34 @@ export default function CheckoutOrderSummary({
         </div>
       )}
 
-      <div className="flex flex-col gap-4 font-body text-sm">
-        <div className="h-px w-full bg-border" />
-
-        <div className="flex justify-between items-center text-text">
+      <div className="flex flex-col gap-2.5 border-t border-border pt-4 font-body text-[15px]">
+        <div className="flex items-center justify-between text-text">
           <span>Subtotal</span>
-          <span>{formatCurrency(subtotal)}</span>
+          <span className="tabular-nums">{formatCurrency(subtotal)}</span>
         </div>
 
         {couponDiscount > 0 && (
-          <div className="flex justify-between items-center text-success">
+          <div className="flex items-center justify-between text-success">
             <span>Descuento cupón</span>
-            <span>-{formatCurrency(couponDiscount)}</span>
+            <span className="tabular-nums">-{formatCurrency(couponDiscount)}</span>
           </div>
         )}
 
-        <div className="flex justify-between items-center text-text">
+        <div className="flex items-center justify-between text-text">
           <span>{couponFreeShipping ? 'Envío (gratis)' : 'Envío'}</span>
-          <span>{couponFreeShipping ? formatCurrency(0) : formatCurrency(deliveryCost)}</span>
+          <span className="tabular-nums">{couponFreeShipping ? formatCurrency(0) : formatCurrency(deliveryCost)}</span>
         </div>
 
         {payphoneSurcharge > 0 && (
-          <div className="flex justify-between items-center text-text-muted">
+          <div className="flex items-center justify-between text-text-muted">
             <span>Recargo Payphone (6%)</span>
-            <span>{formatCurrency(payphoneSurcharge)}</span>
+            <span className="tabular-nums">{formatCurrency(payphoneSurcharge)}</span>
           </div>
         )}
 
-        <div className="mt-2 h-px w-full bg-border" />
-
-        <div className="mt-2 flex items-center justify-between text-text">
-          <span className="font-body text-[11px] uppercase tracking-[0.18em] text-text-muted">Total</span>
-          <span className="font-display text-2xl font-light">{formatCurrency(total)}</span>
+        <div className="mt-2 flex items-center justify-between border-t border-border pt-4 text-text">
+          <span className="font-body text-lg font-bold">Total</span>
+          <span className="font-body text-xl font-bold tabular-nums">{formatCurrency(total)}</span>
         </div>
       </div>
     </div>

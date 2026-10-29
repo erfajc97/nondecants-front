@@ -22,20 +22,20 @@ export default function FreeShippingBar({
 
   return (
     <div className="mb-5">
-      <p className="font-body text-[12px] leading-relaxed text-text">
+      <p className="font-body text-sm leading-relaxed text-text">
         {unlocked ? (
-          <span className="text-success">Envío gratis en este pedido</span>
+          <span className="font-semibold text-success">Envío gratis en este pedido</span>
         ) : (
           <>
             Te faltan{' '}
-            <span className="text-text">{formatCurrency(remaining)}</span> para envío
+            <b className="font-bold tabular-nums">{formatCurrency(remaining)}</b> para envío
             gratis
           </>
         )}
       </p>
-      <div className="mt-2 h-1.5 overflow-hidden bg-border" aria-hidden="true">
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-border" aria-hidden="true">
         <div
-          className="h-full origin-left bg-accent transition-[width] duration-700 ease-out"
+          className="h-full origin-left rounded-full bg-accent transition-[width] duration-700 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>

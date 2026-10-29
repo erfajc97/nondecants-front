@@ -3,8 +3,9 @@ import axiosInstance from '@/app/config/axiosConfig';
 import { API_ENDPOINTS } from '@/app/api/endpoints';
 
 const ANNOUNCEMENT_DEFAULT = 'Envíos a todo el Ecuador · Servientrega 24–72h';
-/** Rotación automática entre promociones (ms). */
-const ROTATE_MS = 6000;
+/** Cuántas veces mínimo debe aparecer el listado en cada pista del marquee
+    para que nunca quede un hueco, aun con un solo texto. */
+const MIN_ITEMS_PER_TRACK = 6;
 
 /**
  * El setting `announcement_bar` guarda un JSON array de textos. Se acepta el
@@ -24,14 +25,12 @@ function parseAnnouncements(raw: unknown): string[] {
 }
 
 /**
- * Barra superior de promociones. Los textos se administran desde el admin
- * (Ajustes → Barra superior). Rota sola y se puede cambiar manualmente con las
- * flechas de los extremos.
+ * Barra superior de avisos — marquee negro con ✦ dorados entre mensajes
+ * (prototipo de marca). Los textos se administran desde el admin
+ * (Ajustes → Barra superior). Se pausa al pasar el mouse.
  */
 export default function AnnouncementBar() {
   const [items, setItems] = useState<string[]>([ANNOUNCEMENT_DEFAULT]);
-  const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     axiosInstance
@@ -43,65 +42,24 @@ export default function AnnouncementBar() {
       .catch(() => {});
   }, []);
 
-  // Rotación automática — se detiene al pasar el mouse o con un solo texto.
-  useEffect(() => {
-    if (items.length < 2 || paused) return;
-    const id = window.setInterval(
-      () => setIndex((i) => (i + 1) % items.length),
-      ROTATE_MS,
-    );
-    return () => window.clearInterval(id);
-  }, [items.length, paused]);
-
-  // Si el admin quita textos, el índice puede quedar fuera de rango.
-  const current = items[index % items.length] ?? items[0];
-  const hasMultiple = items.length > 1;
-
-  const go = (dir: 1 | -1) =>
-    setIndex((i) => (i + dir + items.length) % items.length);
-
-  const arrowCls =
-    'absolute top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center text-text-muted transition-colors hover:text-text';
+  const repeats = Math.max(1, Math.ceil(MIN_ITEMS_PER_TRACK / items.length));
+  const track = Array.from({ length: repeats }, () => items).flat();
 
   return (
-    <div className="border-b border-border bg-bg-alt">
-      <div className="relative flex items-center justify-center overflow-hidden px-10 py-3 md:px-14 md:py-3.5">
-        {hasMultiple && (
-          <button
-            type="button"
-            onClick={() => go(-1)}
-            onMouseEnter={() => setPaused(true)}
-            onMouseLeave={() => setPaused(false)}
-            aria-label="Promoción anterior"
-            className={`${arrowCls} left-1 md:left-5`}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-        )}
-
-        <p
-          key={index}
-          className="announce-slide text-center font-body text-[11px] leading-5 tracking-[0.06em] text-text-soft md:text-[12px]"
-        >
-          {current}
-        </p>
-
-        {hasMultiple && (
-          <button
-            type="button"
-            onClick={() => go(1)}
-            onMouseEnter={() => setPaused(true)}
-            onMouseLeave={() => setPaused(false)}
-            aria-label="Siguiente promoción"
-            className={`${arrowCls} right-1 md:right-5`}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-        )}
+    <div
+      className="marq overflow-hidden whitespace-nowrap bg-text py-2 font-display text-[15px] tracking-[0.02em] text-bg/90"
+      aria-label="Avisos"
+      role="region"
+    >
+      <div className="marq-track">
+        {track.map((t, i) => (
+          <span key={i} className="marq-item">{t}</span>
+        ))}
+      </div>
+      <div className="marq-track" aria-hidden="true">
+        {track.map((t, i) => (
+          <span key={i} className="marq-item">{t}</span>
+        ))}
       </div>
     </div>
   );

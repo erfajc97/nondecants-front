@@ -24,9 +24,9 @@ const FALLBACK = '/banner-catalog.png';
 >
   <div class="bg-bg">
     {/* Header editorial */}
-    <section class="px-6 pb-8 pt-10 text-center md:px-14 md:pb-12 md:pt-24">
-      <span class="eyebrow">— Blog de la casa</span>
-      <h1 class="mt-5 font-display text-6xl font-light italic leading-none tracking-[-0.02em] text-text md:text-8xl">
+    <section class="px-[max(16px,3.4vw)] pb-8 pt-10 text-center md:pb-12 md:pt-24">
+      <span class="eyebrow k">Blog de la casa</span>
+      <h1 class="mt-2 font-display text-[clamp(46px,6vw,84px)] font-normal leading-[0.95] tracking-[-0.025em] text-text">
         Blog.
       </h1>
     </section>
@@ -34,20 +34,20 @@ const FALLBACK = '/banner-catalog.png';
     {featured ? (
       <>
         {/* Destacado */}
-        <section class="px-6 pb-10 md:px-14 md:pb-16">
+        <section class="px-[max(16px,3.4vw)] pb-10 md:pb-16">
           <a href={`/blog/${featured.slug}`} class="group grid grid-cols-1 items-center gap-7 md:grid-cols-2 md:gap-16">
-            <div class="aspect-[4/3] overflow-hidden bg-surface-raised">
+            <div class="aspect-[4/3] overflow-hidden rounded-[4px] bg-bg-alt">
               <img
                 src={featured.imageUrl || FALLBACK}
                 alt={featured.title}
-                class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                class="h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
               />
             </div>
             <div>
-              <span class="font-body text-[10px] uppercase tracking-[0.22em] text-text-muted">
+              <span class="font-body text-[13px] text-text-muted">
                 Editorial{fmtDate(featured.publishedAt || featured.createdAt) ? ` · ${fmtDate(featured.publishedAt || featured.createdAt)}` : ''}
               </span>
-              <h2 class="mt-4 font-display text-3xl font-light leading-tight tracking-[-0.015em] text-text md:text-5xl">
+              <h2 class="mt-4 font-display text-3xl font-normal leading-tight tracking-[-0.015em] text-text md:text-5xl">
                 {featured.title}
               </h2>
               {excerptOf(featured) && (
@@ -55,7 +55,7 @@ const FALLBACK = '/banner-catalog.png';
                   {excerptOf(featured)}
                 </p>
               )}
-              <span class="mt-7 inline-block border-b border-text pb-1 font-body text-[11px] uppercase tracking-[0.18em] text-text transition-colors group-hover:border-accent group-hover:text-accent">
+              <span class="mt-7 inline-block border-b border-accent pb-1 font-body text-[13px] font-semibold text-text transition-colors group-hover:border-accent group-hover:text-accent-hover">
                 Leer el artículo
               </span>
             </div>
@@ -63,31 +63,30 @@ const FALLBACK = '/banner-catalog.png';
         </section>
 
         {rest.length > 0 && (
-          <section class="px-6 pb-12 md:px-14 md:pb-24">
+          <section class="px-[max(16px,3.4vw)] pb-12 md:pb-24">
             <div class="mb-6 flex items-baseline justify-between border-t border-border pt-6 md:mb-12 md:pt-8">
               <div class="flex items-baseline gap-4">
-                <span class="font-body text-[10px] uppercase tracking-[0.24em] text-text-muted">— 02</span>
-                <span class="font-body text-[10px] uppercase tracking-[0.24em] text-text-soft md:text-[11px]">Más artículos</span>
+                <span class="font-body text-[13px] text-text-soft md:text-[11px]">Más artículos</span>
               </div>
             </div>
 
             <div class="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
               {rest.map((p) => (
                 <a href={`/blog/${p.slug}`} class="group/card flex flex-col">
-                  <div class="aspect-[4/3] overflow-hidden bg-surface-raised">
+                  <div class="aspect-[4/3] overflow-hidden rounded-[4px] bg-bg-alt">
                     <img
                       src={p.imageUrl || FALLBACK}
                       alt={p.title}
                       loading="lazy"
-                      class="h-full w-full object-cover transition-transform duration-700 group-hover/card:scale-[1.03]"
+                      class="h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/card:scale-[1.04]"
                     />
                   </div>
                   {fmtDate(p.publishedAt || p.createdAt) && (
-                    <span class="mt-4 font-body text-[10px] uppercase tracking-[0.22em] text-text-muted">
+                    <span class="mt-4 font-body text-[13px] text-text-muted">
                       {fmtDate(p.publishedAt || p.createdAt)}
                     </span>
                   )}
-                  <h3 class="mt-2 font-display text-xl font-light leading-tight text-text">{p.title}</h3>
+                  <h3 class="mt-2 font-display text-xl font-normal leading-tight text-text">{p.title}</h3>
                   {excerptOf(p) && (
                     <p class="mt-2 line-clamp-2 font-body text-sm leading-relaxed text-text-soft">{excerptOf(p)}</p>
                   )}
@@ -98,9 +97,9 @@ const FALLBACK = '/banner-catalog.png';
         )}
       </>
     ) : (
-      <section class="px-6 py-16 text-center md:px-14 md:py-32">
-        <span class="eyebrow">— Blog</span>
-        <h2 class="mt-4 font-display text-4xl font-light italic text-text">Próximamente.</h2>
+      <section class="px-[max(16px,3.4vw)] py-16 text-center md:py-32">
+        <span class="eyebrow k">Blog</span>
+        <h2 class="mt-2 font-display text-4xl font-normal text-text">Próximamente.</h2>
         <p class="mt-3 font-body text-sm text-text-soft">Estamos preparando contenido para ti.</p>
       </section>
     )}

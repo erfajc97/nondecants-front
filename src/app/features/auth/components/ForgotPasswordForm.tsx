@@ -12,7 +12,7 @@ export default function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFo
   return (
     <div>
       {/* Title */}
-      <h2 className="mb-1 text-center font-display text-3xl font-light text-text">Recuperar contraseña</h2>
+      <h2 className="mb-1 text-center font-display text-3xl font-normal text-text">Recuperar contraseña</h2>
       <p className="mb-8 text-center font-body text-sm text-text-soft">
         {sent
           ? 'Revisa tu bandeja de entrada'

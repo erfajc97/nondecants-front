@@ -36,7 +36,7 @@ const COMPARE = [
 ---
 
 <div class="bg-bg">
-  <div class="px-6 pt-5 md:px-14">
+  <div class="px-[max(16px,3.4vw)] pt-5">
     <nav class="font-body text-[11px] tracking-[0.04em] text-text-muted">
       <a href="/" class="transition-colors hover:text-text">Inicio</a>
       <span class="mx-1.5 opacity-50">·</span>
@@ -44,9 +44,9 @@ const COMPARE = [
     </nav>
   </div>
 
-  <section class="border-b border-border px-6 py-10 md:px-14 md:py-14">
-    <p class="eyebrow">Nuestra especialidad</p>
-    <h1 class="mt-3 max-w-[22ch] font-display text-[42px] font-light leading-[1.06] tracking-[-0.02em] text-text md:text-5xl">
+  <section class="border-b border-border px-[max(16px,3.4vw)] py-10 md:py-14">
+    <p class="eyebrow k">Nuestra especialidad</p>
+    <h1 class="mt-2 max-w-[22ch] font-display text-[clamp(40px,5vw,64px)] font-normal leading-[0.98] tracking-[-0.025em] text-balance text-text">
       Decants de perfumes originales en Ecuador
     </h1>
     <p class="mt-3 max-w-[52ch] font-body text-[15.5px] leading-relaxed text-text-soft">
@@ -54,7 +54,7 @@ const COMPARE = [
     </p>
   </section>
 
-  <section class="mx-auto max-w-[780px] px-6 py-8 md:px-14 md:py-10">
+  <section class="mx-auto max-w-[780px] px-[max(16px,3.4vw)] py-8 md:py-10">
     <p class="font-body text-[17px] leading-relaxed text-text-soft">
       Un decant es una porción del perfume original, trasvasada de la misma botella que vendemos sellada a un
       atomizador de 3, 5 o 10&nbsp;ml. No es una imitación ni una versión «inspirada en»: es literalmente el mismo
@@ -65,13 +65,13 @@ const COMPARE = [
     </p>
   </section>
 
-  <section class="px-6 pb-12 md:px-14 md:pb-14">
-    <h2 class="font-display text-3xl font-light tracking-[-0.02em] text-text">3, 5 o 10 ml: cuál elegir</h2>
+  <section class="px-[max(16px,3.4vw)] pb-12 md:pb-14">
+    <h2 class="font-display text-[clamp(28px,3.2vw,46px)] font-normal leading-none tracking-[-0.02em] text-text">3, 5 o 10 ml: cuál elegir</h2>
     <p class="mt-1.5 font-body text-[14.5px] text-text-muted">
       Las pulsaciones son aproximadas y varían según el atomizador y el perfume.
     </p>
 
-    <div class="mt-5 hidden overflow-hidden border border-border bg-surface md:block">
+    <div class="mt-5 hidden overflow-hidden rounded-[4px] border border-border bg-surface md:block">
       <div class="grid grid-cols-[.75fr_.85fr_1.05fr_1.6fr] border-b border-border bg-bg-alt">
         <div class="eyebrow px-[18px] py-3">Tamaño</div>
         <div class="eyebrow px-[18px] py-3">Pulsaciones</div>
@@ -96,7 +96,7 @@ const COMPARE = [
 
     <div class="mt-5 flex flex-col gap-3 md:hidden">
       {SIZES.map((row) => (
-        <article class="border border-border bg-surface px-5 py-5">
+        <article class="rounded-[4px] border border-border bg-surface px-5 py-5">
           <p class="font-display text-2xl text-text">{row.ml}</p>
           <p class="mt-2 font-body text-sm text-text-soft">{row.sprays} pulsaciones · {row.use}</p>
           <p class="mt-1 font-body text-sm text-text-soft">{row.for}</p>
@@ -105,8 +105,8 @@ const COMPARE = [
     </div>
   </section>
 
-  <section class="border-y border-border bg-bg-alt px-6 py-12 md:px-14 md:py-14">
-    <h2 class="font-display text-3xl font-light tracking-[-0.02em] text-text">
+  <section class="border-y border-border bg-bg-alt px-[max(16px,3.4vw)] py-12 md:py-14">
+    <h2 class="font-display text-[clamp(28px,3.2vw,46px)] font-normal leading-none tracking-[-0.02em] text-text">
       Lo que cuesta probar, y lo que cuesta equivocarte
     </h2>
     <p class="mt-1.5 max-w-[70ch] font-body text-[14.5px] text-text-muted">
@@ -114,7 +114,7 @@ const COMPARE = [
     </p>
 
     <div class="mt-6 grid items-start gap-10 md:grid-cols-[1.15fr_.85fr] md:gap-11">
-      <div class="overflow-hidden border border-border bg-surface">
+      <div class="overflow-hidden rounded-[4px] border border-border bg-surface">
         <div class="grid grid-cols-[1.5fr_.8fr_.9fr] border-b border-border bg-bg-alt">
           <div class="eyebrow px-[18px] py-2.5">Perfume</div>
           <div class="eyebrow px-[18px] py-2.5">Probarlo</div>
@@ -134,7 +134,7 @@ const COMPARE = [
         ))}
       </div>
       <div>
-        <p class="font-display text-5xl font-light leading-none text-text md:text-[52px]">14</p>
+        <p class="font-display text-5xl font-normal leading-none text-accent-hover md:text-[64px]">14</p>
         <p class="mt-2.5 font-body text-[15px] leading-relaxed text-text-soft">
           fragancias árabes distintas puedes probar con <strong class="font-semibold text-text">$60</strong> en
           decants de 3&nbsp;ml.
@@ -146,15 +146,15 @@ const COMPARE = [
     </div>
   </section>
 
-  <section class="px-6 py-12 md:px-14 md:py-14">
-    <h2 class="font-display text-3xl font-light tracking-[-0.02em] text-text">
-      Cuándo <em class="italic">no</em> te conviene un decant
+  <section class="px-[max(16px,3.4vw)] py-12 md:py-14">
+    <h2 class="font-display text-[clamp(28px,3.2vw,46px)] font-normal leading-none tracking-[-0.02em] text-text">
+      Cuándo <em class="not-italic text-accent-hover">no</em> te conviene un decant
     </h2>
     <p class="mt-3 max-w-[72ch] font-body text-[15px] leading-relaxed text-text-soft">
       Por mililitro, el frasco siempre sale más barato. El decant no es para ahorrar: es para no equivocarte.
       Si ya sabes que un perfume es tuyo, compra el frasco — y nosotros te lo decimos aunque nos convenga lo otro.
     </p>
-    <div class="mt-6 max-w-[640px] overflow-hidden border border-border bg-surface">
+    <div class="mt-6 max-w-[640px] overflow-hidden rounded-[4px] border border-border bg-surface">
       <div class="grid grid-cols-4 border-b border-border bg-bg-alt">
         <div class="eyebrow px-3 py-2.5 sm:px-[18px]">Lattafa Khamrah</div>
         <div class="eyebrow px-3 py-2.5 sm:px-[18px]">3 ml</div>
@@ -170,23 +170,23 @@ const COMPARE = [
     </div>
   </section>
 
-  <section class="border-t border-border bg-bg-alt px-6 py-10 md:px-14 md:py-12">
-    <h2 class="font-display text-3xl font-light tracking-[-0.02em] text-text">Cuánto dura y cómo guardarlo</h2>
+  <section class="border-t border-border bg-bg-alt px-[max(16px,3.4vw)] py-10 md:py-12">
+    <h2 class="font-display text-[clamp(28px,3.2vw,46px)] font-normal leading-none tracking-[-0.02em] text-text">Cuánto dura y cómo guardarlo</h2>
     <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-7">
-      <article class="border border-border bg-surface px-6 py-6">
-        <h3 class="font-display text-xl font-light text-text">Lejos de la luz y del calor</h3>
+      <article class="rounded-[4px] border border-border bg-surface px-6 py-6">
+        <h3 class="font-display text-xl font-normal text-text">Lejos de la luz y del calor</h3>
         <p class="mt-2 font-body text-[13.5px] leading-relaxed text-text-soft">
           Un cajón vale más que el estante del baño. El vapor de la ducha y el sol directo son lo que de verdad degrada un perfume.
         </p>
       </article>
-      <article class="border border-border bg-surface px-6 py-6">
-        <h3 class="font-display text-xl font-light text-text">Años, no meses</h3>
+      <article class="rounded-[4px] border border-border bg-surface px-6 py-6">
+        <h3 class="font-display text-xl font-normal text-text">Años, no meses</h3>
         <p class="mt-2 font-body text-[13.5px] leading-relaxed text-text-soft">
           Bien guardado, un decant aguanta perfectamente el tiempo que tardas en terminarlo. Los cítricos son los primeros en perder filo.
         </p>
       </article>
-      <article class="border border-border bg-surface px-6 py-6">
-        <h3 class="font-display text-xl font-light text-text">No lo trasvases otra vez</h3>
+      <article class="rounded-[4px] border border-border bg-surface px-6 py-6">
+        <h3 class="font-display text-xl font-normal text-text">No lo trasvases otra vez</h3>
         <p class="mt-2 font-body text-[13.5px] leading-relaxed text-text-soft">
           Cada trasvase mete aire. El atomizador con el que te llega es el que mejor lo conserva.
         </p>
@@ -194,12 +194,12 @@ const COMPARE = [
     </div>
   </section>
 
-  <section class="px-6 py-12 md:px-14 md:py-14">
-    <h2 class="font-display text-3xl font-light tracking-[-0.02em] text-text">Preguntas frecuentes</h2>
+  <section class="px-[max(16px,3.4vw)] py-12 md:py-14">
+    <h2 class="font-display text-[clamp(28px,3.2vw,46px)] font-normal leading-none tracking-[-0.02em] text-text">Preguntas frecuentes</h2>
     <div class="mt-5 max-w-[840px] border-t border-border">
       {faq.map((item) => (
-        <details class="border-b border-border py-4">
-          <summary class="cursor-pointer list-none font-body text-[15.5px] font-semibold text-text [&::-webkit-details-marker]:hidden">
+        <details class="group border-b border-border py-3">
+          <summary class="relative cursor-pointer list-none py-1 pr-9 font-body text-[17px] font-semibold text-text after:absolute after:right-1 after:top-0 after:font-display after:text-[28px] after:font-normal after:text-accent-hover after:transition-transform after:duration-300 after:content-['+'] group-open:after:rotate-45 [&::-webkit-details-marker]:hidden">
             {item.question}
           </summary>
           <p class="mt-1.5 font-body text-[14.5px] leading-relaxed text-text-soft">{item.answer}</p>

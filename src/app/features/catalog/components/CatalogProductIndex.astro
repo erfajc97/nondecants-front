@@ -11,9 +11,9 @@ const { products, title = 'Índice de fragancias' } = Astro.props;
 ---
 
 {products.length > 0 && (
-  <nav class="border-t border-border px-6 py-10 md:px-14 md:py-14" aria-label={title}>
-    <h2 class="font-display text-2xl font-light tracking-[-0.02em] text-text">{title}</h2>
-    <p class="mt-2 max-w-[60ch] font-body text-sm leading-relaxed text-text-soft">
+  <nav class="mx-auto max-w-[1400px] border-t border-border px-4 py-10 md:px-14 md:py-14" aria-label={title}>
+    <h2 class="font-display text-[clamp(26px,3vw,38px)] font-normal leading-none text-text">{title}</h2>
+    <p class="mt-2 max-w-[60ch] font-body text-sm leading-relaxed text-text-muted">
       Todas las referencias de esta selección, enlazadas para que puedas abrir cada ficha.
     </p>
     <ul class="mt-6 columns-1 gap-x-10 sm:columns-2 lg:columns-3">

@@ -1,12 +1,12 @@
-// Clases compartidas para los formularios de auth — diseño Atelier (marfil/ink)
+// Clases compartidas para los formularios de auth — rebranding (blanco, tinta, dorado)
 export const AUTH_INPUT_CLASS =
-  'w-full border-b border-border bg-transparent px-1 py-2.5 font-body text-sm text-text placeholder:text-text-muted focus:border-text focus:outline-none transition-colors';
+  'w-full rounded-[3px] border border-border bg-bg px-3.5 py-3 font-body text-[15px] text-text placeholder:text-text-muted transition-colors focus:border-text focus:outline-none';
 
 export const AUTH_SUBMIT_CLASS =
-  'w-full bg-text py-4 font-body text-xs font-medium uppercase tracking-[0.2em] text-bg transition-colors hover:bg-accent disabled:opacity-60';
+  'inline-flex h-[52px] w-full items-center justify-center rounded-[3px] bg-text font-body text-[14.5px] font-semibold tracking-[0.01em] text-bg transition-[background-color,transform] duration-200 hover:bg-text-soft active:scale-[0.985] disabled:opacity-60';
 
 export const AUTH_GOOGLE_BTN_CLASS =
-  'w-full flex items-center justify-center gap-2.5 border border-border py-3.5 font-body text-xs uppercase tracking-[0.16em] text-text transition-colors hover:border-text';
+  'flex h-[52px] w-full items-center justify-center gap-2.5 rounded-[3px] border border-border font-body text-[14.5px] font-semibold text-text transition-colors hover:border-text';
 
 export const AUTH_LABEL_CLASS =
-  'mb-2 block font-body text-[10px] uppercase tracking-[0.22em] text-text-muted';
+  'mb-1.5 block font-body text-[13px] font-semibold text-text';

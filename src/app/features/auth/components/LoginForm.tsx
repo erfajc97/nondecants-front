@@ -31,7 +31,7 @@ export default function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToFor
   return (
     <div>
       {/* Title */}
-      <h2 className="mb-1 text-center font-display text-3xl font-light text-text">Iniciar sesión</h2>
+      <h2 className="mb-1 text-center font-display text-3xl font-normal text-text">Iniciar sesión</h2>
       <p className="mb-8 text-center font-body text-sm text-text-soft">Ingresa para comprar con tu cuenta</p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -102,7 +102,7 @@ export default function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToFor
         {/* Divider */}
         <div className="my-2 flex items-center gap-4">
           <div className="h-px flex-1 bg-border" />
-          <span className="font-body text-[10px] uppercase tracking-[0.2em] text-text-muted">o</span>
+          <span className="font-body text-[13px] font-semibold text-text-muted">o</span>
           <div className="h-px flex-1 bg-border" />
         </div>
 
@@ -124,7 +124,7 @@ export default function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToFor
           <button
             type="button"
             onClick={onSwitchToRegister}
-            className="w-full border border-text py-3.5 font-body text-xs font-medium uppercase tracking-[0.2em] text-text transition-colors hover:bg-text hover:text-bg"
+            className="w-full border border-text py-3.5 font-body text-[14.5px] font-semibold tracking-[0.01em] text-text transition-colors hover:bg-text hover:text-bg"
           >
             Crear cuenta
           </button>

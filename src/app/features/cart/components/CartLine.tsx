@@ -45,14 +45,14 @@ export default function CartLine({ row, group, deliveryOffset = 0, cutoffHour = 
 
   return (
     <div
-      className={`grid grid-cols-[88px_1fr] gap-x-5 gap-y-4 border-b border-border py-7 sm:grid-cols-[140px_1fr_auto] sm:items-center ${
-        isBajo ? 'border-l-2 border-l-accent pl-4 sm:pl-5' : ''
+      className={`grid grid-cols-[72px_minmax(0,1fr)] gap-x-3.5 gap-y-3 border-b border-border py-4 sm:grid-cols-[96px_minmax(0,1fr)_auto] sm:items-center sm:gap-x-5 sm:py-5 ${
+        isBajo ? 'border-l-[3px] border-l-warning pl-3 sm:pl-4' : ''
       }`}
     >
       {/* Imagen */}
-      <div className="row-span-2 h-[100px] w-[88px] shrink-0 overflow-hidden bg-bg-alt sm:row-span-1 sm:h-40 sm:w-[140px]">
+      <div className="row-span-2 h-[72px] w-[72px] shrink-0 overflow-hidden rounded-sm border border-border bg-surface sm:row-span-1 sm:h-24 sm:w-24">
         {item.image ? (
-          <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+          <img src={item.image} alt={item.name} className={`h-full w-full ${isCombo ? 'object-cover' : 'object-contain p-1.5'}`} />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-text-muted">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
@@ -64,10 +64,10 @@ export default function CartLine({ row, group, deliveryOffset = 0, cutoffHour = 
 
       {/* Info */}
       <div className="min-w-0">
-        <h3 className="font-display text-xl font-light leading-snug text-text line-clamp-2 sm:text-2xl">
+        <h3 className="line-clamp-2 font-display text-[17px] leading-[1.15] text-text sm:text-xl">
           {item.name}
         </h3>
-        <p className="mt-1.5 font-body text-[11px] tracking-[0.04em] text-text-soft">{variantLabel}</p>
+        <p className="mt-1 font-body text-[13px] text-text-muted">{variantLabel}</p>
 
         <div className="mt-2.5 min-w-0 overflow-hidden">
           <DeliveryEta
@@ -78,14 +78,14 @@ export default function CartLine({ row, group, deliveryOffset = 0, cutoffHour = 
           />
         </div>
         {split && !isBajo && (
-          <p className="mt-1 font-body text-[10px] uppercase tracking-[0.14em] text-text-muted">
+          <p className="mt-1 font-body text-[13px] font-semibold text-warning">
             El resto va bajo pedido ↓
           </p>
         )}
 
         <button
           onClick={handleRemove}
-          className="mt-3 border-b border-border pb-[2px] font-body text-[10px] uppercase tracking-[0.16em] text-text-muted transition-colors hover:border-text hover:text-text"
+          className="mt-2.5 font-body text-[12.5px] text-text-muted underline underline-offset-2 transition-colors hover:text-text"
         >
           {isBajo && split ? 'Quitar bajo pedido' : 'Quitar'}
         </button>
@@ -94,33 +94,33 @@ export default function CartLine({ row, group, deliveryOffset = 0, cutoffHour = 
       {/* Stepper + precio */}
       <div className="col-start-2 flex items-center justify-between gap-5 sm:col-start-3 sm:flex-col sm:items-end sm:justify-center">
         {isCombo ? (
-          <span className="select-none font-body text-xs text-text-soft">Cant: {portionQty}</span>
+          <span className="select-none font-body text-sm text-text-muted">Cant: {portionQty}</span>
         ) : (
-          <div className="inline-flex items-center border border-border">
+          <div className="inline-flex items-center rounded-sm border border-border">
             <button
               onClick={() => !minusDisabled && onSetTotal(item.variantId, total - 1)}
               disabled={minusDisabled}
-              className="flex h-8 w-8 items-center justify-center text-text-muted transition-colors hover:text-text disabled:cursor-not-allowed disabled:opacity-30"
+              className="flex h-[34px] w-[34px] items-center justify-center text-[17px] text-text-muted transition-colors hover:text-text disabled:cursor-not-allowed disabled:opacity-30"
               aria-label="Disminuir"
             >
               −
             </button>
-            <span className="flex h-8 w-9 select-none items-center justify-center border-x border-border font-body text-xs text-text">
+            <span className="flex h-[34px] min-w-7 select-none items-center justify-center font-body text-sm tabular-nums text-text">
               {portionQty}
             </span>
             <button
               onClick={() => !plusDisabled && onSetTotal(item.variantId, total + 1)}
               disabled={plusDisabled}
-              className="flex h-8 w-8 items-center justify-center text-text-muted transition-colors hover:text-text disabled:cursor-not-allowed disabled:opacity-30"
+              className="flex h-[34px] w-[34px] items-center justify-center text-[17px] text-text-muted transition-colors hover:text-text disabled:cursor-not-allowed disabled:opacity-30"
               aria-label="Aumentar"
             >
               +
             </button>
           </div>
         )}
-        <p className="font-body text-sm text-text">{formatCurrency(item.price * portionQty)}</p>
+        <p className="font-body text-[15px] font-bold tabular-nums text-text">{formatCurrency(item.price * portionQty)}</p>
         {portionDiscount > 0 && (
-          <p className="font-body text-[11px] text-accent">Cupón −{formatCurrency(portionDiscount)}</p>
+          <p className="font-body text-[13px] font-semibold text-success">Cupón −{formatCurrency(portionDiscount)}</p>
         )}
       </div>
     </div>

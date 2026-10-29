@@ -60,6 +60,10 @@ function getUrlParams() {
     categorySlug: params.get('categoria') ?? undefined,
     marcaSlug: marcaParam && !/^\d+$/.test(marcaParam) ? marcaParam : undefined,
     search: params.get('search') ?? undefined,
+    // Atajos del home ("Empieza por el momento"): ?momento=DIA|NOCHE
+    timeOfDay: ['DIA', 'NOCHE'].includes(params.get('momento') ?? '')
+      ? (params.get('momento') as 'DIA' | 'NOCHE')
+      : undefined,
   };
 }
 
@@ -71,6 +75,7 @@ export function useCatalogHook({ tipo, bajoPedido, initialCategoryId, initialMar
   const [filters, setFilters] = useState<CatalogFilters>({
     ...defaultFilters,
     search: urlParams.search ?? '',
+    timeOfDay: urlParams.timeOfDay ?? defaultFilters.timeOfDay,
     categoryId: catId,
     marcaId: subId,
   });

@@ -10,9 +10,9 @@ interface MobileMenuProps {
 }
 
 /**
- * Menú móvil — misma dirección editorial (Atelier) que la navbar de escritorio:
- * opciones en serif display capitalizada (REQ-036), líneas finas
- * `border-border`, sin píldoras ni acentos rellenos.
+ * Menú móvil (rebranding): opciones en Gloock grande separadas por líneas
+ * finas, entrada escalonada; las categorías conservan su despliegue de dos
+ * niveles.
  */
 export default function MobileMenu({ pathname, onClose }: MobileMenuProps) {
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -22,8 +22,8 @@ export default function MobileMenu({ pathname, onClose }: MobileMenuProps) {
   const { data: bajoPedidoCategories = [] } = useBajoPedidoCategoriesQuery();
 
   return (
-    <div className="border-t border-border bg-bg md:hidden max-h-[80vh] overflow-y-auto pb-24">
-      <nav className="flex flex-col px-6" aria-label="Navegación móvil">
+    <div className="border-t border-border bg-bg md:hidden max-h-[calc(100dvh-58px)] overflow-y-auto pb-24">
+      <nav className="flex flex-col px-5 pt-3" aria-label="Navegación móvil">
         {NAV_LINKS.map((link) => {
           const active = isLinkActive(link.href, pathname, link.exact);
 
@@ -46,7 +46,7 @@ export default function MobileMenu({ pathname, onClose }: MobileMenuProps) {
                     // Al cambiar de sección se cierran las categorías abiertas
                     setExpandedCat(null);
                   }}
-                  className="flex w-full items-center justify-between py-4 font-display text-xl font-medium italic leading-none tracking-[-0.01em]"
+                  className="brand-rise flex w-full items-center justify-between py-3 font-display text-[30px] font-normal leading-[1.1]"
                   aria-expanded={isOpen}
                 >
                   {/* Sin marca de activo: la flecha ya dice si está abierto y
@@ -68,7 +68,7 @@ export default function MobileMenu({ pathname, onClose }: MobileMenuProps) {
                     <a
                       href={basePath}
                       onClick={onClose}
-                      className="mb-6 inline-block border-b border-text pb-1 font-display text-base font-medium italic leading-none text-text transition-colors hover:text-accent"
+                      className="mb-6 inline-block border-b border-accent pb-1 font-body text-sm font-semibold leading-none text-text transition-colors hover:text-accent-hover"
                     >
                       {catalogLabel}
                     </a>
@@ -105,7 +105,7 @@ export default function MobileMenu({ pathname, onClose }: MobileMenuProps) {
                                 {/* Mismo serif curvo de los banners, con peso:
                                     en versalitas finas se perdían contra la línea */}
                                 <span
-                                  className={`font-display text-lg font-medium italic leading-none tracking-[-0.01em] text-text transition-colors hover:underline underline-offset-4 decoration-accent/70 ${
+                                  className={`font-display text-xl font-normal leading-none text-text transition-colors hover:underline underline-offset-4 decoration-accent ${
                                     catOpen ? 'underline decoration-accent decoration-2 underline-offset-[6px]' : ''
                                   }`}
                                 >
@@ -127,7 +127,7 @@ export default function MobileMenu({ pathname, onClose }: MobileMenuProps) {
                                       key={sub.id}
                                       href={`${basePath}?category=${cat.id}&marca=${sub.id}`}
                                       onClick={onClose}
-                                      className="font-display text-base font-normal italic leading-none text-text-soft transition-colors hover:text-accent hover:underline underline-offset-4 decoration-accent/70"
+                                      className="font-body text-[15px] leading-none text-text-soft transition-colors hover:text-text hover:underline underline-offset-4 decoration-accent"
                                     >
                                       {sub.name}
                                     </a>
@@ -151,7 +151,7 @@ export default function MobileMenu({ pathname, onClose }: MobileMenuProps) {
               href={link.href}
               onClick={onClose}
               aria-current={active ? 'page' : undefined}
-              className="border-b border-border py-4 font-display text-xl font-medium italic leading-none tracking-[-0.01em] text-text transition-colors hover:text-accent"
+              className="brand-rise border-b border-border py-3 font-display text-[30px] font-normal leading-[1.1] text-text transition-colors hover:text-accent-hover"
             >
               {link.label}
             </a>
@@ -160,8 +160,8 @@ export default function MobileMenu({ pathname, onClose }: MobileMenuProps) {
       </nav>
 
       {/* Fila de utilidades — aviso de envíos + logo de Servientrega (REQ-037) */}
-      <div className="flex items-center gap-4 bg-bg-alt px-6 py-7">
-        <span className="font-body text-sm tracking-[0.04em] text-text-muted">
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 bg-bg-alt px-5 py-6">
+        <span className="font-body text-sm text-text-muted">
           Envíos por Servientrega
         </span>
         <img
@@ -169,6 +169,9 @@ export default function MobileMenu({ pathname, onClose }: MobileMenuProps) {
           alt="Servientrega"
           className="h-12 w-auto object-contain"
         />
+        <p className="w-full font-body text-sm text-text-muted">
+          WhatsApp +593 99 230 5463 · contacto@nondecants.com
+        </p>
       </div>
     </div>
   );

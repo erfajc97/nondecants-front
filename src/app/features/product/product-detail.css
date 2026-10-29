@@ -1,0 +1,206 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Ficha de producto — animaciones del prototipo que Tailwind no expresa bien.
+   Estado final = estado base: sin JS (sin `.rv`) todo se ve completo; con JS
+   la sección recibe `.rv` y, al entrar en pantalla, `.in` dispara la entrada.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes pdp-bump {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+@keyframes pdp-tick {
+  from { opacity: 0.001; transform: translateY(-10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pdp-pls {
+  to { transform: scale(3.2); opacity: 0; }
+}
+@keyframes pdp-blink {
+  50% { opacity: 0.25; }
+}
+@keyframes pdp-grow {
+  from { width: 0; }
+}
+@keyframes pdp-drift {
+  to { transform: translate(-18%, 14%) scale(1.15); }
+}
+@keyframes pdp-sand-t { 0% { transform: scaleY(1); } 80%, 100% { transform: scaleY(0.15); } }
+@keyframes pdp-sand-b { 0% { transform: scaleY(0.15); } 80%, 100% { transform: scaleY(1); } }
+@keyframes pdp-wave {
+  0% { transform: scale(0.08); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 0; }
+}
+@keyframes pdp-spritz-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+/* Botón con destello al pasar el mouse (.btn::after del prototipo). */
+.pdp-btn { position: relative; overflow: hidden; }
+.pdp-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 236, 190, 0.35), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.pdp-btn:hover::after { left: 130%; }
+.pdp-btn.pdp-pop { animation: pdp-spritz-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* Precio: cae desde arriba al cambiar de formato. */
+.pdp-tick { display: inline-block; animation: pdp-tick 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* Favorito */
+.pdp-fav .h1 { display: none; }
+.pdp-fav[aria-pressed="true"] .h0 { display: none; }
+.pdp-fav[aria-pressed="true"] .h1 { display: inline-block; }
+.pdp-fav[aria-pressed="true"] { color: var(--color-error); }
+.pdp-fav.pop { animation: pdp-bump 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* Despacho con cuenta regresiva */
+.pdp-pulse { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--color-success); flex: none; }
+.pdp-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: inherit;
+  animation: pdp-pls 1.8s ease-out infinite;
+}
+.pdp-late .pdp-pulse { background: var(--color-accent); }
+.pdp-colon { font-style: normal; color: var(--color-accent); padding: 0 1px; animation: pdp-blink 1s steps(1) infinite; }
+.pdp-cd-bar { height: 2px; background: var(--color-border); overflow: hidden; }
+.pdp-cd-bar i {
+  display: block;
+  height: 100%;
+  width: calc(var(--p) * 100%);
+  background: var(--color-accent);
+  animation: pdp-grow 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* La firma: foto que "respira" y puntos de color de las notas */
+.pdp-sig img { transition: transform 2.4s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.rv:not(.in) .pdp-sig img { transform: scale(1.12); }
+.pdp-sig figcaption i {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition-delay: calc(var(--i, 0) * 80ms);
+}
+.rv:not(.in) .pdp-sig figcaption i { transform: scale(0); }
+
+/* Evolución con color: barra que se dibuja y tarjetas con aura */
+.pdp-evo-bar i {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 10px;
+  border-radius: 6px;
+  background: var(--grad);
+  transition: clip-path 1.8s cubic-bezier(0.6, 0.05, 0.25, 1) 0.2s;
+}
+.rv:not(.in) .pdp-evo-bar i { clip-path: inset(0 100% 0 0 round 6px); }
+
+.pdp-stg { isolation: isolate; transition: border-color 0.3s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+.pdp-stg:hover { border-color: var(--a); transform: translateY(-3px); }
+.pdp-aura { position: absolute; inset: 0; z-index: -1; opacity: 0.22; transition: opacity 0.5s; }
+.pdp-stg:hover .pdp-aura { opacity: 0.38; }
+.pdp-aura i {
+  position: absolute;
+  width: 62%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(36px);
+  animation: pdp-drift 14s ease-in-out infinite alternate;
+}
+.pdp-aura i:nth-child(1) { background: var(--a); right: -14%; top: -24%; }
+.pdp-aura i:nth-child(2) { background: var(--b); left: -18%; bottom: -30%; animation-delay: -5s; }
+.pdp-aura i:nth-child(3) { background: var(--c); right: 10%; bottom: -40%; animation-delay: -9s; width: 40%; }
+
+.pdp-nchip {
+  background: color-mix(in srgb, var(--c) 14%, #fff);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 40%, transparent);
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s;
+  transition-delay: calc(var(--i) * 70ms + 0.5s);
+}
+.rv:not(.in) .pdp-nchip { opacity: 0.001; transform: translateY(10px) scale(0.9); }
+.pdp-nchip:hover { background: color-mix(in srgb, var(--c) 30%, #fff); transition-delay: 0s; }
+.pdp-nchip:hover i { animation: pdp-bump 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+.pdp-nchip i {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.18), 0 0 0 3px #fff;
+  flex: none;
+}
+
+/* Medidores de 10 segmentos que se llenan uno a uno */
+.pdp-meter i { position: relative; overflow: hidden; background: var(--color-border); }
+.pdp-meter i.on::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--color-accent);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--d) + 0.6s);
+}
+.rv:not(.in) .pdp-meter i.on::after { transform: scaleX(0); }
+
+/* Gauge de longevidad (reloj de arena + arco) y proyección (anillos + ondas) */
+.pdp-gauge svg { width: 104px; height: 104px; flex: none; overflow: visible; }
+.pdp-g-lon .trk, .pdp-g-lon .val { fill: none; stroke-width: 3; transform: rotate(135deg); transform-origin: 60px 60px; }
+.pdp-g-lon .trk { stroke: var(--color-border); stroke-dasharray: 75 100; }
+.pdp-g-lon .val {
+  stroke: var(--color-accent);
+  stroke-linecap: round;
+  stroke-dasharray: calc(var(--v) * 7.5) 100;
+  transition: stroke-dashoffset 1.6s cubic-bezier(0.6, 0.05, 0.25, 1) 0.5s;
+}
+.rv:not(.in) .pdp-g-lon .val { stroke-dashoffset: calc(var(--v) * 7.5); }
+.pdp-g-lon .tk { fill: var(--color-border); }
+.pdp-g-lon .tk.on { fill: var(--color-accent-hover); transition: fill 0.2s; transition-delay: calc(0.5s + var(--i) * 160ms); }
+.rv:not(.in) .pdp-g-lon .tk.on { fill: var(--color-border); }
+.pdp-hg path { fill: none; stroke: var(--color-text); stroke-width: 1.6; stroke-linecap: round; }
+.pdp-hg .sand, .pdp-hg .sand2 { fill: var(--color-accent); stroke: none; }
+.pdp-hg .sand { transform-origin: 0 -10px; animation: pdp-sand-t 4s ease-in-out infinite; }
+.pdp-hg .sand2 { transform-origin: 0 15px; animation: pdp-sand-b 4s ease-in-out infinite; }
+.pdp-g-pr .ring { fill: none; stroke: var(--color-border); stroke-width: 1.2; }
+.pdp-g-pr .ring.on { stroke: var(--color-accent); opacity: calc(1.1 - var(--i) * 0.15); transition: opacity 0.5s; transition-delay: calc(0.4s + var(--i) * 140ms); }
+.rv:not(.in) .pdp-g-pr .ring.on { opacity: 0; }
+.pdp-g-pr .core { fill: var(--color-text); }
+.pdp-g-pr .wave {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+  transform-origin: 60px 60px;
+  transform: scale(0.08);
+  opacity: 0;
+  animation: pdp-wave 3.6s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+  animation-delay: calc(var(--w) * 1.2s + 1.2s);
+}
+@media (max-width: 820px) {
+  .pdp-gauge svg { width: 84px; height: 84px; }
+}
+
+/* Tarjetas de autenticidad / reseñas: ligera elevación al pasar el mouse */
+.pdp-lift { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s; }
+.pdp-lift:hover { transform: translateY(-3px); }
+
+/* Pestañas de salto: scroll suave y margen bajo header + barra */
+html:has(.pdp-jump) { scroll-behavior: smooth; }
+.pdp-anchor { scroll-margin-top: 124px; }
+.pdp-jump a[aria-current="true"] { color: var(--color-text); box-shadow: inset 0 -2px 0 var(--color-accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.pdp-jump) { scroll-behavior: auto; }
+  .pdp-tick, .pdp-pulse::after, .pdp-colon, .pdp-aura i, .pdp-hg .sand, .pdp-hg .sand2,
+  .pdp-g-pr .wave, .pdp-cd-bar i, .pdp-fav.pop, .pdp-btn.pdp-pop { animation: none; }
+  .pdp-sig img, .pdp-sig figcaption i, .pdp-evo-bar i, .pdp-nchip, .pdp-meter i.on::after,
+  .pdp-g-lon .val, .pdp-g-lon .tk.on, .pdp-g-pr .ring.on, .pdp-lift, .pdp-stg { transition: none; }
+}

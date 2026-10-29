@@ -4,15 +4,16 @@ import PaymentConfirmation from '@/app/features/order/components/PaymentConfirma
 ---
 
 <BaseLayout title="Pedido confirmado — NonDecants" description="Tu pedido ha sido confirmado exitosamente" robots="noindex,nofollow">
-  <div class="min-h-screen bg-[url('/footer.png')] bg-[--color-bg] bg-repeat bg-center flex flex-col pt-[40px]">
-
-    <header class="w-full flex justify-center items-center py-4 mt-6">
-      <a href="/">
-        <img src="/logo.svg" alt="NönDecants" class="h-8" />
-      </a>
+  <div class="flex min-h-screen flex-col bg-bg-alt">
+    <header class="border-b border-border bg-bg">
+      <div class="mx-auto flex h-[66px] w-full max-w-[1480px] items-center justify-center px-4">
+        <a href="/" aria-label="NönDecants — Inicio">
+          <img src="/logonondecants.png" alt="NönDecants" width={543} height={127} class="h-7 w-auto" />
+        </a>
+      </div>
     </header>
 
-    <main class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-10 md:pb-16">
+    <main class="mx-auto w-full max-w-5xl flex-1 px-4 pb-10 pt-6 sm:px-6 md:pb-16">
       <PaymentConfirmation client:load />
     </main>
   </div>

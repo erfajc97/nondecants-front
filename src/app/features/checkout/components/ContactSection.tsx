@@ -1,7 +1,6 @@
 import type { CustomerFormData } from '../types';
 
-const INPUT_CLASS =
-  'w-full border-0 border-b border-border bg-transparent px-0 py-2.5 font-body text-sm text-text placeholder:text-text-muted focus:border-text focus:ring-0 transition-colors';
+import { INPUT_CLASS } from '../classes';
 
 interface ContactSectionProps {
   customer: CustomerFormData;
@@ -23,12 +22,11 @@ export default function ContactSection({
 }: ContactSectionProps) {
   return (
     <section>
-      <h2 className="mb-4 text-center font-display text-xl font-light text-text">
-        Información de contacto
-      </h2>
+      <h2 className="mb-3 font-body! text-xl font-bold text-text">Información de contacto</h2>
 
       <input
         type="email"
+        aria-label="Correo electrónico"
         placeholder="Correo electrónico *"
         value={customer.email}
         onChange={(e) => onChange('email', e.target.value)}
@@ -37,15 +35,15 @@ export default function ContactSection({
       />
 
       {!isAuthenticated && (
-        <div className="mt-4 flex flex-col items-start gap-2.5 border border-border bg-bg-alt px-4 py-3.5">
-          <p className="font-body text-[12px] leading-snug text-text-soft">
+        <div className="mt-4 flex flex-col items-start gap-2.5 rounded-md bg-gold-light px-4 py-3.5">
+          <p className="font-body text-[15px] leading-snug text-text-soft">
             Sigues <span className="text-text">como invitado</span>: no necesitas cuenta para
             terminar el pedido.
           </p>
           <button
             type="button"
             onClick={onLogin}
-            className="shrink-0 border-b border-text pb-0.5 font-body text-[11px] uppercase tracking-[0.16em] text-text transition-colors hover:border-accent hover:text-accent"
+            className="shrink-0 font-body text-[15px] font-semibold text-text underline underline-offset-4 transition-colors hover:text-accent-hover"
           >
             Crear cuenta o entrar
           </button>

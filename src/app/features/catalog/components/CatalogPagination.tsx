@@ -68,7 +68,7 @@ export default function CatalogPagination({ pagination, onPageChange }: CatalogP
   return (
     <div className="mt-10 flex flex-col items-center gap-3 border-t border-border pt-6 pb-4">
       {/* Resumen: cuántos se están viendo del total */}
-      <p className="font-body text-[11px] uppercase tracking-[0.18em] text-text-muted">
+      <p className="font-body text-sm text-text-muted">
         Mostrando {from}–{to} de {total} productos · Página {page} de {totalPages}
       </p>
 
@@ -76,7 +76,7 @@ export default function CatalogPagination({ pagination, onPageChange }: CatalogP
         <button
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
-          className="px-3 sm:px-5 py-2.5 font-body text-[10px] sm:text-[11px] uppercase tracking-[0.14em] sm:tracking-[0.18em] border border-border text-text-muted hover:border-text hover:text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="h-10 rounded-full px-4 sm:px-5 font-body text-sm font-semibold border border-border text-text hover:border-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           Atrás
         </button>
@@ -91,10 +91,10 @@ export default function CatalogPagination({ pagination, onPageChange }: CatalogP
               <button
                 key={p}
                 onClick={() => onPageChange(p)}
-                className={`w-8 sm:w-9 h-9 text-[13px] sm:text-sm font-body transition-colors ${
+                className={`w-9 h-9 rounded-full text-sm font-semibold font-body transition-colors ${
                   p === page
-                    ? 'bg-text text-bg'
-                    : 'border border-border text-text-muted hover:border-text hover:text-text'
+                    ? 'bg-text text-white'
+                    : 'border border-border text-text hover:border-text'
                 }`}
               >
                 {p}
@@ -106,7 +106,7 @@ export default function CatalogPagination({ pagination, onPageChange }: CatalogP
         <button
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages}
-          className="px-3 sm:px-5 py-2.5 font-body text-[10px] sm:text-[11px] uppercase tracking-[0.14em] sm:tracking-[0.18em] bg-text text-bg hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="h-10 rounded-full px-4 sm:px-5 font-body text-sm font-semibold bg-text text-white hover:bg-[#34312f] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           Siguiente
         </button>

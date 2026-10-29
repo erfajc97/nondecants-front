@@ -75,17 +75,17 @@ export default function CatalogQuickFilters({
     sortedCategories.find((c) => Number(c.id) === categoryId)?.name ?? 'Categoría';
 
   const btn = (active: boolean, menu: OpenMenu) =>
-    `flex w-full min-w-0 items-center justify-between gap-1 border px-2 py-2.5 font-body text-[10px] uppercase tracking-[0.08em] transition-colors ${
+    `flex h-10 w-full min-w-0 items-center justify-between gap-1 rounded-full border px-3 font-body text-[13px] font-semibold transition-colors ${
       active || open === menu
-        ? 'border-text bg-text text-bg'
-        : 'border-border bg-surface text-text'
+        ? 'border-text bg-text text-white'
+        : 'border-border bg-white text-text'
     }`;
 
   const menuPanel =
-    'absolute left-0 right-0 top-full z-30 mt-1 max-h-64 overflow-x-hidden overflow-y-auto border border-border bg-surface py-1 shadow-[0_8px_24px_rgba(28,26,23,0.12)]';
+    'absolute left-0 right-0 top-full z-30 mt-1 max-h-64 overflow-x-hidden overflow-y-auto rounded-[10px] border border-border bg-white p-1.5 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.35)]';
   const menuItem = (active: boolean) =>
-    `block w-full truncate px-3 py-2.5 text-left font-body text-sm ${
-      active ? 'bg-text text-bg' : 'text-text hover:bg-bg-alt'
+    `block w-full truncate rounded-md px-3 py-2.5 text-left font-body text-[15px] ${
+      active ? 'bg-text font-semibold text-white' : 'text-text hover:bg-bg-alt'
     }`;
 
   return (

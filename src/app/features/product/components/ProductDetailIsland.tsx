@@ -1,59 +1,41 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import useEmblaCarousel from 'embla-carousel-react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import AppProviders from '@/app/providers/AppProviders';
 import ProductPurchaseOptions from './ProductPurchaseOptions';
 import ExclusiveCouponBadge from '@/app/features/coupons/ExclusiveCouponBadge';
-import { EMBLA_DURATION } from '@/app/components/UI/CarouselNav';
 import type { Product, ProductVariant } from '@/app/types/global.types';
+import '../product-detail.css';
 
 interface ProductDetailIslandProps {
   product: Product;
 }
 
+/**
+ * Galería del prototipo (.gal): en desktop una cuadrícula de 2 columnas con la
+ * primera foto a todo el ancho; en móvil, tiras con scroll-snap (86 %) que
+ * sangran hasta el borde derecho. Sin miniaturas: todas las fotos a la vista.
+ */
 function ProductGallery({
   images,
   name,
   bajoPedido,
+  discount,
 }: {
   images: string[];
   name: string;
   bajoPedido?: boolean;
+  discount?: number;
 }) {
   const list = images.filter(Boolean);
-  const [idx, setIdx] = useState(0);
-
-  /* Arrastre real —con el dedo y con el mouse— en vez del swipe casero, que
-     solo reaccionaba al soltar y se perdía si el gesto empezaba sobre la foto. */
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: list.length > 1,
-    align: 'start',
-    containScroll: false,
-    duration: EMBLA_DURATION,
-  });
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    const sync = () => setIdx(emblaApi.selectedScrollSnap());
-    sync();
-    emblaApi.on('select', sync);
-    emblaApi.on('reInit', sync);
-    return () => {
-      emblaApi.off('select', sync);
-      emblaApi.off('reInit', sync);
-    };
-  }, [emblaApi]);
+  const railRef = useRef<HTMLDivElement>(null);
 
   // Al cambiar de variante cambia la lista de fotos: volver a la primera.
   useEffect(() => {
-    emblaApi?.reInit();
-    emblaApi?.scrollTo(0, true);
-  }, [emblaApi, images]);
-
-  const goTo = useCallback((i: number) => emblaApi?.scrollTo(i), [emblaApi]);
+    railRef.current?.scrollTo({ left: 0 });
+  }, [images]);
 
   if (list.length === 0) {
     return (
-      <div className="flex h-[55svh] items-center justify-center bg-surface-raised text-text-muted">
+      <div className="flex aspect-square items-center justify-center rounded border border-border bg-bg-alt text-text-muted">
         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.75">
           <rect x="3" y="3" width="18" height="18" rx="2" />
           <circle cx="8.5" cy="8.5" r="1.5" />
@@ -63,66 +45,45 @@ function ProductGallery({
     );
   }
 
+  const restIsOdd = (list.length - 1) % 2 === 1;
+
   return (
-    /* Galería compacta. En MÓVIL se limita a ~42svh y se navega con swipe +
-       puntos (sin miniaturas); en desktop usa el alto grande con miniaturas. */
-    <div className="flex h-[42svh] flex-col gap-2.5 sm:h-[50svh] md:h-[calc(100svh-15rem)] md:max-h-[620px]">
-      {/* Imagen principal — botella completa sobre tile blanco (object-contain) */}
-      <div className="relative min-h-0 flex-1 overflow-hidden bg-white">
-        <div className="h-full overflow-hidden" ref={emblaRef}>
-          <div className="flex h-full">
-            {list.map((img, i) => (
-              <div key={i} className="h-full min-w-0 shrink-0 basis-full">
-                <img
-                  src={img}
-                  alt={i === 0 ? name : `${name} ${i + 1}`}
-                  draggable={false}
-                  className="h-full w-full select-none object-contain p-3 md:p-4"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-        {bajoPedido && (
-          <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 border border-accent bg-bg px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.22em] text-text md:left-5 md:top-5">
-            <span className="h-[5px] w-[5px] rounded-full bg-accent" />
-            Bajo Pedido
-          </span>
-        )}
-      </div>
-      {/* Puntos del carrusel — solo mobile, bajo la imagen sobre fondo claro */}
-      {list.length > 1 && (
-        <div className="flex shrink-0 items-center justify-center gap-1.5 py-1 md:hidden">
-          {list.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              aria-label={`Imagen ${i + 1}`}
-              onClick={() => goTo(i)}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                idx === i ? 'w-4 bg-text' : 'w-1.5 bg-text/30'
-              }`}
+    <div
+      ref={railRef}
+      className="grid grid-cols-2 gap-2.5 max-md:-mr-4 max-md:auto-cols-[86%] max-md:grid-flow-col max-md:grid-cols-none max-md:snap-x max-md:snap-mandatory max-md:overflow-x-auto max-md:pr-4 max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden"
+    >
+      {list.map((img, i) => {
+        const first = i === 0;
+        const lastOdd = restIsOdd && i === list.length - 1;
+        const wide = first || lastOdd;
+        return (
+          <div
+            key={`${img}-${i}`}
+            className={`group relative max-w-full overflow-hidden rounded border border-border bg-white max-md:aspect-square max-md:snap-start ${
+              wide ? 'md:col-span-2 md:aspect-square' : 'md:aspect-[4/5]'
+            }`}
+          >
+            <img
+              src={img}
+              alt={first ? name : `${name} ${i + 1}`}
+              draggable={false}
+              loading={first ? 'eager' : 'lazy'}
+              className="absolute inset-0 h-full w-full select-none object-contain p-[8%] transition-transform duration-700 ease-out md:group-hover:scale-[1.04]"
             />
-          ))}
-        </div>
-      )}
-      {/* Miniaturas cuadradas — solo desktop */}
-      {list.length > 1 && (
-        <div className="hidden w-full max-w-82.5 shrink-0 grid-cols-3 gap-2.5 md:grid">
-          {list.slice(0, 3).map((img, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => goTo(i)}
-              className={`relative aspect-square overflow-hidden border bg-white transition-colors ${
-                idx === i ? 'border-text' : 'border-border opacity-90 hover:opacity-100'
-              }`}
-            >
-              <img src={img} alt={`${name} ${i + 1}`} className="h-full w-full object-contain p-1.5" />
-            </button>
-          ))}
-        </div>
-      )}
+            {first && bajoPedido && (
+              <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white py-1.5 pl-2 pr-2.5 font-body text-[10.5px] font-semibold uppercase leading-none tracking-[0.08em] text-warning shadow-[0_0_0_1px_var(--color-border),0_4px_12px_-6px_rgba(27,25,25,0.25)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                Por encargo
+              </span>
+            )}
+            {first && !!discount && discount > 0 && (
+              <span className="absolute right-3 top-3 rounded-full bg-accent px-2.5 py-1.5 font-body text-[11px] font-bold leading-none text-text">
+                -{Math.round(discount)}%
+              </span>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -155,12 +116,18 @@ function ProductDetailContent({ product }: ProductDetailIslandProps) {
   }, [selectedVariant, product.images, product.image]);
 
   return (
-    <div className="mt-4 grid grid-cols-1 items-start gap-8 md:grid-cols-[0.82fr_1fr] md:gap-12">
-      <div className="max-w-full overflow-hidden">
-        <ProductGallery images={galleryImages} name={product.name} bajoPedido={product.bajoPedido} />
+    <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:gap-[clamp(24px,4.5vw,72px)]">
+      <div className="min-w-0">
+        <ProductGallery
+          images={galleryImages}
+          name={product.name}
+          bajoPedido={product.bajoPedido}
+          discount={Number(product.discount ?? 0)}
+        />
       </div>
-      <div className="md:sticky md:top-20">
-        <ExclusiveCouponBadge productId={product.id} variantId={selectedVariant?.id} className="mb-3" />
+      {/* Panel de compra pegajoso (desktop): se queda bajo el header al scrollear. */}
+      <div className="grid min-w-0 gap-4 md:sticky md:top-[88px]">
+        <ExclusiveCouponBadge productId={product.id} variantId={selectedVariant?.id} />
         <ProductPurchaseOptions
           product={product}
           selectedVariant={selectedVariant}

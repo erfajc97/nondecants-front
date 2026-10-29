@@ -90,24 +90,24 @@ function OrderConfirmationContent() {
 
   if (status === 'loading') {
     return (
-      <div className="flex flex-col items-center justify-center py-12 md:py-20 gap-4">
+      <div className="flex flex-col items-center justify-center gap-4 py-12 md:py-20">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-text" />
-        <p className="font-body text-sm text-text-muted">Verificando tu pago...</p>
+        <p className="font-body text-base text-text-muted">Verificando tu pago...</p>
       </div>
     );
   }
 
   if (status === 'failed') {
     return (
-      <div className="flex flex-col items-center text-center py-10 md:py-16 gap-5">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-error-muted text-error">
+      <div className="mx-auto my-5 grid max-w-[640px] justify-items-center gap-3.5 rounded-md border border-border bg-surface p-7 text-center md:p-14">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-error text-bg">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </div>
-        <h1 className="font-display text-3xl font-light text-text">Pago no completado</h1>
-        <p className="max-w-sm font-body text-sm text-text-muted">{error}</p>
-        <a href="/checkout" className="mt-4 bg-text px-8 py-4 font-body text-xs font-medium uppercase tracking-[0.2em] text-bg transition-colors hover:bg-accent">
+        <h1 className="font-display text-[clamp(34px,4vw,48px)] leading-none text-text">Pago no completado</h1>
+        <p className="max-w-[44ch] font-body text-[17px] text-text-soft">{error}</p>
+        <a href="/checkout" className="inline-flex h-[52px] items-center justify-center rounded-sm bg-text px-7 font-body text-[14.5px] font-semibold text-bg transition-colors hover:bg-text-soft mt-2">
           Intentar de nuevo
         </a>
       </div>
@@ -117,54 +117,54 @@ function OrderConfirmationContent() {
   const isTransfer = status === 'transfer';
 
   return (
-    <div className="flex flex-col items-center text-center py-12 gap-6">
+    <div className="mx-auto my-5 grid max-w-[640px] justify-items-center gap-3.5 rounded-md border border-border bg-surface p-7 text-center md:p-14">
       <GoogleReviewOptIn
         orderId={order?.id || order?.orderNumber}
         email={order?.customerEmail}
       />
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success-muted text-success">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success text-bg">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="20 6 9 17 4 12" />
         </svg>
       </div>
 
-      <h1 className="font-display text-3xl font-light text-text md:text-4xl">
+      <h1 className="font-display text-[clamp(34px,4vw,48px)] leading-none text-text">
         {isTransfer ? '¡Orden registrada!' : '¡Pago exitoso!'}
       </h1>
 
       {order?.orderNumber && (
-        <p className="font-body text-sm text-text-muted">
-          Orden: <span className="text-text">{order.orderNumber}</span>
+        <p className="font-body text-[17px] text-text-soft">
+          Orden: <span className="font-bold text-text">{order.orderNumber}</span>
         </p>
       )}
 
       {!isTransfer && order?.total ? (
-        <p className="font-body text-sm text-text-muted">
-          Total pagado: <span className="text-text">{formatCurrency(order.total)}</span>
+        <p className="font-body text-[17px] text-text-soft">
+          Total pagado: <span className="font-bold tabular-nums text-text">{formatCurrency(order.total)}</span>
         </p>
       ) : null}
 
       {/* Transfer: receipt already uploaded during checkout */}
       {isTransfer && (
         <div className="w-full max-w-md">
-          <div className="flex items-center gap-3 border-l-2 border-success bg-bg-alt px-4 py-4">
+          <div className="flex items-center gap-3 rounded-md bg-gold-light px-4 py-4 text-left">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-success">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
             </svg>
-            <p className="font-body text-sm text-text-soft">Comprobante enviado. Te notificaremos cuando confirmemos tu pago.</p>
+            <p className="font-body text-[15px] text-text-soft">Comprobante enviado. Te notificaremos cuando confirmemos tu pago.</p>
           </div>
         </div>
       )}
 
-      <p className="mt-2 max-w-sm font-body text-xs text-text-muted">
-        Te enviaremos los detalles a <span className="text-text-soft">{order?.customerEmail || 'tu correo'}</span>.
+      <p className="mt-1 max-w-[44ch] font-body text-[15px] text-text-muted">
+        Te enviaremos los detalles a <span className="font-semibold text-text">{order?.customerEmail || 'tu correo'}</span>.
       </p>
 
       <div className="mt-4 flex w-full max-w-md flex-col gap-3 sm:flex-row">
-        <a href="/mi-cuenta" className="flex-1 bg-text px-6 py-4 text-center font-body text-xs font-medium uppercase tracking-[0.2em] text-bg transition-colors hover:bg-accent">
+        <a href="/mi-cuenta" className="inline-flex h-[52px] items-center justify-center rounded-sm bg-text px-7 font-body text-[14.5px] font-semibold text-bg transition-colors hover:bg-text-soft flex-1">
           Ver mi pedido
         </a>
-        <a href="/catalogo/perfumes" className="flex-1 border border-border px-6 py-4 text-center font-body text-xs uppercase tracking-[0.2em] text-text transition-colors hover:border-text">
+        <a href="/catalogo/perfumes" className="inline-flex h-[52px] flex-1 items-center justify-center rounded-sm border-[1.5px] border-text px-7 font-body text-[14.5px] font-semibold text-text transition-colors hover:bg-bg-alt">
           Seguir comprando
         </a>
       </div>

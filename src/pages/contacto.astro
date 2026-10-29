@@ -8,9 +8,9 @@ import PublicLayout from '@/layouts/PublicLayout.astro';
   canonical="/contacto"
 >
   <section class="bg-bg">
-    <div class="mx-auto max-w-[720px] px-6 py-12 md:px-8 md:py-28">
-      <span class="eyebrow">Atención</span>
-      <h1 class="mt-4 font-display text-4xl font-light italic leading-[1.05] text-text md:text-5xl">
+    <div class="mx-auto max-w-[720px] px-[max(16px,3.4vw)] py-12 md:py-24">
+      <span class="eyebrow k">Atención</span>
+      <h1 class="mt-2 font-display text-[clamp(46px,6vw,84px)] font-normal leading-[0.95] tracking-[-0.025em] text-text">
         Contacto
       </h1>
       <p class="mt-6 max-w-[54ch] font-body text-[15px] leading-relaxed text-text-soft">
@@ -20,32 +20,32 @@ import PublicLayout from '@/layouts/PublicLayout.astro';
 
       <div class="mt-10 space-y-6 border-t border-border pt-10">
         <div>
-          <p class="font-body text-[11px] uppercase tracking-[0.18em] text-text-muted">WhatsApp</p>
+          <p class="font-body text-[13px] font-semibold text-accent-hover">WhatsApp</p>
           <a
             href="https://wa.me/593992305463"
-            class="mt-1 inline-block font-display text-2xl italic text-text hover:text-accent"
+            class="mt-1 inline-block font-display text-3xl text-text transition-colors hover:text-accent-hover"
           >
             +593 99 230 5463
           </a>
         </div>
         <div>
-          <p class="font-body text-[11px] uppercase tracking-[0.18em] text-text-muted">Correo</p>
+          <p class="font-body text-[13px] font-semibold text-accent-hover">Correo</p>
           <a
             href="mailto:contacto@nondecants.com"
-            class="mt-1 inline-block font-body text-lg text-text hover:text-accent"
+            class="mt-1 inline-block font-body text-lg font-medium text-text transition-colors hover:text-accent-hover"
           >
             contacto@nondecants.com
           </a>
         </div>
         <div>
-          <p class="font-body text-[11px] uppercase tracking-[0.18em] text-text-muted">Horario</p>
+          <p class="font-body text-[13px] font-semibold text-accent-hover">Horario</p>
           <p class="mt-1 font-body text-[15px] leading-relaxed text-text-soft">
             Lunes a domingo, 08:00 a 24:00 (hora de Ecuador). Los pedidos confirmados hasta las
             15:00 salen el mismo día.
           </p>
         </div>
         <div>
-          <p class="font-body text-[11px] uppercase tracking-[0.18em] text-text-muted">Envíos</p>
+          <p class="font-body text-[13px] font-semibold text-accent-hover">Envíos</p>
           <p class="mt-1 font-body text-[15px] leading-relaxed text-text-soft">
             Servientrega a todo el país: Guayaquil $3, provincias $7, retiro en tienda sin costo.
             Plazo habitual 24 a 72 horas. Encargos bajo pedido, 13 a 17 días.
@@ -54,8 +54,8 @@ import PublicLayout from '@/layouts/PublicLayout.astro';
       </div>
 
       <p class="mt-12 font-body text-sm leading-relaxed text-text-soft">
-        Preguntas frecuentes en <a href="/faq" class="underline underline-offset-2 hover:text-text">FAQ</a>.
-        Condiciones en <a href="/terminos" class="underline underline-offset-2 hover:text-text">Términos</a>.
+        Preguntas frecuentes en <a href="/faq" class="underline decoration-accent underline-offset-2 hover:text-text">FAQ</a>.
+        Condiciones en <a href="/terminos" class="underline decoration-accent underline-offset-2 hover:text-text">Términos</a>.
       </p>
     </div>
   </section>

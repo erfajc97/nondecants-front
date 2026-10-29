@@ -1,7 +1,8 @@
-import axios from 'axios'
+import axios from '@/app/config/axiosConfig'
 import { API_ENDPOINTS } from '@/app/api/endpoints'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://stgapi.nondecants.com/api'
+// Misma instancia que el resto de servicios: respeta VITE_API_BASE_URL y el modo demo.
+const API_BASE_URL = ''
 
 export interface BlogPost {
   id: number | string

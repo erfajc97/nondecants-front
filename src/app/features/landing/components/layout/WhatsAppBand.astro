@@ -1,0 +1,31 @@
+---
+/**
+ * Banda "Atención directa" previa al footer (prototipo de marca): fondo dorado
+ * muy claro, título Gloock, teléfono y botón de WhatsApp. Mismo número oficial
+ * que el footer y el botón de WhatsApp de la ficha.
+ */
+const WHATSAPP_URL = 'https://wa.me/593992305463';
+const PHONE = '+593 99 230 5463';
+---
+
+<section class="bg-gold-light py-[clamp(44px,5vw,72px)] text-center" aria-labelledby="wa-band-title">
+  <div class="mx-auto max-w-[1480px] px-[max(16px,3.4vw)]">
+    <span class="eyebrow k">Atención directa</span>
+    <h2 id="wa-band-title" class="mt-2.5 font-display text-[clamp(32px,4vw,54px)] font-normal leading-none text-text">
+      ¿Dudas con tu perfume? Escríbenos.
+    </h2>
+    <p class="mt-2.5 font-body text-text-muted">Te ayudamos a elegir por WhatsApp.</p>
+    <div class="mt-[18px] select-all font-body text-[22px] font-semibold tracking-[0.04em] tabular-nums text-text">{PHONE}</div>
+    <a
+      href={WHATSAPP_URL}
+      target="_blank"
+      rel="noopener"
+      class="group mx-auto mt-[18px] inline-flex h-[52px] items-center justify-center gap-2.5 rounded-[3px] bg-bg px-7 font-body text-[14.5px] font-semibold tracking-[0.01em] text-success shadow-[inset_0_0_0_1.5px_var(--color-success)] transition-colors hover:bg-success hover:text-bg"
+    >
+      <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+        <path d="M152.58,145.23l23,11.48A24,24,0,0,1,152,176a72.08,72.08,0,0,1-72-72A24,24,0,0,1,99.29,80.46l11.48,23L101,118a8,8,0,0,0-.73,7.51,56.47,56.47,0,0,0,30.15,30.15A8,8,0,0,0,138,155ZM232,128A104,104,0,0,1,79.12,219.82L45.07,231.17a16,16,0,0,1-20.24-20.24l11.35-34.05A104,104,0,1,1,232,128Zm-40,24a8,8,0,0,0-4.42-7.16l-32-16a8,8,0,0,0-8,.5l-14.69,9.8a40.55,40.55,0,0,1-16-16l9.8-14.69a8,8,0,0,0,.5-8l-16-32A8,8,0,0,0,104,64a40,40,0,0,0-40,40,88.1,88.1,0,0,0,88,88A40,40,0,0,0,192,152Z" />
+      </svg>
+      Abrir WhatsApp
+    </a>
+  </div>
+</section>

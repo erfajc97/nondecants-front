@@ -7,21 +7,23 @@ import PublicLayout from '@/layouts/PublicLayout.astro';
   description="La página que estás buscando no existe o ha sido movida."
   robots="noindex,nofollow"
 >
-  <div class="min-h-[60vh] flex flex-col items-center justify-center px-6 py-12 text-center md:py-20">
-    <h1 class="font-heading text-8xl md:text-9xl text-[--color-accent] mb-4">
+  <div class="mx-auto flex min-h-[60vh] max-w-[720px] flex-col items-center justify-center px-[max(16px,3.4vw)] py-12 text-center md:py-20">
+    <span class="eyebrow k">Error 404</span>
+    <h1 class="mt-2 font-display text-[clamp(80px,14vw,160px)] font-normal leading-[0.9] tracking-[-0.025em] text-text">
       404
     </h1>
-    <h2 class="font-heading text-2xl md:text-4xl text-[--color-text] mb-6">
+    <h2 class="mt-4 font-display text-3xl font-normal leading-tight text-text md:text-4xl">
       Página no encontrada
     </h2>
-    <p class="text-[--color-text-muted] max-w-md mb-10 text-lg">
+    <p class="mb-10 mt-4 max-w-md font-body text-base text-text-muted">
       Lo sentimos, la página que estás buscando no existe, ha sido eliminada o su nombre ha cambiado.
     </p>
     <a
       href="/"
-      class="inline-flex items-center justify-center bg-[--color-accent] text-black px-8 py-3.5 font-medium uppercase tracking-widest hover:bg-white transition-colors duration-300"
+      class="group inline-flex h-[52px] items-center justify-center gap-2.5 rounded-[3px] bg-text px-7 font-body text-[14.5px] font-semibold tracking-[0.01em] text-bg transition-[background-color,transform] duration-200 hover:bg-text-soft active:scale-[0.985]"
     >
       Volver al inicio
+      <span class="transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">→</span>
     </a>
   </div>
 </PublicLayout>

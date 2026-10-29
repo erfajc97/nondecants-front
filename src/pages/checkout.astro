@@ -6,15 +6,21 @@ export const prerender = false; // Checkout requires client side checking or SSR
 ---
 
 <BaseLayout title="Checkout — NonDecants" description="Finaliza tu compra de forma segura" robots="noindex,nofollow">
-  <div class="flex min-h-screen flex-col bg-bg pt-6">
-    <header class="flex w-full items-center justify-center py-6">
-      <a href="/" aria-label="NönDecants — Inicio">
-        <img src="/logonondecants.png" alt="NönDecants" width={543} height={127} class="h-9 w-auto md:h-11" />
-      </a>
+  <div class="flex min-h-screen flex-col bg-bg-alt">
+    <header class="border-b border-border bg-bg">
+      <div class="mx-auto flex h-[66px] w-full max-w-[1480px] items-center justify-between px-4 md:px-[clamp(16px,3.4vw,52px)]">
+        <a href="/" aria-label="NönDecants — Inicio">
+          <img src="/logonondecants.png" alt="NönDecants" width={543} height={127} class="h-7 w-auto" />
+        </a>
+        <a href="/carrito" class="font-body text-[15px] font-semibold text-text underline underline-offset-4">Volver al carrito</a>
+      </div>
     </header>
 
-    <main class="mx-auto w-full max-w-7xl flex-1 px-6 pb-12 md:px-14 md:pb-20">
-      {/* Container blanco emulando el popup redondeado que muestra el mockup */}
+    <main class="mx-auto w-full max-w-[1480px] flex-1 px-4 pb-12 md:px-[clamp(16px,3.4vw,52px)] md:pb-20">
+      <div class="pb-5 pt-7">
+        <h1 class="font-display text-[clamp(36px,4vw,52px)] leading-none text-text">Finalizar compra</h1>
+        <p class="mt-2 font-body text-base text-text-muted">Compra sin crear cuenta. Solo te tomará un par de minutos.</p>
+      </div>
       <CheckoutIsland client:load />
     </main>
   </div>

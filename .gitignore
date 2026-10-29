@@ -4,3 +4,7 @@ dist/
 .claude
 .agent
 .agents
+
+.netlify
+demo-dev.log
+srv.log

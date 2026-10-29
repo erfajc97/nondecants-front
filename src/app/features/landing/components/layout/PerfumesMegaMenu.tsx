@@ -20,7 +20,7 @@ interface MegaMenuProps {
 const FEATURE_FALLBACK = '/banner-catalog.png';
 
 /**
- * Mega menú editorial (dirección Noir · estilo SSENSE / Mr Porter).
+ * Mega menú (rebranding NönDecants: blanco, tinta y dorado).
  * Despliega las categorías reales del backend, cada una con sus marcas.
  * "Ver todo {categoría}" lleva a la página de catálogo filtrada por
  * esa categoría (banner con su imagen + todos los perfumes de sus marcas).
@@ -77,9 +77,9 @@ export default function PerfumesMegaMenu({
       ref={dropdownRef}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className="absolute left-0 right-0 top-full z-50 hidden border-y border-border bg-bg text-text shadow-2xl md:block"
+      className="absolute left-0 right-0 top-full z-50 hidden border-b border-border bg-bg text-text shadow-xl md:block"
     >
-      <div className="mx-auto grid max-w-[1600px] grid-cols-[1fr_360px] gap-16 px-14 pb-10 pt-10">
+      <div className="mx-auto grid max-w-[1480px] grid-cols-[1fr_360px] gap-16 px-[min(52px,3.4vw)] pb-10 pt-10">
         {/* Columnas de categorías → marcas (paginadas, máx 3) */}
         <div>
           {/* Sin el rótulo "Categorías" (REQ-001): las columnas suben y
@@ -94,7 +94,7 @@ export default function PerfumesMegaMenu({
                 aria-label="Categorías anteriores"
                 disabled={safePage === 0}
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
-                className="grid h-8 w-8 place-items-center rounded-full border border-border transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-border disabled:hover:text-text"
+                className="grid h-8 w-8 place-items-center rounded-full border border-border transition-colors hover:border-text disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-border"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4"><path d="M15 6l-6 6 6 6" /></svg>
               </button>
@@ -103,7 +103,7 @@ export default function PerfumesMegaMenu({
                 aria-label="Siguientes categorías"
                 disabled={safePage >= totalPages - 1}
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                className="grid h-8 w-8 place-items-center rounded-full border border-border transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-border disabled:hover:text-text"
+                className="grid h-8 w-8 place-items-center rounded-full border border-border transition-colors hover:border-text disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-border"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4"><path d="M9 6l6 6-6 6" /></svg>
               </button>
@@ -125,7 +125,7 @@ export default function PerfumesMegaMenu({
                   onClick={onClose}
                   className="group block"
                 >
-                  <span className="block font-display text-[28px] font-light italic leading-none tracking-[-0.01em] text-text transition-colors group-hover:text-accent group-hover:underline underline-offset-[6px] decoration-accent/70">
+                  <span className="block font-display text-[26px] font-normal leading-none tracking-[-0.01em] text-text transition-colors group-hover:text-accent-hover">
                     {cat.name}
                   </span>
                 </a>
@@ -139,7 +139,7 @@ export default function PerfumesMegaMenu({
                       onClick={onClose}
                       className="group block transition-transform duration-200 hover:translate-x-1"
                     >
-                      <span className="block font-body text-[13px] leading-tight tracking-[0.01em] text-text-soft transition-colors group-hover:text-accent group-hover:underline underline-offset-4 decoration-accent/70">
+                      <span className="block font-body text-[14px] leading-tight text-text-soft transition-colors group-hover:text-text group-hover:underline underline-offset-4 decoration-accent">
                         {sub.name}
                       </span>
                     </a>
@@ -150,7 +150,7 @@ export default function PerfumesMegaMenu({
                 <a
                   href={`${basePath}?category=${cat.id}`}
                   onClick={onClose}
-                  className="mt-6 inline-block border-b border-border pb-1 font-display text-base font-medium italic leading-none text-text transition-colors hover:text-accent"
+                  className="mt-6 inline-block border-b border-accent pb-1 font-body text-[13px] font-semibold leading-none text-text transition-colors hover:text-accent-hover"
                 >
                   {catalogLabel}
                 </a>
@@ -163,10 +163,10 @@ export default function PerfumesMegaMenu({
           <a
             href={basePath}
             onClick={onClose}
-            className="group mt-16 inline-flex items-center gap-3 border-b-2 border-text pb-1.5 font-body text-sm uppercase tracking-[0.16em] text-text transition-colors hover:border-accent hover:text-accent"
+            className="group mt-14 inline-flex h-[52px] items-center justify-center gap-2.5 rounded-[3px] bg-text px-7 font-body text-[14.5px] font-semibold tracking-[0.01em] text-bg transition-colors hover:bg-text-soft"
           >
             Ver el catálogo completo
-            <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14M13 6l6 6-6 6" />
             </svg>
           </a>
@@ -177,7 +177,7 @@ export default function PerfumesMegaMenu({
           <a
             href={panel.href}
             onClick={onClose}
-            className="relative block min-h-[340px] overflow-hidden text-white"
+            className="relative block min-h-[340px] overflow-hidden rounded-[4px] text-white"
           >
             <img
               src={panel.img}
@@ -185,9 +185,9 @@ export default function PerfumesMegaMenu({
               className="absolute inset-0 h-full w-full object-cover brightness-[0.82]"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/65" />
-            <span className="eyebrow absolute left-6 top-6 text-white/80">Destacado</span>
+            <span className="absolute left-6 top-6 inline-flex items-center gap-1.5 font-body text-[13px] font-semibold text-white/90"><span className="text-accent">✦</span>Destacado</span>
             <div className="absolute inset-x-6 bottom-6">
-              <div className="font-display text-3xl font-normal leading-tight text-white">
+              <div className="font-display text-3xl font-normal leading-[1.05] text-white">
                 {panel.title}
               </div>
               {panel.description && (
@@ -195,7 +195,7 @@ export default function PerfumesMegaMenu({
                   {panel.description}
                 </p>
               )}
-              <span className="eyebrow mt-5 inline-block border-b border-white/60 pb-1 text-white">
+              <span className="mt-5 inline-block border-b border-accent pb-1 font-body text-[13px] font-semibold text-white">
                 Descubrir →
               </span>
             </div>

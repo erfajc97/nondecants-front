@@ -1,151 +1,46 @@
-import { useState } from 'react';
-import { formatCurrency } from '@/app/helpers/formatCurrency';
-import { productUrl as productUrlHelper } from '@/app/helpers/productUrl';
-import { useCartStore, type CartItem } from '@/app/store/cart/cartStore';
-import { sonnerResponse } from '@/app/helpers/sonnerResponse';
+import { useProductCardHook } from '../hooks/useProductCardHook';
 import type { Product } from '@/app/types/global.types';
 import ExclusiveCouponBadge from '@/app/features/coupons/ExclusiveCouponBadge';
+import FormatTiles, { ctaLabel } from './FormatTiles';
+import { formatCurrency } from '@/app/helpers/formatCurrency';
 
 interface ProductCardProps {
   product: Product;
 }
 
-interface Format {
-  id: string;
-  ml: number;
-  price: number;
-  isFullBottle: boolean;
-  imageUrl?: string;
-}
+const PILL =
+  'inline-flex items-center gap-1.5 rounded-full bg-white py-1.5 pl-2 pr-2.5 font-body text-[10.5px] font-semibold uppercase leading-none tracking-[0.08em] shadow-[0_0_0_1px_var(--color-border),0_4px_12px_-6px_rgba(27,25,25,0.25)]';
+const PILL_DOT = "before:h-1.5 before:w-1.5 before:rounded-full before:bg-current before:content-['']";
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const addItem = useCartStore((s) => s.addItem);
+  const c = useProductCardHook(product);
+  const {
+    formats,
+    selected,
+    displayImage,
+    hoverImage,
+    productUrl,
+    detailUrl,
+    canPurchase,
+    isNew,
+    hasDiscount,
+    discount,
+    basePrice,
+    finalPrice,
+  } = c;
 
-  // Galería del producto: [0] principal, [1] hover. La foto del decant
-  // (formato) solo entra cuando el chip elegido no es el frasco.
-  const productImages = (product.images ?? [])
-    .map((img: any) => (typeof img === 'string' ? img : img.url))
-    .filter(Boolean)
-    .filter((url, i, arr) => arr.indexOf(url) === i);
-  const productImage = productImages[0] || product.image || product.imageUrl;
+  // Máx. 4 tiles: hasta 3 decants + el frasco (que siempre se ve).
+  const decants = formats.filter((f) => !f.isFullBottle);
+  const bottle = formats.find((f) => f.isFullBottle);
+  const chipFormats = [...decants.slice(0, bottle ? 3 : 4), ...(bottle ? [bottle] : [])];
+  const hasMoreFormats = formats.length > chipFormats.length;
 
-  const variants = product.variants ?? [];
-  // Formatos: preferir la lista compacta del backend; si no, derivar de las
-  // variantes cargadas (mock / detalle). Orden: botella completa primero y
-  // luego decants por ml ascendente — el frasco arranca seleccionado.
-  const formats: Format[] = (product.formats && product.formats.length
-    ? product.formats
-    : variants.map((v) => ({
-        id: v.id,
-        ml: v.ml,
-        price: v.price,
-        isFullBottle: v.isFullBottle,
-        imageUrl: v.images?.[0],
-      }))
-  )
-    .filter((f) => f.ml > 0 || f.price > 0)
-    .slice()
-    .sort((a, b) => {
-      if (a.isFullBottle !== b.isFullBottle) return a.isFullBottle ? -1 : 1;
-      return a.ml - b.ml;
-    });
-
-  // Formato elegido desde la propia card: cambia el precio sin salir de aquí.
-  const [selectedId, setSelectedId] = useState<string | null>(formats[0]?.id ?? null);
-  const selected = formats.find((f) => f.id === selectedId) ?? formats[0] ?? null;
-
-  const sealedStock = Number(product.stock ?? 0);
-  const openMl = Number(product.openBottleMlRemaining ?? 0);
-  const totalMl = Number(product.totalMl ?? 0);
-  const availableMl = openMl + sealedStock * totalMl;
-  const hasStock = sealedStock > 0 || availableMl > 0;
-
-  const discount = product.discount ?? 0;
-  const hasDiscount = discount > 0;
-  const applyDiscount = (n: number) => (hasDiscount ? n * (1 - discount / 100) : n);
-
-  // Precio del formato seleccionado (antes se mostraba el rango del producto).
-  const basePrice = selected?.price ?? product.minFormatPrice ?? product.price ?? 0;
-  const finalPrice = applyDiscount(basePrice);
-
-  const formatImage =
-    selected && !selected.isFullBottle ? selected.imageUrl : undefined;
-  const displayImage = formatImage || productImage;
-  const hoverImage = formatImage ? undefined : productImages[1];
-
-  // Máximo 2 formatos como chips; el "+" solo aparece si hay más de 2.
-  const chipFormats = formats.slice(0, 2);
-  const hasMoreFormats = formats.length > 2;
-
-  const productUrl = productUrlHelper(product);
-  // El "+" abre el detalle ya posicionado en el formato elegido aquí.
-  const detailUrl = selected ? `${productUrl}?variant=${selected.id}` : productUrl;
-
-  /** Item de carrito del formato elegido en la card. */
-  const buildCartItem = (): CartItem | null => {
-    const image = displayImage || '';
-    const fullIsBackorder = !!product.bajoPedido || sealedStock <= 0;
-
-    const buildFull = (price: number): CartItem => ({
-      productId: product.id,
-      variantId: `full-${product.id}`,
-      name: product.name,
-      image,
-      ml: totalMl,
-      price: applyDiscount(price),
-      quantity: 1,
-      bajoPedido: fullIsBackorder,
-      // El frasco no tiene tope: el excedente se desglosa como bajo pedido.
-      maxQty: undefined,
-      stockAvailable: fullIsBackorder ? undefined : sealedStock,
-      availableMl,
-    });
-
-    // Se intenta el formato elegido y, si no se puede preparar, los siguientes.
-    const ordered = selected ? [selected, ...formats.filter((f) => f.id !== selected.id)] : formats;
-
-    for (const f of ordered) {
-      if (f.price <= 0) continue;
-      if (f.isFullBottle) return buildFull(f.price);
-      // Decant: topado por los ml disponibles del producto.
-      const maxQty = f.ml > 0 ? Math.floor(availableMl / f.ml) : 0;
-      if (maxQty < 1) continue;
-      return {
-        productId: product.id,
-        variantId: f.id,
-        name: product.name,
-        image,
-        ml: f.ml,
-        price: applyDiscount(f.price),
-        quantity: 1,
-        bajoPedido: false,
-        maxQty,
-        availableMl,
-      };
-    }
-
-    // Sin decants preparables: queda el frasco (siempre comprable si hay precio).
-    const price = product.price ?? basePrice;
-    return price > 0 ? buildFull(price) : null;
-  };
-
-  const canPurchase = product.isPurchasable !== false;
-
-  const handleQuickAdd = () => {
-    if (!canPurchase) return;
-    const item = buildCartItem();
-    if (!item) {
-      window.location.href = productUrl;
-      return;
-    }
-    addItem(item);
-    sonnerResponse(`${product.name} · ${item.ml} ml añadido al carrito.`, 'success');
-  };
+  const brandName = product.marca?.name ?? '';
 
   return (
-    <div className="group/card flex h-full flex-col bg-white">
-      {/* Imagen — tile blanco cuadrado; 1ª de galería + 2ª al hover en desktop. */}
-      <div data-card-media className="relative aspect-square overflow-hidden bg-white">
+    <article className="group/card flex h-full min-w-0 flex-col overflow-hidden rounded-sm border border-border bg-white transition-[border-color,box-shadow] duration-300 hover:border-accent/50 hover:shadow-[0_18px_40px_-28px_rgba(27,25,25,0.4)]">
+      {/* Imagen — tile cuadrado; 1ª de galería + 2ª al hover en desktop. */}
+      <div data-card-media className="relative aspect-square overflow-hidden border-b border-border bg-white">
         <a href={productUrl} className="relative block h-full w-full">
           {displayImage ? (
             <>
@@ -154,7 +49,9 @@ export default function ProductCard({ product }: ProductCardProps) {
                 src={displayImage}
                 alt={product.name}
                 loading="lazy"
-                className="h-full w-full object-contain p-3 sm:p-4"
+                className={`h-full w-full object-contain p-[9%] transition-[transform,opacity] duration-700 ease-out group-hover/card:scale-[1.04] ${
+                  hoverImage ? 'md:group-hover/card:opacity-0' : ''
+                }`}
               />
               {hoverImage && (
                 <img
@@ -163,7 +60,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                   alt=""
                   aria-hidden
                   loading="lazy"
-                  className="pointer-events-none absolute inset-0 h-full w-full object-contain p-3 opacity-0 transition-opacity duration-200 sm:p-4 md:group-hover/card:opacity-100"
+                  className="pointer-events-none absolute inset-0 h-full w-full object-contain p-[9%] opacity-0 transition-[transform,opacity] duration-500 ease-out group-hover/card:scale-[1.04] md:group-hover/card:opacity-100"
                 />
               )}
             </>
@@ -176,107 +73,78 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </a>
 
-        {hasDiscount && (
-          <span className="absolute left-3 top-3 bg-accent px-2.5 py-1 font-body text-[9px] font-medium uppercase tracking-[0.18em] text-bg">
-            -{discount}%
-          </span>
-        )}
-
-        {/* Desktop: overlay al hover. En móvil el CTA vive abajo, en el
-            cuerpo de la card: aquí no cabe “Agregar al carrito” y tapaba
-            el frasco. */}
-        {canPurchase && (
-          <button
-            type="button"
-            onClick={handleQuickAdd}
-            className="gold-frame absolute inset-x-0 bottom-0 z-10 hidden bg-text py-2.5 font-body text-[10px] uppercase tracking-[0.18em] text-bg transition-[background-color,color] duration-150 hover:bg-accent hover:text-bg md:block md:translate-y-full md:opacity-0 md:group-hover/card:translate-y-0 md:group-hover/card:opacity-100"
-          >
-            Agregar al carrito
-          </button>
-        )}
+        {/* Etiquetas: píldoras del prototipo (NUEVO negro, estados en blanco con punto) */}
+        <div className="pointer-events-none absolute left-2.5 top-2.5 z-[2] flex flex-col items-start gap-[5px]">
+          {product.bajoPedido ? (
+            <span className={`${PILL} ${PILL_DOT} text-warning`}>Por encargo</span>
+          ) : c.decantsSoldOut ? (
+            <span className={`${PILL} ${PILL_DOT} text-text-muted`}>Decants agotados</span>
+          ) : null}
+          {isNew && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-text py-1.5 pl-2 pr-2.5 font-body text-[10.5px] font-semibold uppercase leading-none tracking-[0.08em] text-white">
+              <span className="text-[10px] text-accent" aria-hidden>✦</span>Nuevo
+            </span>
+          )}
+          {hasDiscount && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-text py-1.5 pl-2 pr-2.5 font-body text-[10.5px] font-semibold uppercase leading-none tracking-[0.08em] text-white">
+              <span className="text-[10px] text-accent" aria-hidden>✦</span>-{discount}%
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Info */}
-      <div className="flex flex-1 flex-col gap-1 px-3 pb-3 pt-2.5">
+      <div className="flex flex-1 flex-col gap-0.5 p-2.5 sm:p-3.5">
         <ExclusiveCouponBadge productId={product.id} className="mb-1" />
+        {brandName && (
+          <span className="font-body text-xs font-medium text-text-muted">{brandName}</span>
+        )}
         <a href={productUrl}>
-          {/* Altura mínima de 2 líneas: los nombres largos ya no desalinean
-              los chips de formato entre cards vecinas */}
-          <h3 className="line-clamp-2 min-h-[2.75em] font-display text-[15px] font-normal leading-snug tracking-[-0.005em] text-text transition-colors group-hover/card:text-accent">
+          <h3 className="line-clamp-2 min-h-[2.3em] font-display text-base font-normal leading-[1.15] tracking-normal text-text transition-colors group-hover/card:text-accent-hover sm:text-[19px]">
             {product.name}
           </h3>
         </a>
 
-        {/* Precio del formato elegido + estado */}
-        <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
-          <span className="font-body text-[11px] tracking-[0.02em] text-text">
-            {hasDiscount && (
-              <span className="mr-1.5 text-text-muted line-through">{formatCurrency(basePrice)}</span>
-            )}
-            {formatCurrency(finalPrice)}
-          </span>
-          <span
-            className={`shrink-0 font-body text-[9px] uppercase tracking-[0.16em] ${
-              product.bajoPedido ? 'text-accent' : hasStock ? 'text-text-muted' : 'text-error'
-            }`}
-          >
-            {product.bajoPedido ? 'Bajo pedido' : hasStock ? 'En stock' : 'Sin stock'}
-          </span>
-        </div>
-
-        {/* Chips de formato (máx 2): seleccionan y actualizan el precio aquí
-            mismo. El "+" (solo con más de 2 formatos) abre el detalle.
-            `mt-auto` los fija al pie de la card para que queden alineados
-            entre cards de la misma fila. */}
+        {/* Tamaños: ml + precio del formato; seleccionan y actualizan el CTA. */}
         {chipFormats.length > 0 && (
-          <div className="mt-auto flex flex-nowrap items-center gap-1.5 pt-0.5">
-            {chipFormats.map((f) => {
-              const isSelected = selected?.id === f.id;
-              return (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => setSelectedId(f.id)}
-                  aria-pressed={isSelected}
-                  className={`border px-2.5 py-1 font-body text-[10px] uppercase tracking-[0.08em] transition-colors ${
-                    isSelected
-                      ? 'border-text bg-text text-bg'
-                      : 'border-border text-text-soft hover:border-text hover:text-text'
-                  }`}
-                >
-                  {f.ml} ml
-                </button>
-              );
-            })}
-            {hasMoreFormats && (
-              <a
-                href={detailUrl}
-                aria-label="Ver todos los formatos"
-                className="flex h-6 w-6 items-center justify-center rounded-full border border-border text-text-soft transition-colors hover:border-text hover:text-text"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-              </a>
-            )}
+          <div className="mt-3">
+            <FormatTiles
+              formats={chipFormats}
+              selectedId={selected?.id}
+              onSelect={c.setSelectedId}
+              applyDiscount={c.applyDiscount}
+            />
           </div>
         )}
+        {hasMoreFormats && (
+          <a
+            href={detailUrl}
+            aria-label="Ver todos los formatos"
+            className="mt-1.5 font-body text-xs font-semibold text-accent-hover underline underline-offset-2"
+          >
+            Ver todos los formatos
+          </a>
+        )}
+        {hasDiscount && (
+          <span className="mt-1 font-body text-xs text-text-muted line-through">{formatCurrency(basePrice)}</span>
+        )}
 
-        {/* Móvil / tablet: el botón va en el container, no sobre la foto. */}
+        <div className="mt-auto pt-2">
         {canPurchase ? (
           <button
             type="button"
-            onClick={handleQuickAdd}
-            className="gold-frame mt-2 min-h-9 w-full bg-text px-1.5 py-2 font-body text-[9px] font-medium uppercase leading-none tracking-[0.08em] text-bg transition-colors hover:bg-accent md:hidden"
+            onClick={c.handleQuickAdd}
+            className="inline-flex h-11 w-full items-center justify-center rounded-[3px] bg-text px-2.5 font-body text-xs font-semibold text-white transition-[background-color,transform] duration-200 hover:bg-text-soft active:scale-[0.97] sm:h-[46px] sm:text-[13px]"
           >
-            Agregar al carrito
+            {ctaLabel(c.ctaIsBackorder, finalPrice)}
           </button>
         ) : (
-          <span className="mt-2 block w-full bg-bg-alt px-1.5 py-2 text-center font-body text-[9px] uppercase leading-tight tracking-[0.12em] text-text-muted md:hidden">
+          <span className="flex h-11 w-full items-center justify-center rounded-[3px] bg-bg-alt px-2.5 font-body text-xs font-semibold text-text-muted sm:h-[46px] sm:text-[13px]">
             No disponible
           </span>
         )}
+        </div>
       </div>
-    </div>
+    </article>
   );
 }

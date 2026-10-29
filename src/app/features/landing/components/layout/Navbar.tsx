@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import AuthModalIsland from '@/app/features/auth/AuthModalIsland';
 import AppProviders from '@/app/providers/AppProviders';
 import { useNavbarHook } from '../../hooks/useNavbarHook';
@@ -6,24 +7,15 @@ import PerfumesMegaMenu from './PerfumesMegaMenu';
 import MobileMenu from './MobileMenu';
 import NavbarSearch from './NavbarSearch';
 import LiquidTabBar from './LiquidTabBar';
-
-/* ── Iconos de línea fina (estilo Noir) ───────────────────────────────── */
-const ico = 'h-[18px] w-[18px]';
-const IconUser = () => (
-  <svg className={ico} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><circle cx="12" cy="9" r="4" /><path d="M4 21c0-4 4-7 8-7s8 3 8 7" /></svg>
-);
-const IconHeart = () => (
-  <svg className={ico} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><path d="M12 20s-7-4.5-9-9.5C1.5 6.5 4.5 4 7.5 5 9 5.5 12 8 12 8s3-2.5 4.5-3c3-1 6 1.5 4.5 6.5-2 5-9 9.5-9 9.5z" /></svg>
-);
-const IconBag = () => (
-  <svg className={ico} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><path d="M5 8h14l-1 12H6L5 8z" /><path d="M9 8V6a3 3 0 0 1 6 0v2" /></svg>
-);
-
+import CartDrawer from '@/app/features/cart/components/CartDrawer';
+import { useCartStore } from '@/app/store/cart/cartStore';
+import { isLinkActive } from '../../hooks/useNavbarHook';
+import { IconUserCircle, IconTote, IconList, IconClose } from './NavIcons';
 
 export default function Navbar() {
   const {
-    itemCount,
-    isAuthenticated,
+    itemCount: storedItemCount,
+    isAuthenticated: storedIsAuthenticated,
     authOpen,
     setAuthOpen,
     mobileOpen,
@@ -38,119 +30,133 @@ export default function Navbar() {
     handleDropdownContentLeave,
   } = useNavbarHook();
 
+  const setDrawerOpen = useCartStore((s) => s.setDrawerOpen);
+  const drawerOpen = useCartStore((s) => s.isDrawerOpen);
+
+  // Carrito y sesión viven en localStorage: en el primer render del cliente deben
+  // coincidir con el HTML del servidor (vacío / sin sesión) o React descarta el SSR.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const itemCount = mounted ? storedItemCount : 0;
+  const isAuthenticated = mounted ? storedIsAuthenticated : false;
+
   const megaMode =
     openDropdown === 'perfumes' ? 'perfumes'
     : openDropdown === 'bajoPedido' ? 'bajoPedido'
     : null;
 
-  // Enlace simple — mismo serif cursivo que los títulos del mega menú, sin
-  // cambio de fuente/color al hover (ref. Atelier)
-  const NavLink = ({ label, href, muted = false }: { label: string; href: string; muted?: boolean }) => (
+  const navCls =
+    'nav-u py-2.5 font-body text-[14px] font-medium text-text-soft transition-colors hover:text-text aria-[current=page]:text-text';
+
+  // Enlace simple del nav
+  const NavLink = ({ label, href }: { label: string; href: string }) => (
     <a
       href={href}
       onMouseEnter={() => setOpenDropdown(null)}
-      className={`cursor-pointer ${muted ? 'text-text-soft' : 'text-text'}`}
+      aria-current={isLinkActive(href, pathname, true) ? 'page' : undefined}
+      className={navCls}
     >
       {label}
     </a>
   );
 
-  // Trigger para items con mega menú (Perfumes / Bajo Pedido).
-  // Solo el subrayado aparece al abrir el mega — la tipografía nunca cambia.
+  // Trigger de los items con mega menú (Perfumes / Bajo pedido): el subrayado
+  // dorado queda marcado mientras el panel está abierto.
   const MegaTrigger = ({ id, label, href }: { id: string; label: string; href: string }) => (
     <span
       onMouseEnter={() => handleDropdownEnter(id)}
       onMouseLeave={handleDropdownLeave}
-      className="relative flex cursor-pointer items-center gap-2 text-text"
+      className="flex items-center"
     >
-      <a href={href}>{label}</a>
-      {/* Trazo grueso: a 1.4 la flecha se perdía junto al serif */}
-      <svg
-        className={`h-3 w-3 transition-transform ${openDropdown === id ? 'rotate-180' : ''}`}
-        viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"
-        strokeLinecap="round" strokeLinejoin="round"
+      <a
+        href={href}
+        aria-haspopup="true"
+        aria-expanded={openDropdown === id}
+        data-open={openDropdown === id}
+        aria-current={isLinkActive(href, pathname, true) ? 'page' : undefined}
+        className={`${navCls} ${openDropdown === id ? 'text-text' : ''}`}
       >
-        <path d="M6 9l6 6 6-6" />
-      </svg>
-      <span className={`absolute -bottom-2 left-0 right-4 h-px bg-text transition-opacity ${openDropdown === id ? 'opacity-100' : 'opacity-0'}`} />
+        {label}
+      </a>
     </span>
   );
 
+  const ib =
+    'relative grid h-[42px] w-[42px] place-items-center rounded-full text-text transition-colors hover:bg-bg-alt';
+
   return (
     <AppProviders withToaster>
-      <header className="sticky top-0 z-40 bg-bg text-text">
-        {/* Barra de promociones — textos administrables + flechas */}
-        <AnnouncementBar />
+      {/* Barra de avisos — marquee negro, fuera del header sticky */}
+      <AnnouncementBar />
 
-        {/* Fila principal */}
+      <header className="sticky top-0 z-30 border-b border-border bg-bg/95 text-text backdrop-blur-md">
         <div className="relative">
-          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 px-4 py-4 md:grid-cols-[1fr_auto_1fr] md:gap-8 md:px-14 md:py-6">
-            {/* Izquierda: nav desktop + hamburguesa móvil */}
-            <div className="flex items-center">
-              <button
-                className="p-1 md:hidden"
-                onClick={() => setMobileOpen((o) => !o)}
-                aria-label="Menú"
-              >
-                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
-                  {mobileOpen
-                    ? <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>
-                    : <><path d="M3 7h18" /><path d="M3 17h18" /></>}
-                </svg>
-              </button>
-
-              <nav
-                className="hidden items-center gap-9 font-display text-xl font-normal italic leading-none tracking-[-0.01em] md:flex"
-                aria-label="Navegación principal"
-              >
-                <MegaTrigger id="perfumes" label="Perfumes" href="/catalogo/perfumes" />
-                <NavLink label="Combos" href="/catalogo/combos" />
-                <MegaTrigger id="bajoPedido" label="Bajo pedido" href="/bajo-pedido" />
-                <NavLink label="Blog" href="/blog" muted />
-              </nav>
-            </div>
-
-            {/* Centro: logo */}
-            <a href="/" className="justify-self-center text-text" aria-label="NonDecants — Inicio">
+          <div className="mx-auto grid h-[58px] max-w-[1480px] grid-cols-[1fr_auto] items-center gap-1 px-[max(16px,3.4vw)] md:h-[66px] md:grid-cols-[1fr_auto_1fr] md:gap-4 md:px-[min(52px,3.4vw)]">
+            {/* Izquierda: logo */}
+            <a href="/" className="block justify-self-start text-text" aria-label="NonDecants — Inicio">
               <img
                 src="/logonondecants.png"
                 alt="NonDecants"
                 width={543}
                 height={127}
-                className="h-6 w-auto sm:h-7 md:h-9"
+                className="h-6 w-auto md:h-7"
               />
             </a>
 
-            {/* Derecha: iconos */}
+            {/* Centro: nav desktop */}
+            <nav className="hidden items-center gap-8 md:flex" aria-label="Navegación principal">
+              <MegaTrigger id="perfumes" label="Perfumes" href="/catalogo/perfumes" />
+              <NavLink label="Combos" href="/catalogo/combos" />
+              <MegaTrigger id="bajoPedido" label="Bajo pedido" href="/bajo-pedido" />
+              <NavLink label="Blog" href="/blog" />
+            </nav>
+
+            {/* Derecha: herramientas */}
             <div
-              className="flex items-center justify-end gap-5 text-text md:gap-6"
+              className="flex items-center justify-end gap-0.5"
               onMouseEnter={() => setOpenDropdown(null)}
             >
               <NavbarSearch />
               {isAuthenticated ? (
-                <a href="/mi-cuenta" className="hidden p-0.5 hover:text-accent md:block" aria-label="Mi cuenta">
-                  <IconUser />
+                <a href="/mi-cuenta" className={`${ib} hidden md:grid`} aria-label="Mi cuenta">
+                  <IconUserCircle />
                 </a>
               ) : (
-                <button onClick={() => setAuthOpen(true)} className="hidden p-0.5 hover:text-accent md:block" aria-label="Ingresar">
-                  <IconUser />
+                <button onClick={() => setAuthOpen(true)} className={`${ib} hidden md:grid`} aria-label="Ingresar">
+                  <IconUserCircle />
                 </button>
               )}
-              <a href="/mi-cuenta" className="hidden p-0.5 hover:text-accent md:block" aria-label="Favoritos">
-                <IconHeart />
-              </a>
-              <a href="/carrito" className="relative p-0.5 hover:text-accent" aria-label="Carrito">
-                <IconBag />
+              <a
+                href="/carrito"
+                className={ib}
+                aria-label={itemCount > 0 ? `Carrito (${itemCount})` : 'Carrito'}
+                aria-haspopup="dialog"
+                data-cart-target
+                aria-expanded={drawerOpen}
+                onClick={(e) => {
+                  // En /carrito y /checkout el carrito ya es la página: navega normal.
+                  if (/^\/(carrito|checkout)/.test(window.location.pathname)) return;
+                  e.preventDefault();
+                  setDrawerOpen(true);
+                }}
+              >
+                <IconTote />
                 {itemCount > 0 && (
-                  <span className="absolute -right-2 -top-1.5 flex items-center justify-center rounded-full bg-text px-[5px] py-[1px] font-body text-[9px] font-medium text-bg">
+                  <span className="absolute right-0.5 top-1 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-accent px-1 font-body text-[10.5px] font-extrabold tabular-nums text-text">
                     {itemCount > 9 ? '9+' : itemCount}
                   </span>
                 )}
               </a>
+              <button
+                className={`${ib} md:hidden`}
+                onClick={() => setMobileOpen((o) => !o)}
+                aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'}
+                aria-expanded={mobileOpen}
+              >
+                {mobileOpen ? <IconClose /> : <IconList />}
+              </button>
             </div>
           </div>
-
-          <div className="h-px bg-border" />
 
           {/* Mega menú — Perfumes o Bajo Pedido */}
           {megaMode && (
@@ -176,7 +182,7 @@ export default function Navbar() {
         )}
       </header>
 
-      {/* Bottom tab líquida — experimento mobile */}
+      {/* Barra flotante inferior (mobile) */}
       <LiquidTabBar
         pathname={pathname}
         itemCount={itemCount}
@@ -184,6 +190,7 @@ export default function Navbar() {
         onAuthOpen={() => setAuthOpen(true)}
       />
 
+      <CartDrawer />
       <AuthModalIsland open={authOpen} onClose={() => setAuthOpen(false)} />
     </AppProviders>
   );

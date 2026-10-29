@@ -19,16 +19,16 @@ function ProfileContent() {
     <div className="min-h-screen bg-bg">
       {/* Header */}
       <div className="border-b border-border">
-        <div className="mx-auto max-w-6xl px-6 py-8 md:px-8">
-          <span className="eyebrow">— Mi cuenta</span>
-          <h1 className="mt-2 font-display text-3xl font-light leading-none tracking-[-0.01em] text-text md:text-4xl">
+        <div className="mx-auto max-w-[1480px] px-[max(16px,3.4vw)] py-8">
+          <span className="eyebrow k">Mi cuenta</span>
+          <h1 className="mt-1.5 font-display text-[clamp(32px,4vw,56px)] font-normal leading-none tracking-[-0.02em] text-text">
             {user?.name ?? 'Hola'}
           </h1>
         </div>
       </div>
 
       {/* Layout: sidebar + content */}
-      <div className="mx-auto max-w-6xl px-6 py-10 md:px-8">
+      <div className="mx-auto max-w-[1480px] px-[max(16px,3.4vw)] py-10">
         <div className="flex flex-col gap-10 md:flex-row md:gap-14">
           {/* Sidebar */}
           <aside className="md:w-56 shrink-0">

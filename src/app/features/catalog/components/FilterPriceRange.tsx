@@ -18,12 +18,12 @@ export default function FilterPriceRange({
   };
 
   return (
-    <div>
-      <p className="eyebrow-strong mb-3">{label}</p>
+    <div className="py-4">
+      <p className="mb-3 font-body text-[12.5px] font-bold uppercase tracking-[0.08em] text-text-muted">{label}</p>
       <div className="flex items-center justify-between gap-2 mb-3">
-        <span className="font-body text-sm text-text-muted">{min}</span>
-        <span className="font-body text-sm text-text">${value}</span>
-        <span className="font-body text-sm text-text-muted">{max}</span>
+        <span className="font-body text-sm text-text-muted">${min}</span>
+        <span className="font-body text-base font-semibold text-text">${value}</span>
+        <span className="font-body text-sm text-text-muted">${max}</span>
       </div>
       <input
         type="range"
@@ -31,7 +31,7 @@ export default function FilterPriceRange({
         max={max}
         value={value}
         onChange={handleSliderChange}
-        className="w-full h-px appearance-none cursor-pointer bg-border accent-accent"
+        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border accent-accent"
       />
     </div>
   );

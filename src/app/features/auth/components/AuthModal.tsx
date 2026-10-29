@@ -24,7 +24,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+        className="fixed inset-0 z-50 bg-text/60 backdrop-blur-sm"
         onClick={handleClose}
         aria-hidden="true"
       />
@@ -38,13 +38,13 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
         {/* Solo el formulario: el panel con la foto se quitó, así que la caja
             es angosta y centrada en lugar de partida en dos. */}
         <div
-          className="relative flex w-full max-w-lg flex-col overflow-hidden bg-bg shadow-2xl"
+          className="relative flex w-full max-w-lg flex-col overflow-hidden rounded-[4px] bg-bg shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close button */}
           <button
             onClick={handleClose}
-            className="absolute right-4 top-4 z-10 p-1.5 text-text-muted transition-colors hover:text-text"
+            className="absolute right-3 top-3 z-10 grid h-10 w-10 place-items-center rounded-full text-text-muted transition-colors hover:bg-bg-alt hover:text-text"
             aria-label="Cerrar"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

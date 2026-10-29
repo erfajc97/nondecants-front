@@ -57,7 +57,7 @@ export default function CartRecommendations() {
   // carrusel cargado, así nada salta al aparecer los productos.
   if (isLoading) {
     return (
-      <section className="mt-12 border-t border-border pt-10 md:mt-16 md:pt-14" aria-hidden="true">
+      <section className="mt-12 border-t border-border pt-10 md:mt-14 md:pt-12" aria-hidden="true">
         <div className="mb-6 h-6 w-56 animate-pulse rounded-sm bg-surface-raised md:mb-8" />
         <div className="flex gap-5 overflow-hidden md:gap-6">
           {Array.from({ length: 4 }, (_, i) => (
@@ -75,15 +75,12 @@ export default function CartRecommendations() {
   const title = sections[0]?.title || 'No te pierdas estos productos';
 
   return (
-    <section className="mt-12 border-t border-border pt-10 md:mt-16 md:pt-14">
+    <section className="mt-12 border-t border-border pt-10 md:mt-14 md:pt-12">
       <div className="mb-6 flex items-baseline justify-between md:mb-8">
-        <div className="flex items-baseline gap-4">
-          <span className="font-body text-[10px] uppercase tracking-[0.24em] text-text-muted">—</span>
-          <h2 className="font-display text-2xl font-light italic leading-none text-text md:text-3xl">{title}</h2>
-        </div>
+        <h2 className="font-display text-[26px] leading-none text-text md:text-3xl">{title}</h2>
         <a
           href="/catalogo/perfumes"
-          className="hidden border-b border-text pb-0.5 font-body text-[11px] uppercase tracking-[0.18em] text-text transition-colors hover:border-accent hover:text-accent sm:inline-block"
+          className="hidden font-body text-[13.5px] font-semibold text-text underline underline-offset-4 transition-colors hover:text-accent-hover sm:inline-block"
         >
           Ver todo
         </a>

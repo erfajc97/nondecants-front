@@ -103,10 +103,10 @@ export default function OrdersTab() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-display text-2xl font-light text-text">{selected.orderNumber}</h2>
+            <h2 className="font-display text-2xl font-normal text-text">{selected.orderNumber}</h2>
             <p className="mt-0.5 font-body text-xs text-text-muted">{new Date(selected.createdAt).toLocaleDateString('es-EC', { dateStyle: 'long' })}</p>
           </div>
-          <span className={`px-3 py-1 font-body text-[10px] uppercase tracking-[0.14em] ${s.color}`}>{s.label}</span>
+          <span className={`px-3 py-1 font-body text-[13px] font-semibold ${s.color}`}>{s.label}</span>
         </div>
 
         {/* Items */}
@@ -222,7 +222,7 @@ export default function OrdersTab() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-display text-2xl font-light text-text">Mis pedidos</h2>
+        <h2 className="font-display text-2xl font-normal text-text">Mis pedidos</h2>
         <p className="mt-1 font-body text-sm text-text-soft">Revisa el estado de tus pedidos</p>
       </div>
 
@@ -259,8 +259,8 @@ export default function OrdersTab() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-display text-lg font-light text-text">{order.orderNumber}</p>
-                    <span className={`px-2 py-0.5 font-body text-[9px] uppercase tracking-[0.12em] ${s.color}`}>{s.label}</span>
+                    <p className="font-display text-lg font-normal text-text">{order.orderNumber}</p>
+                    <span className={`px-2 py-0.5 font-body text-[11px] font-semibold ${s.color}`}>{s.label}</span>
                   </div>
                   <p className="text-xs text-text-muted mt-0.5">
                     {order.items.length} producto{order.items.length > 1 ? 's' : ''} · {new Date(order.createdAt).toLocaleDateString('es-EC', { day: '2-digit', month: 'short' })}

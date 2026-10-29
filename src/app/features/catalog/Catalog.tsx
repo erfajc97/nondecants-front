@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AppProviders from '@/app/providers/AppProviders';
 import { useCatalogHook } from './hooks/useCatalogHook';
 import { useCategoriesWithMarcasQuery } from '@/app/tanstack-queries/categoriesQuery';
@@ -43,7 +43,7 @@ function LoadMoreButton({
         type="button"
         onClick={onPress}
         disabled={isFetching}
-        className="bg-text px-8 py-3.5 font-body text-xs uppercase tracking-[0.2em] text-bg transition-colors hover:bg-accent disabled:opacity-40"
+        className="h-[52px] rounded-[3px] bg-text px-8 font-body text-[14.5px] font-semibold text-white transition-[background-color,transform] hover:bg-[#34312f] active:scale-[0.985] disabled:opacity-40"
       >
         {isFetching ? 'Cargando…' : 'Ver más'}
       </button>
@@ -92,6 +92,19 @@ function CatalogContent({
 
   const { data: categories = [] } = useCategoriesWithMarcasQuery();
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // Hoja móvil abierta: bloquea el scroll del fondo y cierra con Escape.
+  useEffect(() => {
+    if (!filtersOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setFiltersOpen(false);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [filtersOpen]);
 
   const resultCount =
     (pagination?.total ?? products.length) + (showBrandBackorder ? brandBackorderTotal : 0);
@@ -154,7 +167,8 @@ function CatalogContent({
         products.length === 0 &&
         brandBackorderProducts.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-center md:py-20">
-            <p className="font-body text-sm text-text-muted">
+            <p className="font-display text-[28px] text-text">Sin resultados</p>
+            <p className="mt-2 font-body text-sm text-text-muted">
               No se encontraron productos con esos filtros.
             </p>
           </div>
@@ -174,6 +188,26 @@ function CatalogContent({
     </>
   );
 
+  const sheetTitle = tipo === 'combos' ? 'Filtrar combos' : 'Filtrar perfumes';
+
+  const sortSelect = (
+    <label className="inline-flex items-center gap-2 font-body text-sm text-text-muted">
+      <span className="hidden sm:inline">Ordenar</span>
+      <select
+        value={sortValue}
+        onChange={(e) => setSort(e.target.value)}
+        aria-label="Ordenar productos"
+        className="h-11 cursor-pointer rounded-full border border-border bg-white px-4 font-body text-sm font-semibold text-text transition-colors hover:border-text focus:border-text focus:outline-none md:h-[46px]"
+      >
+        {SORT_OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+
   return (
     <div className="bg-bg">
       <CatalogBanner
@@ -185,13 +219,13 @@ function CatalogContent({
       />
 
       {isBrandView ? (
-        <div className="px-6 py-6 md:px-14 md:py-10">
+        <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-14 md:py-10">
           <button
             type="button"
             onClick={clearFilters}
-            className="mb-8 inline-flex items-center gap-2 border-b border-border pb-1 font-body text-[11px] uppercase tracking-[0.18em] text-text transition-colors hover:border-accent hover:text-accent"
+            className="mb-8 inline-flex items-center gap-2 font-body text-sm font-semibold text-text-soft underline underline-offset-[3px] transition-colors hover:text-text"
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
               <path d="M19 12H5M11 18l-6-6 6-6" />
             </svg>
             Volver al catálogo
@@ -199,42 +233,74 @@ function CatalogContent({
 
           {bajoPedido !== true && (products.length > 0 || isLoading) && (
             <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-              <h2 className="font-display text-2xl font-light text-text md:text-3xl">
+              <h2 className="font-display text-[clamp(26px,3vw,38px)] font-normal leading-none text-text">
                 Para probar en decant hoy
               </h2>
-              <span className="font-body text-[11px] uppercase tracking-[0.16em] text-text-muted">
-                Entrega en 24–72 h
-              </span>
+              <span className="font-body text-sm text-text-muted">Entrega en 24–72 h</span>
             </div>
           )}
 
           {productBlock}
         </div>
       ) : (
-        <>
-          <div className="border-b border-border px-6 py-4 md:px-14 md:py-6">
-            <input
-              type="search"
-              value={filters.search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar fragancia o casa…"
-              className="w-full max-w-md border-b border-border bg-transparent pb-2 font-body text-sm text-text placeholder:text-text-muted focus:border-text focus:outline-none"
-            />
-          </div>
+        <div className="mx-auto max-w-[1400px] px-4 pb-16 md:px-14">
+          <div className="grid items-start gap-0 md:grid-cols-[260px_minmax(0,1fr)] md:gap-[clamp(24px,3vw,44px)]">
+            {/* Desktop: panel lateral fijo */}
+            <aside className="sticky top-24 hidden max-h-[calc(100vh-7rem)] overflow-y-auto pr-1.5 md:block" aria-label="Filtros">
+              <div className="flex items-center justify-between pb-1.5">
+                <b className="font-display text-[26px] font-normal">{sheetTitle}</b>
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="font-body text-sm font-semibold text-text-soft underline underline-offset-[3px] transition-colors hover:text-text"
+                  >
+                    Limpiar
+                  </button>
+                )}
+              </div>
+              <p className="border-b border-border pb-3 font-body text-sm text-text-muted">
+                <b className="text-base text-text">{resultCount}</b> {resultCount === 1 ? 'resultado' : 'resultados'}
+              </p>
+              {filtersNode}
+            </aside>
 
-          <div className="sticky top-0 z-20 border-b border-border bg-bg/95 backdrop-blur-sm">
-            <div className="flex flex-col gap-3 px-6 py-4 md:flex-row md:items-center md:justify-between md:px-14">
-              <div className="flex min-w-0 flex-col gap-2 md:hidden">
+            <div className="min-w-0 pt-4 md:pt-6">
+              {/* Barra de herramientas */}
+              <div className="sticky top-[var(--hdr,0px)] z-20 -mx-4 flex flex-wrap items-center gap-2 border-b border-border bg-white/95 px-4 py-2.5 backdrop-blur-sm md:static md:mx-0 md:gap-3 md:bg-transparent md:px-0 md:pb-3.5 md:pt-0 md:backdrop-blur-none">
                 <button
                   type="button"
                   onClick={() => setFiltersOpen(true)}
-                  className="inline-flex w-fit shrink-0 items-center gap-2 bg-text px-3.5 py-2.5 font-body text-[11px] uppercase tracking-[0.14em] text-bg transition-colors hover:bg-accent"
+                  className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-border bg-white px-3.5 font-body text-sm font-semibold transition-colors hover:border-text md:hidden"
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
+                    <path d="M4 6h16M7 12h10M10 18h4" />
                   </svg>
-                  Filtros{activeChips.length ? ` (${activeChips.length})` : ''}
+                  Filtros
+                  {activeChips.length > 0 && (
+                    <b className="grid h-[22px] min-w-[22px] place-items-center rounded-full bg-accent px-1.5 text-xs text-text">
+                      {activeChips.length}
+                    </b>
+                  )}
                 </button>
+                <input
+                  type="search"
+                  value={filters.search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Buscar fragancia o casa…"
+                  aria-label="Buscar fragancia o casa"
+                  className="order-last h-11 w-full min-w-0 rounded-full border border-border bg-white px-4 font-body text-sm text-text placeholder:text-text-muted focus:border-text focus:outline-none md:order-none md:h-[46px] md:w-auto md:max-w-sm md:flex-none"
+                />
+                <div className="ml-auto flex items-center gap-3">
+                  <span className="hidden whitespace-nowrap font-body text-sm text-text-muted sm:inline" aria-live="polite">
+                    <b className="text-base text-text">{resultCount}</b> {resultCount === 1 ? 'resultado' : 'resultados'}
+                  </span>
+                  {sortSelect}
+                </div>
+              </div>
+
+              {/* Móvil: accesos rápidos */}
+              <div className="mt-3 md:hidden">
                 <CatalogQuickFilters
                   gender={filters.gender}
                   onGenderChange={setGender}
@@ -247,82 +313,87 @@ function CatalogContent({
                 />
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                {activeChips.map((chip) => (
-                  <button
-                    key={chip.key}
-                    type="button"
-                    onClick={chip.onRemove}
-                    className={`items-center gap-1.5 border border-border px-3 py-1.5 font-body text-[11px] tracking-[0.04em] text-text-soft transition-colors hover:border-accent hover:text-accent ${
-                      chip.key === 'gender' || chip.key === 'marca' || chip.key === 'cat'
-                        ? 'hidden md:inline-flex'
-                        : 'inline-flex'
-                    }`}
-                  >
-                    {chip.label} <span aria-hidden>×</span>
-                  </button>
-                ))}
-                {activeChips.length > 0 && (
+              {activeChips.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 pt-3.5">
+                  {activeChips.map((chip) => (
+                    <button
+                      key={chip.key}
+                      type="button"
+                      onClick={chip.onRemove}
+                      className={`h-9 items-center gap-2 rounded-full border border-accent/45 bg-gold-light pl-3.5 pr-3 font-body text-sm font-semibold text-text transition-colors hover:border-accent ${
+                        chip.key === 'gender' || chip.key === 'marca' || chip.key === 'cat'
+                          ? 'hidden md:inline-flex'
+                          : 'inline-flex'
+                      }`}
+                    >
+                      {chip.label} <span aria-hidden className="text-[11px] opacity-60">✕</span>
+                    </button>
+                  ))}
                   <button
                     type="button"
                     onClick={clearFilters}
-                    className="font-body text-[10px] uppercase tracking-[0.18em] text-text-muted transition-colors hover:text-text"
+                    className="font-body text-sm font-semibold text-text-soft underline underline-offset-[3px] transition-colors hover:text-text"
                   >
                     Limpiar
                   </button>
-                )}
-              </div>
+                </div>
+              )}
 
-              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-                <span className="font-body text-xs text-text-soft">
-                  Mostrando {resultCount} {resultCount === 1 ? 'resultado' : 'resultados'}
-                </span>
-                <label className="inline-flex items-center gap-2 font-body text-[11px] uppercase tracking-[0.18em] text-text">
-                  Ordenar ·
-                  <select
-                    value={sortValue}
-                    onChange={(e) => setSort(e.target.value)}
-                    className="cursor-pointer border-0 bg-transparent font-body text-[11px] uppercase tracking-[0.12em] text-text focus:outline-none"
-                  >
-                    {SORT_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
+              <div className="mt-5">{productBlock}</div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-[260px_1fr]">
-            <aside className="hidden border-r border-border px-8 py-10 md:block">
-              {filtersNode}
-            </aside>
-
-            {filtersOpen && (
-              <>
-                <div className="fixed inset-0 z-50 bg-black/50 md:hidden" onClick={() => setFiltersOpen(false)} aria-hidden="true" />
-                <div className="fixed left-0 top-0 z-50 h-full w-full max-w-sm overflow-y-auto bg-bg shadow-2xl md:hidden" role="dialog" aria-label="Filtros">
-                  <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-bg px-5 py-4">
-                    <h3 className="font-display text-xl text-text">Filtros</h3>
-                    <button type="button" onClick={() => setFiltersOpen(false)} className="p-2 text-text-muted transition-colors hover:text-text" aria-label="Cerrar filtros">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                    </button>
-                  </div>
-                  <div className="p-5">{filtersNode}</div>
-                  <div className="sticky bottom-0 border-t border-border bg-bg px-5 py-4">
-                    <button type="button" onClick={() => setFiltersOpen(false)} className="w-full bg-text py-3.5 font-body text-xs uppercase tracking-[0.2em] text-bg transition-colors hover:bg-accent">
-                      Ver resultados
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div className="min-w-0 px-6 py-6 md:px-14 md:py-10">{productBlock}</div>
+          {/* Móvil: hoja inferior de filtros (siempre montada para animar) */}
+          <div
+            className={`fixed inset-0 z-[86] md:hidden ${filtersOpen ? 'visible pointer-events-auto' : 'invisible pointer-events-none'}`}
+            role="dialog"
+            aria-modal="true"
+            aria-label={sheetTitle}
+            aria-hidden={!filtersOpen}
+          >
+            <div
+              className={`absolute inset-0 bg-text/45 transition-opacity duration-300 ${filtersOpen ? 'opacity-100' : 'opacity-0'}`}
+              onClick={() => setFiltersOpen(false)}
+              aria-hidden="true"
+            />
+            <div
+              className={`absolute inset-x-0 bottom-0 flex max-h-[88dvh] flex-col rounded-t-[18px] bg-white transition-transform duration-[450ms] ease-[cubic-bezier(.2,.9,.25,1)] ${
+                filtersOpen ? 'translate-y-0' : 'translate-y-full'
+              }`}
+            >
+              <div className="relative flex items-center justify-between border-b border-border pb-2.5 pl-5 pr-3 pt-[18px]">
+                <span className="absolute left-1/2 top-[7px] -ml-5 h-1 w-10 rounded-sm bg-[#d9d5cd]" aria-hidden />
+                <b className="font-display text-[26px] font-normal">{sheetTitle}</b>
+                <button
+                  type="button"
+                  onClick={() => setFiltersOpen(false)}
+                  className="grid h-11 w-11 place-items-center text-text-muted transition-colors hover:text-text"
+                  aria-label="Cerrar filtros"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                </button>
+              </div>
+              <div className="overflow-auto overscroll-contain px-5">{filtersNode}</div>
+              <div className="grid grid-cols-[auto_1fr] gap-2.5 border-t border-border bg-white px-4 pb-[calc(12px+env(safe-area-inset-bottom,0px))] pt-3">
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  disabled={!hasActiveFilters}
+                  className="h-[54px] rounded-full border border-border px-5 font-body text-[15px] font-semibold text-text transition-colors hover:border-text disabled:opacity-40"
+                >
+                  Limpiar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFiltersOpen(false)}
+                  className="h-[54px] rounded-[3px] bg-text font-body text-base font-semibold text-white transition-[background-color,transform] hover:bg-[#34312f] active:scale-[0.985]"
+                >
+                  Ver {resultCount} {resultCount === 1 ? 'resultado' : 'resultados'}
+                </button>
+              </div>
+            </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

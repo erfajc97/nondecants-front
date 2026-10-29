@@ -3,13 +3,7 @@ import { PROVINCE_NAMES, cantonsOf, ALL_CANTONS } from '@/app/data/ecuadorLocati
 import type { CustomerFormData } from '../types';
 import type { Address } from '@/app/features/profile/types';
 
-const INPUT_CLASS =
-  'w-full border-0 border-b border-border bg-transparent px-0 py-2.5 font-body text-sm text-text placeholder:text-text-muted focus:border-text focus:ring-0 transition-colors';
-
-/* Mismo subrayado que el resto del checkout, para que el buscador no rompa la
-   línea visual de los campos. */
-const SELECT_CLASS =
-  'w-full border-0 border-b border-border bg-transparent px-0 py-2.5 font-body text-sm text-text outline-none transition-colors placeholder:text-text-muted focus:border-text focus:ring-0';
+import { INPUT_CLASS, SELECT_CLASS, optionClass, radioDotClass } from '../classes';
 
 interface AddressSectionProps {
   customer: CustomerFormData;
@@ -41,16 +35,16 @@ export default function AddressSection({
 
   return (
     <section>
-      <h2 className="mb-1 text-center font-display text-xl font-light text-text">
+      <h2 className="mb-1 font-body! text-xl font-bold text-text">
         {isPickup ? '¿Quién retira el pedido?' : '¿Dónde enviamos tu pedido?'}
       </h2>
-      <p className="mb-5 text-center font-body text-[11px] text-text-muted">
+      <p className="mb-4 font-body text-[15px] text-text-muted">
         {isPickup ? 'Datos de quien pasa a retirar' : 'Nombre y dirección de entrega'}
       </p>
 
       {showSavedSelector && (
         <div className="mb-6">
-          <p className="mb-2.5 font-body text-[11px] uppercase tracking-[0.16em] text-text-muted">
+          <p className="mb-2.5 font-body text-[15px] font-semibold text-text">
             Usa una dirección guardada
           </p>
           <div className="flex flex-col gap-2">
@@ -61,29 +55,23 @@ export default function AddressSection({
                   key={addr.id}
                   type="button"
                   onClick={() => onSelectAddress?.(addr.id)}
-                  className={`flex items-center gap-3 border px-4 py-3 text-left transition-colors ${
-                    active ? 'border-text bg-bg-alt' : 'border-border hover:border-text'
-                  }`}
+                  className={optionClass(active)}
                 >
-                  <span
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors ${
-                      active ? 'border-text' : 'border-border'
-                    }`}
-                  >
-                    {active && <span className="h-2 w-2 rounded-full bg-text" />}
+                  <span className={radioDotClass(active)}>
+                    {active && <span className="h-3 w-3 rounded-full bg-text" />}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex flex-wrap items-center gap-2">
-                      <span className="font-body text-[13px] font-medium leading-snug text-text">
+                      <span className="font-body text-[16px] font-semibold leading-snug text-text">
                         {addr.alias}
                       </span>
                       {addr.isDefault && (
-                        <span className="bg-accent/10 px-2 py-0.5 font-body text-[9px] uppercase tracking-[0.12em] text-accent">
+                        <span className="rounded-full bg-gold-light px-2.5 py-0.5 font-body text-xs font-semibold text-accent-hover">
                           Predeterminada
                         </span>
                       )}
                     </span>
-                    <span className="block truncate font-body text-[11px] text-text-muted">
+                    <span className="block truncate font-body text-sm text-text-muted">
                       {addr.direccion}, {addr.ciudad}
                     </span>
                   </span>
@@ -93,18 +81,12 @@ export default function AddressSection({
             <button
               type="button"
               onClick={() => onSelectAddress?.(null)}
-              className={`flex items-center gap-3 border px-4 py-3 text-left transition-colors ${
-                selectedAddressId === null ? 'border-text bg-bg-alt' : 'border-border hover:border-text'
-              }`}
+              className={optionClass(selectedAddressId === null)}
             >
-              <span
-                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors ${
-                  selectedAddressId === null ? 'border-text' : 'border-border'
-                }`}
-              >
-                {selectedAddressId === null && <span className="h-2 w-2 rounded-full bg-text" />}
+              <span className={radioDotClass(selectedAddressId === null)}>
+                {selectedAddressId === null && <span className="h-3 w-3 rounded-full bg-text" />}
               </span>
-              <span className="font-body text-[13px] leading-snug text-text">
+              <span className="font-body text-[16px] font-semibold leading-snug text-text">
                 Nueva dirección — escribir los datos a mano
               </span>
             </button>
@@ -112,7 +94,7 @@ export default function AddressSection({
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-5 gap-y-5 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <input
           type="text"
           placeholder="Nombres *"

@@ -1,3 +1,5 @@
+import SectionHead from '../shared/SectionHead';
+
 const STEPS = [
   { n: '01', h: 'Descubre', t: 'Empieza con 3 ml. Conoce el perfume antes de invertir en un frasco completo.' },
   { n: '02', h: 'Decide', t: 'Decide con calma cu√°l es tu fragancia, probando las que quieras.' },
@@ -5,38 +7,31 @@ const STEPS = [
 ];
 
 /**
- * "C√≥mo funciona" ‚Äî tres pasos editoriales (ref. DecantStory).
+ * "CÛmo funciona" ó tres pasos (prototipo .how / .steps3): fondo tile, n˙meros
+ * Gloock en dorado oscuro y tarjetas con borde fino.
  *
- * Sin el r√≥tulo "‚Äî C√≥mo funciona" (REQ-007): el t√≠tulo arranca la secci√≥n.
- * Los n√∫meros mandan (REQ-008) y el alto es compacto en desktop (REQ-009).
+ * Sin el rÛtulo "ó CÛmo funciona" (REQ-007): el tÌtulo arranca la secciÛn.
  */
 export default function HowItWorksSection() {
   return (
-    <section className="border-y border-border bg-surface-raised px-6 py-8 md:px-14 md:py-16">
-      <div className="mx-auto max-w-[720px] text-center">
-        <h2 className="font-display text-3xl font-light leading-none tracking-[-0.02em] text-text md:text-6xl">
-          Tres pasos hacia <span className="italic">tu fragancia.</span>
-        </h2>
-      </div>
+    <section className="bg-bg-alt py-[clamp(44px,5.5vw,76px)]">
+      <div className="mx-auto max-w-[1480px] px-[max(16px,3.4vw)]">
+        <SectionHead eyebrow="CÛmo funciona" title="Tres pasos hacia tu fragancia." className="md:mb-9" />
 
-      {/* Mobile: n√∫mero y t√≠tulo en la misma l√≠nea para no alargar el scroll. */}
-      <div className="mx-auto mt-6 grid max-w-[1200px] gap-5 md:mt-12 md:grid-cols-3 md:gap-14">
-        {STEPS.map((s) => (
-          <div key={s.n} className="border-t border-border pt-4 md:border-t-0 md:pt-0">
-            <div className="flex items-baseline gap-3 md:block">
-              <span className="font-display text-2xl font-light italic leading-none tracking-[-0.02em] text-text md:block md:text-6xl">
-                {s.n}
-              </span>
-              <span className="hidden md:mb-4 md:mt-4 md:block md:h-px md:bg-border" />
-              <span className="font-display text-2xl font-light tracking-[-0.01em] text-text md:block md:text-3xl">
-                {s.h}
-              </span>
-            </div>
-            <p className="mt-1.5 font-body text-[13px] leading-[1.6] text-text-soft md:mt-3 md:text-sm md:leading-[1.7]">
-              {s.t}
-            </p>
-          </div>
-        ))}
+        <ol className="grid gap-3 min-[821px]:grid-cols-3 min-[821px]:gap-[18px]">
+          {STEPS.map((s) => (
+            <li
+              key={s.n}
+              className="flex items-start gap-4 rounded-[4px] border border-border bg-surface p-5 min-[821px]:p-6"
+            >
+              <span className="font-display text-[34px] font-normal leading-[0.9] text-accent-hover">{s.n}</span>
+              <div>
+                <h3 className="font-display text-2xl font-normal leading-none text-text">{s.h}</h3>
+                <p className="mt-2 font-body text-sm leading-relaxed text-text-soft">{s.t}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );

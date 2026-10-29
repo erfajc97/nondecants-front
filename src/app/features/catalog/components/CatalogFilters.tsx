@@ -53,21 +53,27 @@ function CheckRow({
       type="button"
       onClick={onToggle}
       aria-pressed={active}
-      className="group flex w-full items-center gap-2.5 text-left"
+      className="group -mx-1.5 flex min-h-[42px] w-[calc(100%+12px)] items-center gap-3 rounded-md px-1.5 text-left transition-colors hover:bg-bg-alt"
     >
       <span
         aria-hidden
-        className={`flex h-4 w-4 shrink-0 items-center justify-center border transition-colors ${
-          active ? 'border-text bg-text' : 'border-border bg-surface group-hover:border-text'
+        className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[5px] border-[1.5px] transition-colors ${
+          active ? 'border-text bg-text' : 'border-[#b7b2a9] bg-white'
         }`}
       >
-        {active && (
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="text-bg">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        )}
+        <svg
+          width="13"
+          height="13"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3.5"
+          className={`text-white transition-transform duration-300 ${active ? 'scale-100' : 'scale-0'}`}
+        >
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
       </span>
-      <span className="font-body text-sm text-text-soft transition-colors group-hover:text-text">
+      <span className="font-body text-[15px] text-text">
         {label}
       </span>
     </button>
@@ -112,11 +118,12 @@ export default function CatalogFilters({
     : marcas;
 
   return (
-    <div className="space-y-9">
+    <div>
       {hasActiveFilters && (
         <button
+          type="button"
           onClick={onClearFilters}
-          className="border-b border-border pb-0.5 font-body text-[10px] uppercase tracking-[0.18em] text-text-muted transition-colors hover:text-text"
+          className="font-body text-sm font-semibold text-text-soft underline underline-offset-[3px] transition-colors hover:text-text"
         >
           Limpiar filtros
         </button>
@@ -162,18 +169,18 @@ export default function CatalogFilters({
 
       {/* 4. Marca — buscador + lista */}
       {marcas.length > 0 && (
-        <div>
-          <p className="eyebrow-strong mb-3">4. Marca</p>
+        <div className="border-b border-border py-4">
+          <p className="mb-3 font-body text-[12.5px] font-bold uppercase tracking-[0.08em] text-text-muted">4. Marca</p>
           {marcas.length > 5 && (
             <input
               type="search"
               value={marcaSearch}
               onChange={(e) => setMarcaSearch(e.target.value)}
               placeholder="Buscar marca…"
-              className="mb-3 w-full border-b border-border bg-transparent pb-2 font-body text-sm text-text placeholder:text-text-muted focus:border-text focus:outline-none"
+              className="mb-3 h-10 w-full rounded-full border border-border bg-white px-4 font-body text-sm text-text placeholder:text-text-muted focus:border-text focus:outline-none"
             />
           )}
-          <div className="max-h-56 space-y-2.5 overflow-y-auto pr-1">
+          <div className="grid max-h-56 gap-0.5 overflow-y-auto pr-1">
             {visibleMarcas.map((m) => (
               <CheckRow
                 key={m.id}
@@ -190,9 +197,9 @@ export default function CatalogFilters({
       )}
 
       {/* 5. Concentración — lista */}
-      <div>
-        <p className="eyebrow-strong mb-3">5. Concentración</p>
-        <div className="space-y-2.5">
+      <div className="border-b border-border py-4">
+        <p className="mb-3 font-body text-[12.5px] font-bold uppercase tracking-[0.08em] text-text-muted">5. Concentración</p>
+        <div className="grid gap-0.5">
           {CATALOG_CONCENTRATIONS.map((opt) => (
             <CheckRow
               key={opt.value}

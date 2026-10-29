@@ -2,6 +2,7 @@ import axios from 'axios';
 import { API_ENDPOINTS } from '@/app/api/endpoints';
 import { secureStorage } from '@/app/helpers/secureStorage';
 import { useAuthStore } from '@/app/store/auth/authStore';
+import { DEMO_ENABLED } from '@/app/lib/mock';
 
 // En dev, si no carga VITE_API_BASE_URL, pega al backend LOCAL (no a staging).
 // En build/prod el fallback sigue siendo staging.
@@ -11,6 +12,10 @@ const FALLBACK_BASE_URL = import.meta.env.DEV
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || FALLBACK_BASE_URL,
+  // Demo: sin backend. El import dinámico deja los datos de prueba fuera del bundle normal.
+  ...(DEMO_ENABLED
+    ? { adapter: (cfg: any) => import('@/app/mock/mockAdapter').then((m) => m.mockAdapter(cfg)) }
+    : {}),
   headers: {
     'Content-Type': 'application/json',
   },

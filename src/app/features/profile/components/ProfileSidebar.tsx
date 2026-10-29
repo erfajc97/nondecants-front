@@ -38,9 +38,9 @@ export default function ProfileSidebar({ activeTab, onTabChange }: ProfileSideba
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={[
-              'flex items-center gap-2.5 whitespace-nowrap border-l-2 px-4 py-3 font-body text-xs uppercase tracking-[0.16em] transition-colors',
+              'flex items-center gap-2.5 whitespace-nowrap rounded-[3px] border-l-2 px-4 py-3 font-body text-sm font-medium transition-colors',
               isActive
-                ? 'border-accent bg-bg-alt text-text'
+                ? 'border-accent bg-gold-light text-text'
                 : 'border-transparent text-text-soft hover:text-text',
             ].join(' ')}
           >

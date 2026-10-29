@@ -2,33 +2,37 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Colores de marca · Dirección ATELIER ───────── */
-  /* Marfil suave + tinta cálida + bronce. Editorial, galería, luz. */
-  --color-bg:              #F6F3EE;   /* marfil suave */
-  --color-bg-alt:          #EFEAE2;   /* beige cálido (paneles / barras) */
+  /* ── Colores de marca · Rebranding (blanco + negro del logo + dorado del tapón) ── */
+  --color-bg:              #FFFFFF;
+  --color-bg-alt:          #F5F4F1;   /* tile */
   --color-surface:         #FFFFFF;
-  --color-surface-raised:  #FBFAF7;   /* surfaceTint */
-  --color-accent:          #8A7A66;   /* bronce apagado */
-  --color-accent-hover:    #6F6152;   /* bronce más oscuro (sobre fondo claro) */
-  --color-text:            #1C1A17;   /* negro cálido (ink) */
-  --color-text-soft:       #5C544B;   /* cuerpo */
-  --color-text-muted:      #8A8278;   /* metadata */
-  --color-border:          #E4DED4;   /* hairlines */
-  --color-border-soft:     #EEE9DF;
-  --color-border-accent:   #8A7A66;
-  --color-error:           #B23B3B;
-  --color-error-muted:     #B23B3B22;
-  --color-success:         #5A6B4E;
-  --color-success-muted:   #5A6B4E22;
-  --color-warning:         #B07A1E;
-  --color-warning-muted:   #B07A1E22;
+  --color-surface-raised:  #F5F4F1;
+  --color-accent:          #C3A658;   /* dorado del tapón */
+  --color-accent-hover:    #8C7330;   /* dorado oscuro (texto pequeño / hover) */
+  --color-text:            #1B1919;   /* negro del logo */
+  --color-text-soft:       #2E2C2A;
+  --color-text-muted:      #6B6964;
+  --color-border:          #E7E5E1;
+  --color-border-soft:     #F0EEEA;
+  --color-border-accent:   #C3A658;
+  --color-error:           #9B2D20;
+  --color-error-muted:     #9B2D2022;
+  --color-success:         #2D6545;
+  --color-success-muted:   #2D654522;
+  --color-warning:         #8A5A22;   /* "bajo pedido" */
+  --color-warning-muted:   #8A5A2222;
   --color-info:            #3E6E99;
+  --color-gold-light:      #F3ECDA;   /* dorado muy claro para fondos */
+  --color-cream:           #EDE9DF;   /* texto sobre negro (bandas oscuras) */
+  --color-stone:           #A9A397;   /* texto de apoyo sobre negro */
+  --color-stone-soft:      #B8B3A8;
+  --color-ink-line:        #3A3734;   /* separadores sobre negro */
 
   /* ── Tipografía ────────────────────────────────── */
-  /* Display serif editorial (Cormorant Garamond) + sans neutra (DM Sans). */
-  --font-heading: "Cormorant Garamond Variable", "Cormorant Garamond", serif;
-  --font-display: "Cormorant Garamond Variable", "Cormorant Garamond", serif;
-  --font-body:    "DM Sans Variable", "DM Sans", system-ui, sans-serif;
+  /* Display Gloock (serif de alto contraste) + Bricolage Grotesque (texto). */
+  --font-heading: "Gloock", "Bodoni 72", Didot, Georgia, serif;
+  --font-display: "Gloock", "Bodoni 72", Didot, Georgia, serif;
+  --font-body:    "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
 
   /* ── Radios ────────────────────────────────────── */
   --radius-sm: 4px;
@@ -70,35 +74,93 @@ body {
   border: 0;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
-  font-weight: 400;
-  letter-spacing: -0.005em;
-  /* Noir: display serif en caja normal/itálica — sin uppercase forzado. */
+/* En @layer base para que las utilidades (font-body, tracking-*) puedan
+   sobrescribirlo en cada encabezado. */
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: -0.005em;
+  }
 }
 
-/* Etiquetas / eyebrows editoriales — DM Sans en versalitas con tracking.
-   Aplicar con la clase .eyebrow donde el diseño usa labels uppercase. */
+/* Eyebrow de marca — texto en dorado oscuro, sin versalitas. Con `.k` añade el
+   ✦ dorado delante (como en el prototipo). */
 .eyebrow {
   font-family: var(--font-body);
-  text-transform: uppercase;
-  letter-spacing: 0.24em;
-  font-size: 0.625rem;
-  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--color-accent-hover);
+}
+/* Variante con destello ✦ dorado delante (clase .k del prototipo). */
+.k {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.k::before {
+  content: "✦";
+  color: var(--color-accent);
 }
 
-/* Misma etiqueta pero en tinta: para los rótulos que encabezan un bloque
-   (los pasos numerados de los filtros). El gris de .eyebrow los dejaba
-   casi beige sobre el marfil y no se leían como títulos.
-   Nota: .eyebrow vive fuera de @layer, así que gana a `text-text`; por eso
-   hace falta una clase propia y no basta con añadir la utilidad. */
+/* Rótulo que encabeza un bloque (pasos numerados de filtros): tinta, sin ✦. */
 .eyebrow-strong {
   font-family: var(--font-body);
-  text-transform: uppercase;
-  letter-spacing: 0.24em;
-  font-size: 0.625rem;
+  font-size: 0.8125rem;
   font-weight: 600;
+  letter-spacing: 0;
   color: var(--color-text);
+}
+
+/* ── Marquee de avisos (barra negra superior) ─────────────────────────── */
+@keyframes marquee-x {
+  to { transform: translateX(-100%); }
+}
+.marq-track {
+  display: inline-flex;
+  gap: 28px;
+  padding-right: 28px;
+  animation: marquee-x 40s linear infinite;
+}
+.marq:hover .marq-track { animation-play-state: paused; }
+.marq-item::after {
+  content: "✦";
+  margin-left: 28px;
+  color: var(--color-accent);
+}
+
+/* Indicador de línea del banner: se llena en lo que dura el slide. */
+@keyframes banner-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.banner-fill { animation: banner-fill 6.5s linear forwards; }
+@media (prefers-reduced-motion: reduce) { .banner-fill { animation: none; transform: scaleX(1); } }
+
+/* ── Sello giratorio / entradas de marca ──────────────────────────────── */
+@keyframes brand-rise {
+  from { opacity: 0.001; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+.brand-rise { animation: brand-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Subrayado dorado que crece desde la izquierda (nav desktop). */
+.nav-u { position: relative; }
+.nav-u::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 3px;
+  height: 2px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-u:hover::after,
+.nav-u[aria-current="page"]::after,
+.nav-u[data-open="true"]::after { transform: scaleX(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .marq-track { animation: none; }
+  .brand-rise { animation: none; }
 }
 
 /* ── Entrega destacada (detalle de producto): brillo que recorre el texto
@@ -305,4 +367,153 @@ h1, h2, h3, h4, h5, h6 {
 }
 @media (prefers-reduced-motion: reduce) {
   .announce-slide { animation: none; }
+}
+
+/* ── Sello NöD (prototipo de marca) ───────────────────────────────────── */
+@layer components {
+  .seal { position: relative; flex: none; width: 118px; height: 118px; }
+  .seal svg { width: 100%; height: 100%; animation: seal-spin 28s linear infinite; }
+  .seal:hover svg { animation-duration: 6s; }
+  .seal img { position: absolute; inset: 22%; width: 56%; height: 56%; border-radius: 50%; }
+  @keyframes seal-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .seal svg { animation: none; } }
+}
+
+/* ── Sello flotante + burbuja de WhatsApp ─────────────────────────────── */
+.fseal {
+  position: fixed;
+  right: max(20px, env(safe-area-inset-right, 0px));
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  z-index: 44;
+  display: block;
+  width: 78px;
+  height: 78px;
+  transform: scale(0) rotate(-120deg);
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), bottom 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.fseal.in { transform: none; }
+.fseal.in:hover { transform: scale(1.07); }
+.fseal.in:active { transform: scale(0.94); }
+.fseal .seal { width: 100%; height: 100%; filter: drop-shadow(0 10px 16px rgba(27, 25, 25, 0.35)); }
+.fseal:hover .seal svg { animation-duration: 5s; }
+.fseal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--color-accent);
+  pointer-events: none;
+  animation: fseal-ring 3.2s ease-out 1.5s infinite;
+}
+@keyframes fseal-ring {
+  0% { transform: scale(1); opacity: 0.75; }
+  70%, 100% { transform: scale(1.5); opacity: 0; }
+}
+.fseal-wa {
+  position: absolute;
+  right: -3px;
+  bottom: -1px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+  box-shadow: 0 0 0 3px var(--color-bg);
+}
+.fseal-bub {
+  position: absolute;
+  right: calc(100% + 12px);
+  bottom: 12px;
+  width: max-content;
+  max-width: min(260px, calc(100vw - 130px));
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px 14px 4px 14px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 13.5px;
+  line-height: 1.35;
+  box-shadow: 0 14px 30px -14px rgba(27, 25, 25, 0.4);
+  opacity: 0;
+  transform: translateX(10px) scale(0.92);
+  transform-origin: right bottom;
+  transition: opacity 0.35s, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+.fseal-bub b { display: block; font-weight: 700; color: #1c8f4a; }
+.fseal-bub.on { opacity: 1; transform: none; }
+@media (max-width: 820px) {
+  .fseal { width: 62px; height: 62px; right: max(14px, env(safe-area-inset-right, 0px)); bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .fseal-wa { width: 24px; height: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fseal { transform: none; transition: none; }
+  .fseal::before { animation: none; display: none; }
+}
+
+/* ── Aparición al hacer scroll (.rv → .rv.in) ─────────────────────────── */
+.rv {
+  opacity: 0.001;
+  transform: translateY(18px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.rv.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; transition: none; } }
+
+/* ── Hero: entrada escalonada del copy y zoom lento de la imagen ──────── */
+.hero-copy > * {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hero-slide.on .hero-copy > * { opacity: 1; transform: none; }
+.hero-slide.on .hero-copy > :nth-child(2) { transition-delay: 0.08s; }
+.hero-slide.on .hero-copy > :nth-child(3) { transition-delay: 0.16s; }
+.hero-slide.on .hero-copy > :nth-child(4) { transition-delay: 0.24s; }
+.hero-photo img { transform: scale(1.07); transition: transform 7s linear; }
+.hero-slide.on .hero-photo img { transform: scale(1); }
+@media (prefers-reduced-motion: reduce) {
+  .hero-copy > * { opacity: 1; transform: none; transition: none; }
+  .hero-photo img { transform: none; transition: none; }
+}
+
+/* Tiles de tamaño: franja dorada que se llena en el seleccionado. */
+.size-tile { position: relative; overflow: hidden; }
+.size-tile::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 3px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.size-tile[aria-pressed="true"]::after { transform: scaleX(var(--lv, 1)); }
+@media (prefers-reduced-motion: reduce) { .size-tile::after { transition: none; } }
+
+/* Secciones consecutivas del home comparten un solo respiro (prototipo .sec + .sec). */
+.sec + .sec { padding-top: 0; }
+
+/* ── Buscador + carrito lateral (prototipo) ───────────────────────────── */
+@keyframes nd-rise {
+  from { opacity: 0.001; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes nd-blink { 50% { opacity: 0; } }
+@keyframes nd-gone {
+  to { opacity: 0; transform: translateX(24px); height: 0; padding-block: 0; border-width: 0; }
+}
+@keyframes nd-bump { 40% { transform: scale(1.25); } }
+.nd-rise { animation: nd-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: calc(var(--i, 0) * 45ms); }
+.nd-blink { animation: nd-blink 1s steps(1) infinite; }
+.nd-gone { animation: nd-gone 0.3s ease forwards; overflow: hidden; }
+.nd-bump { animation: nd-bump 0.35s ease; }
+.nd-hl mark { background: none; color: inherit; box-shadow: inset 0 -0.32em 0 color-mix(in srgb, var(--color-accent) 45%, transparent); }
+body.nd-lock { overflow: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  .nd-rise, .nd-blink, .nd-gone, .nd-bump { animation: none; }
 }

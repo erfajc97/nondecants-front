@@ -1,5 +1,6 @@
 import { formatCurrency } from '@/app/helpers/formatCurrency';
 import type { DeliveryMethod, DeliveryOption } from '../types';
+import { optionClass, radioDotClass } from '../classes';
 
 /** Métodos que el cliente retira en persona (no se envían). */
 export const PICKUP_METHODS: DeliveryMethod[] = ['ENTREGA_PERSONAL', 'RETIRO_PIWU'];
@@ -56,10 +57,10 @@ export default function DeliverySection({
     <section className="flex flex-col gap-7">
       {/* 1 · Cómo lo recibe */}
       <div>
-        <h2 className="mb-4 text-center font-display text-xl font-light text-text">
+        <h2 className="mb-3 font-body! text-xl font-bold text-text">
           ¿Cómo quieres recibir tu pedido?
         </h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {modeOptions.map((opt) => {
             const active = mode === opt.id;
             return (
@@ -67,14 +68,16 @@ export default function DeliverySection({
                 key={opt.id}
                 type="button"
                 onClick={() => onModeChange(opt.id)}
-                className={`flex flex-col items-center gap-1 border px-4 py-4 text-center transition-colors ${
-                  active
-                    ? 'border-text bg-bg-alt text-text'
-                    : 'border-border text-text-soft hover:border-text hover:text-text'
-                }`}
+                aria-pressed={active}
+                className={optionClass(active)}
               >
-                <span className="font-body text-[13px] font-medium leading-snug">{opt.label}</span>
-                <span className="font-body text-[11px] text-text-muted">{opt.hint}</span>
+                <span className={radioDotClass(active)}>
+                  {active && <span className="h-3 w-3 rounded-full bg-text" />}
+                </span>
+                <span className="min-w-0">
+                  <span className="block font-body text-[17px] font-bold leading-tight text-text">{opt.label}</span>
+                  <span className="mt-1 block font-body text-[14.5px] text-text-muted">{opt.hint}</span>
+                </span>
               </button>
             );
           })}
@@ -83,54 +86,51 @@ export default function DeliverySection({
 
       {/* 2 · Método concreto, con su costo siempre visible */}
       <div>
-        <h2 className="mb-4 text-center font-display text-xl font-light text-text">
+        <h2 className="mb-3 font-body! text-xl font-bold text-text">
           {mode === 'pickup' ? 'Puntos de retiro' : 'Métodos de envío'}
         </h2>
 
         {isLoading ? (
-          <p className="py-3 text-center font-body text-sm text-text-muted">Cargando opciones…</p>
+          <p className="py-3 font-body text-[15px] text-text-muted">Cargando opciones…</p>
         ) : visibleOptions.length === 0 ? (
-          <p className="py-3 text-center font-body text-sm text-text-muted">
+          <p className="py-3 font-body text-[15px] text-text-muted">
             {mode === 'pickup'
               ? 'No hay puntos de retiro para la ciudad seleccionada.'
               : 'No hay envíos disponibles para la ciudad seleccionada.'}
           </p>
         ) : (
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-3">
             {visibleOptions.map((opt) => {
               const active = selected === opt.method;
               const place = PICKUP_PLACES[opt.method];
               return (
                 <div
                   key={opt.id}
-                  className={`border transition-colors ${
-                    active ? 'border-text bg-bg-alt' : 'border-border hover:border-text'
+                  className={`overflow-hidden rounded-md border-2 transition-colors ${
+                    active ? 'border-text bg-gold-light' : 'border-border hover:border-text-muted'
                   }`}
                 >
                   <button
                     type="button"
                     onClick={() => onSelect(opt.method)}
-                    className="flex w-full items-center justify-between gap-4 px-4 py-3.5 text-left"
+                    aria-pressed={active}
+                    className="flex w-full items-start justify-between gap-4 p-4 text-left"
                   >
-                    <span className="flex items-center gap-3">
-                      <span
-                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors ${
-                          active ? 'border-text' : 'border-border'
-                        }`}
-                      >
-                        {active && <span className="h-2 w-2 rounded-full bg-text" />}
+                    <span className="flex items-start gap-3.5">
+                      <span className={radioDotClass(active)}>
+                        {active && <span className="h-3 w-3 rounded-full bg-text" />}
                       </span>
-                      <span className="font-body text-[13px] leading-snug text-text">
+                      <span className="font-body text-[17px] font-bold leading-snug text-text">
                         {place?.name ?? opt.label}
                         {place && (
-                          <span className="block font-body text-[11px] text-text-muted">
+                          <span className="mt-0.5 block font-body text-[14.5px] font-normal text-text-muted">
                             {place.hint}
                           </span>
                         )}
                       </span>
                     </span>
                     <span
-                      className={`shrink-0 font-body text-sm ${opt.cost === 0 ? 'text-accent' : 'text-text'}`}
+                      className={`shrink-0 font-body text-base font-bold ${opt.cost === 0 ? 'text-success' : 'text-text'}`}
                     >
                       {opt.cost === 0 ? 'Gratis' : formatCurrency(opt.cost)}
                     </span>
@@ -141,7 +141,7 @@ export default function DeliverySection({
                       href={place.mapsUrl}
                       target="_blank"
                       rel="noopener"
-                      className="flex items-center gap-1.5 border-t border-border px-4 py-2.5 font-body text-[11px] uppercase tracking-[0.16em] text-text-muted transition-colors hover:text-text"
+                      className="flex items-center gap-1.5 border-t border-border bg-surface px-4 py-3 font-body text-sm font-semibold text-accent-hover underline-offset-2 transition-colors hover:text-text hover:underline"
                     >
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0Z" />
@@ -156,7 +156,7 @@ export default function DeliverySection({
           </div>
         )}
 
-        <p className="mt-2.5 font-body text-[11px] text-text-muted">
+        <p className="mt-3 font-body text-sm text-text-muted">
           El costo de envío puede variar según la ciudad de entrega.
         </p>
       </div>

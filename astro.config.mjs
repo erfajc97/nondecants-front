@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import node from '@astrojs/node';
+import netlify from '@astrojs/netlify';
 import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -13,7 +14,8 @@ export default defineConfig({
   // localhost y rompe la vista previa al compartir.
   site: 'https://nondecants.com',
   output: 'hybrid',
-  adapter: node({ mode: 'standalone' }),
+  // Netlify (ambiente de revisión) define NETLIFY=true durante el build; el resto usa Node/Docker.
+  adapter: process.env.NETLIFY ? netlify() : node({ mode: 'standalone' }),
   integrations: [react()],
   // El CSS de página (~15 KiB) no sale como <link> bloqueante: va en el HTML.
   build: {
@@ -24,6 +26,10 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    // Astro no inyecta VITE_* del entorno del proceso en el bundle del cliente: se define aquí.
+    define: {
+      'import.meta.env.VITE_DEMO': JSON.stringify(process.env.VITE_DEMO ?? ''),
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src'),

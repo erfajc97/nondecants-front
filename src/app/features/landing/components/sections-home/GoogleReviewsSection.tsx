@@ -8,16 +8,14 @@ export default function GoogleReviewsSection() {
   return (
     <section
       id="valoraciones"
-      className="border-y border-border bg-surface-raised px-6 py-8 md:px-14 md:py-14"
+      className="bg-bg-alt py-[clamp(36px,4.5vw,64px)]"
     >
-      <div className="mx-auto flex max-w-[720px] flex-col items-center text-center">
-        <h2 className="font-display text-3xl font-light leading-none tracking-[-0.02em] text-text md:text-5xl">
+      <div className="mx-auto flex max-w-[720px] flex-col items-center px-[max(16px,3.4vw)] text-center">
+        <span className="eyebrow k">Clientes verificados por Google</span>
+        <h2 className="mt-2 font-display text-[clamp(28px,3.2vw,46px)] font-normal leading-none tracking-[-0.02em] text-text">
           Valoraciones.
         </h2>
-        <p className="mt-4 font-display text-xl font-light italic leading-snug text-text md:text-2xl">
-          Clientes verificados por Google
-        </p>
-        <p className="mt-3 max-w-md font-body text-[13px] leading-relaxed text-text-soft md:text-sm">
+        <p className="mt-3 max-w-md font-body text-[15px] leading-relaxed text-text-muted">
           Opiniones reales de compradores en Ecuador. El sello lo emite Google, no
           nosotros.
         </p>

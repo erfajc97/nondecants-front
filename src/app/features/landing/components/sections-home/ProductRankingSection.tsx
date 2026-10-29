@@ -3,6 +3,7 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
 import { productUrl } from '@/app/helpers/productUrl';
 import { CarouselProgressBar, useCarouselNav, EMBLA_DURATION } from '@/app/components/UI/CarouselNav';
+import SectionHead, { PillLink } from '../shared/SectionHead';
 import type { Product } from '@/app/types/global.types';
 
 /** Productos por página en la lista lateral (desktop) y en la lista móvil. */
@@ -14,6 +15,9 @@ interface ProductRankingSectionProps {
   products: Product[];
   isLoading?: boolean;
   viewAllHref?: string;
+  /** Posición de la sección (no se pinta). */
+  num?: string;
+  eyebrow?: string;
 }
 
 const CONCENTRATION_SHORT: Record<string, string> = {
@@ -66,6 +70,7 @@ export default function ProductRankingSection({
   products,
   isLoading = false,
   viewAllHref = '/catalogo',
+  eyebrow = 'Ranking',
 }: ProductRankingSectionProps) {
   // Página actual de la lista (hook antes de cualquier return condicional).
   const [page, setPage] = useState(0);
@@ -83,11 +88,11 @@ export default function ProductRankingSection({
   if (isLoading) {
     // Esqueleto del layout del ranking: destacado + lista de 4.
     return (
-      <section className="bg-bg px-6 pb-0 pt-10 md:px-14 md:pb-10 md:pt-20" aria-hidden="true">
-        <div className="mx-auto max-w-7xl animate-pulse">
+      <section className="bg-bg py-[clamp(44px,5.5vw,76px)]" aria-hidden="true">
+        <div className="mx-auto max-w-[1480px] animate-pulse px-[max(16px,3.4vw)]">
           <div className="mb-6 h-8 w-52 rounded-sm bg-bg-alt md:mb-12 md:h-10 md:w-72" />
           <div className="hidden items-start gap-12 md:grid md:grid-cols-[0.75fr_1.25fr]">
-            <div className="border border-border p-6 md:p-8">
+            <div className="rounded-[4px] border border-border p-6 md:p-8">
               <div className="h-8 w-10 rounded-sm bg-bg-alt" />
               <div className="mx-auto mt-4 aspect-square w-full max-w-[280px] bg-bg-alt" />
               <div className="mt-6 h-6 w-3/5 rounded-sm bg-bg-alt" />
@@ -140,30 +145,28 @@ export default function ProductRankingSection({
   );
 
   return (
-    <section className="bg-bg px-6 pb-0 pt-10 md:px-14 md:pb-10 md:pt-20">
-      <div className="mx-auto max-w-7xl">
-        {/* Header de sección — título en Cormorant Garamond (REQ-028) */}
-        <div className="mb-6 flex items-baseline justify-between md:mb-12">
-          <h2 className="font-display text-3xl font-light italic leading-none tracking-[-0.01em] text-text md:text-5xl">{title}</h2>
-          <a href={viewAllHref} className="hidden shrink-0 border-b border-text pb-0.5 font-body text-[11px] uppercase tracking-[0.18em] text-text transition-colors hover:border-accent hover:text-accent sm:inline-block">
-            Ver el ranking completo
-          </a>
-        </div>
+    <section className="bg-bg py-[clamp(44px,5.5vw,76px)]">
+      <div className="mx-auto max-w-[1480px] px-[max(16px,3.4vw)]">
+        <SectionHead
+          eyebrow={eyebrow}
+          title={title}
+          right={<span className="max-sm:hidden"><PillLink href={viewAllHref}>Ver el ranking completo</PillLink></span>}
+        />
 
         {/* ── Desktop: #1 destacado (card compacta con marco, ref. ANX-10) + lista 02–05 ── */}
-        <div className="hidden items-start gap-12 md:grid md:grid-cols-[0.75fr_1.25fr]">
+        <div className="hidden items-start gap-[clamp(24px,4vw,64px)] md:grid md:grid-cols-[0.75fr_1.25fr]">
           {/* Destacado de la página (01, 06, 11…) */}
-          <a href={t.href} className="group block border border-border bg-surface-raised p-6 transition-colors duration-300 hover:border-text-muted md:p-8">
-            <span className="font-display text-3xl leading-none text-text md:text-4xl">{topRank}</span>
+          <a href={t.href} className="group block overflow-hidden rounded-[4px] border border-border bg-surface p-6 transition-[border-color,box-shadow] duration-300 hover:border-border-accent hover:shadow-[0_18px_40px_-28px_var(--color-text)] md:p-8">
+            <span className="font-display text-3xl leading-none text-accent-hover md:text-4xl">{topRank}</span>
             <div className="mx-auto mt-4 aspect-square w-full max-w-[240px] overflow-hidden md:max-w-[280px]">
               {t.image && (
                 <img src={t.image} alt={top.name} className="h-full w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]" />
               )}
             </div>
             <div className="mt-6">
-              <div className="font-display text-2xl font-light leading-tight tracking-[-0.01em] text-text">{top.name}</div>
-              {t.tags && <span className="eyebrow mt-2 block">{t.tags}</span>}
-              <div className="mt-3 font-body text-sm text-text">Desde {formatCurrency(t.entryPrice)}</div>
+              <div className="font-display text-2xl font-normal leading-[1.1] text-text">{top.name}</div>
+              {t.tags && <span className="mt-2 block font-body text-[13px] text-text-muted">{t.tags}</span>}
+              <div className="mt-3 font-body text-sm font-semibold text-text">Desde {formatCurrency(t.entryPrice)}</div>
             </div>
           </a>
 
@@ -173,17 +176,17 @@ export default function ProductRankingSection({
               const d = derive(p);
               return (
                 <a key={p.id} href={d.href} className="group grid grid-cols-[40px_120px_1fr_auto] items-center gap-6 border-b border-border py-6 first:border-t">
-                  <span className="font-display text-3xl leading-none text-text">{rankAt(i)}</span>
-                  <div className="h-32 w-full overflow-hidden border border-border bg-surface-raised p-2">
+                  <span className="font-display text-3xl leading-none text-accent-hover">{rankAt(i)}</span>
+                  <div className="h-32 w-full overflow-hidden rounded-[4px] border border-border bg-surface p-2">
                     {d.image && <img src={d.image} alt={p.name} className="h-full w-full object-contain transition-transform duration-700 group-hover:scale-[1.03]" />}
                   </div>
                   <div>
-                    <div className="font-display text-[22px] font-light leading-tight text-text">{p.name}</div>
-                    {d.tags && <span className="eyebrow mt-1.5 block">{d.tags}</span>}
+                    <div className="font-display text-[22px] font-normal leading-[1.1] text-text">{p.name}</div>
+                    {d.tags && <span className="mt-1.5 block font-body text-[13px] text-text-muted">{d.tags}</span>}
                   </div>
                   <div className="flex items-center gap-2.5">
-                    <span className="font-body text-[13px] text-text">Desde {formatCurrency(d.entryPrice)}</span>
-                    <span className="text-text-soft transition-colors group-hover:text-accent"><Arrow /></span>
+                    <span className="font-body text-[13px] font-semibold text-text">Desde {formatCurrency(d.entryPrice)}</span>
+                    <span className="text-text-soft transition-transform duration-300 group-hover:translate-x-1 group-hover:text-text"><Arrow /></span>
                   </div>
                 </a>
               );
@@ -217,14 +220,14 @@ export default function ProductRankingSection({
                         draggable={false}
                         className="grid grid-cols-[28px_84px_1fr] items-center gap-4 border-b border-border py-3.5"
                       >
-                        <span className="font-display text-2xl italic leading-none text-text">{rank}</span>
-                        <div className="h-24 w-full overflow-hidden bg-surface-raised">
+                        <span className="font-display text-2xl leading-none text-accent-hover">{rank}</span>
+                        <div className="h-24 w-full overflow-hidden rounded-[4px] border border-border bg-surface">
                           {d.image && <img src={d.image} alt={p.name} draggable={false} className="h-full w-full object-cover" />}
                         </div>
                         <div>
-                          {d.tags && <span className="eyebrow">{d.tags}</span>}
-                          <div className="mt-1 font-display text-lg font-light leading-tight text-text">{p.name}</div>
-                          <div className="mt-1 font-body text-[11px] text-text-soft">Desde {formatCurrency(d.entryPrice)}</div>
+                          {d.tags && <span className="font-body text-xs text-text-muted">{d.tags}</span>}
+                          <div className="mt-1 font-display text-lg font-normal leading-tight text-text">{p.name}</div>
+                          <div className="mt-1 font-body text-xs font-semibold text-text-soft">Desde {formatCurrency(d.entryPrice)}</div>
                         </div>
                       </a>
                     );

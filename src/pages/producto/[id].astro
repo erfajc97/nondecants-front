@@ -13,6 +13,7 @@ import {
 import { productShareImagePath } from '@/app/helpers/ogCard';
 import ProductDetailIsland from '@/app/features/product/components/ProductDetailIsland';
 import ProductEditorial from '@/app/features/product/components/ProductEditorial.astro';
+import { getEditorialFlags } from '@/app/features/product/editorialFlags';
 import ProductReviews from '@/app/features/reviews/components/ProductReviews';
 import ExploreCategoriesCarousel from '@/app/features/product/components/ExploreCategoriesCarousel';
 
@@ -39,9 +40,20 @@ const relatedProducts = product.marcaId
       .filter((p) => p.id !== product.id)
   : [];
 
+const flags = getEditorialFlags(product);
+const jumpLinks = [
+  flags.hasSignature && { id: 'p-firma', label: 'La firma' },
+  flags.hasNotes && { id: 'p-notas', label: 'Notas y carácter' },
+  flags.hasDetail && { id: 'p-det', label: 'Descripción' },
+  { id: 'p-rev', label: 'Reseñas' },
+  { id: 'p-auth', label: 'Autenticidad' },
+  relatedProducts.length > 0 && { id: 'p-rel', label: 'Similares' },
+].filter(Boolean) as { id: string; label: string }[];
+
 const listingHref = product.bajoPedido ? '/bajo-pedido' : '/catalogo/perfumes';
 const listingLabel = product.bajoPedido ? 'Bajo Pedido' : 'Perfumes';
 ---
+
 
 <PublicLayout
   title={productSeoTitle(product)}
@@ -60,36 +72,127 @@ const listingLabel = product.bajoPedido ? 'Bajo Pedido' : 'Perfumes';
     ]),
   ]}
 >
-  <div class="bg-bg min-h-screen pt-3 md:pt-5">
-    {/* pb mobile compacto (REQ-035): el bloque PAGO cierra la columna y
-        "Perfil olfativo" arranca enseguida; en desktop se mantiene pb-10 */}
-    <div class="max-w-[1400px] mx-auto px-6 md:px-14 py-3 pb-5 md:pb-10">
-      {/* Breadcrumb */}
-      <nav class="mb-4 font-body text-[11px] tracking-[0.04em] text-text-muted flex items-center gap-2">
-        <a href="/" class="hover:text-text transition-colors">Inicio</a>
-        <span>·</span>
-        <a href={product.bajoPedido ? '/bajo-pedido' : '/catalogo/perfumes'} class="hover:text-text transition-colors">
-          {product.bajoPedido ? 'Bajo Pedido' : 'Perfumes'}
-        </a>
-        <span>·</span>
-        <span class="text-text">{product.name}</span>
+  <div class="bg-bg min-h-screen">
+    <div class="mx-auto max-w-[1480px] px-[max(16px,3.4vw)]">
+      {/* Breadcrumb (prototipo .crumb): Inicio / sección / casa */}
+      <nav aria-label="Migas de pan" class="flex flex-wrap items-center gap-x-1.5 py-[18px] font-body text-[13px] text-text-muted">
+        <a href="/" class="transition-colors hover:text-text">Inicio</a>
+        <span aria-hidden="true">/</span>
+        <a href={listingHref} class="transition-colors hover:text-text">{listingLabel}</a>
+        <span aria-hidden="true">/</span>
+        {product.marca?.name ? (
+          <a
+            href={`/catalogo/perfumes?marca=${product.marca.slug || product.marca.id}`}
+            class="transition-colors hover:text-text"
+          >{product.marca.name}</a>
+        ) : (
+          <span class="text-text">{product.name}</span>
+        )}
       </nav>
 
       <ProductDetailIsland product={product} client:load />
     </div>
 
-    {/* Secciones editoriales (perfil olfativo · carácter/ocasión · firma · promesas) */}
-    <ProductEditorial product={product} />
+    {/* Pestañas de salto (prototipo .jump): pegadas bajo el header */}
+    <nav
+      aria-label="Secciones de la ficha"
+      class="pdp-jump sticky top-[59px] z-20 mt-[clamp(36px,5vw,64px)] border-y border-border bg-white/95 backdrop-blur-md md:top-[67px]"
+    >
+      <div class="mx-auto flex max-w-[1480px] gap-6 overflow-x-auto px-[max(16px,3.4vw)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {jumpLinks.map((l) => (
+          <a
+            href={`#${l.id}`}
+            data-jump={l.id}
+            class="whitespace-nowrap py-3.5 font-body text-sm font-medium text-text-muted transition-colors hover:text-text"
+          >{l.label}</a>
+        ))}
+      </div>
+    </nav>
+
+    {/* Firma → notas y carácter → descripción */}
+    <ProductEditorial product={product} part="firma" />
+    <ProductEditorial product={product} part="notas" />
+    <ProductEditorial product={product} part="descripcion" />
 
     {/* Reseñas verificadas (solo aprobadas) + formulario */}
-    <ProductReviews productId={product.id} client:visible />
+    <div id="p-rev" data-rv class="pdp-anchor border-b border-border py-[clamp(36px,5vw,64px)]">
+      <ProductReviews productId={product.id} productName={product.name} client:visible />
+    </div>
 
-    {/* Relacionados — misma categoría, otras casas. Sin relacionados no se
+    <ProductEditorial product={product} part="autenticidad" />
+
+    {/* Relacionados — otros perfumes de la misma casa. Sin relacionados no se
         pinta el contenedor: si no, queda un bloque vacío antes del footer. */}
     {relatedProducts.length > 0 && (
-      <div class="max-w-[1400px] mx-auto px-6 md:px-14 pb-12 pt-8 md:pb-20 md:pt-16">
-        <ExploreCategoriesCarousel products={relatedProducts} client:visible />
+      <div id="p-rel" data-rv class="pdp-anchor py-[clamp(36px,5vw,64px)]">
+        <div class="mx-auto max-w-[1480px] px-[max(16px,3.4vw)]">
+          <ExploreCategoriesCarousel
+            products={relatedProducts}
+            moreHref={product.marca ? `/catalogo/perfumes?marca=${product.marca.slug || product.marca.id}` : undefined}
+            client:visible
+          />
+        </div>
       </div>
     )}
   </div>
 </PublicLayout>
+
+<script>
+  // Entrada al hacer scroll (prototipo .rv → .rv.in), conteo de los puntajes y
+  // pestaña activa de la barra de salto. Todo se omite con prefers-reduced-motion
+  // salvo el marcado de la pestaña activa.
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function countUp(root: Element) {
+    root.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+      const to = Number(el.dataset.count);
+      if (reduce || !Number.isFinite(to)) return;
+      const t0 = performance.now() + 700;
+      const d = 1300;
+      el.textContent = '0';
+      const step = (t: number) => {
+        const k = Math.min(1, Math.max(0, (t - t0) / d));
+        el.textContent = String(Math.round(to * (1 - Math.pow(1 - k, 3))));
+        if (k < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+  }
+
+  const blocks = document.querySelectorAll<HTMLElement>('[data-rv]');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          e.target.classList.add('in');
+          countUp(e.target);
+          io.unobserve(e.target);
+        }),
+      { rootMargin: '0px 0px -8% 0px' },
+    );
+    blocks.forEach((b) => {
+      b.classList.add('rv');
+      io.observe(b);
+    });
+  }
+
+  // Scroll-spy de la barra de salto.
+  const links = document.querySelectorAll<HTMLAnchorElement>('.pdp-jump [data-jump]');
+  if (links.length && 'IntersectionObserver' in window) {
+    const spy = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          links.forEach((a) =>
+            a.setAttribute('aria-current', String(a.dataset.jump === (e.target as HTMLElement).id)),
+          );
+        }),
+      { rootMargin: '-30% 0px -60% 0px' },
+    );
+    links.forEach((a) => {
+      const t = document.getElementById(a.dataset.jump!);
+      if (t) spy.observe(t);
+    });
+  }
+</script>

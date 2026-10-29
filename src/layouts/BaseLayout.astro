@@ -1,8 +1,8 @@
 ---
 import '../styles/global.css';
 import { SHARE_DESCRIPTION, SHARE_TITLE, SITE_ORIGIN } from '@/app/helpers/seoMeta';
-import dmSansLatin from '@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2?url';
-import cormorantItalic from '@fontsource-variable/cormorant-garamond/files/cormorant-garamond-latin-wght-italic.woff2?url';
+import bricolageLatin from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url';
+import gloockLatin from '@fontsource/gloock/files/gloock-latin-400-normal.woff2?url';
 
 interface Props {
   title?: string;
@@ -111,8 +111,8 @@ const ogUpdated = new Date().toISOString();
     <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260828" />
 
     <!-- Fuentes autohospedadas: sin CSS externo que bloquee el primer paint. -->
-    <link rel="preload" href={dmSansLatin} as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href={cormorantItalic} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={bricolageLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={gloockLatin} as="font" type="font/woff2" crossorigin />
     {jsonLdPayload.map((block) => (
       <script type="application/ld+json" set:html={JSON.stringify(block)} />
     ))}

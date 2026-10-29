@@ -19,7 +19,7 @@ export default function ComboGrid({ combos, isLoading }: ComboGridProps) {
   if (combos.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center md:py-20">
-        <p className="text-text-muted text-sm">
+        <p className="font-body text-[15px] text-text-muted">
           No hay combos disponibles en este momento.
         </p>
       </div>
@@ -27,7 +27,7 @@ export default function ComboGrid({ combos, isLoading }: ComboGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-3 lg:gap-[18px] xl:grid-cols-4">
       {combos.map((combo) => (
         <ComboCard key={combo.id} combo={combo} />
       ))}

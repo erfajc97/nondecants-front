@@ -8,12 +8,11 @@ function CheckoutContent() {
   const checkoutData = useCheckoutHook();
 
   return (
-    <div className="relative flex flex-col gap-7 border border-border bg-surface p-5 md:gap-10 md:p-10 lg:flex-row lg:gap-14">
-      <div className="flex-1">
+    <div className="relative grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+      <div className="min-w-0 rounded-md border border-border bg-surface p-5 md:p-8">
         <CheckoutForm {...checkoutData} onLogin={checkoutData.openAuth} />
       </div>
-      <div className="hidden w-px shrink-0 bg-border lg:block" />
-      <div className="lg:w-[400px] shrink-0">
+      <div className="min-w-0 rounded-md border border-border bg-surface p-5 md:p-6 lg:sticky lg:top-6">
         <CheckoutOrderSummary
           items={checkoutData.items}
           subtotal={checkoutData.subtotal}
@@ -63,15 +62,15 @@ function BajoPedidoConfirmModal({
 
   return (
     <div className="fixed inset-0 z-80 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-bg/70 backdrop-blur-sm" onClick={isPending ? undefined : onCancel} />
-      <div className="relative w-full max-w-md border border-border bg-surface p-7 shadow-xl">
+      <div className="absolute inset-0 bg-text/50" onClick={isPending ? undefined : onCancel} />
+      <div className="relative w-full max-w-md rounded-lg bg-surface p-6 shadow-xl md:p-7">
         <div className="mb-5 flex items-start gap-3">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="mt-0.5 shrink-0 text-accent">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="mt-0.5 shrink-0 text-warning">
             <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
           <div>
-            <p className="eyebrow mb-2 text-accent">Pedido bajo demanda</p>
-            <h3 className="font-display text-2xl font-light leading-tight text-text">
+            <p className="mb-1.5 font-body text-[13px] font-semibold text-warning">Pedido bajo demanda</p>
+            <h3 className="font-display text-2xl leading-tight text-text">
               {hasPartial ? 'Stock parcial disponible' : '¿Confirmas tu pedido?'}
             </h3>
           </div>
@@ -84,7 +83,7 @@ function BajoPedidoConfirmModal({
         </p>
 
         {/* Desglose por producto */}
-        <div className="mb-5 divide-y divide-border border border-border">
+        <div className="mb-5 divide-y divide-border rounded-md border border-border">
           {items.map((it, idx) => (
             <div key={idx} className="flex flex-col gap-1 px-4 py-3">
               <p className="font-body text-sm text-text">
@@ -99,7 +98,7 @@ function BajoPedidoConfirmModal({
                 )}
                 {it.inStock > 0 && it.bajo > 0 && <span className="text-text-muted"> · </span>}
                 {it.bajo > 0 && (
-                  <span className="text-accent">
+                  <span className="font-semibold text-warning">
                     {it.bajo} bajo pedido
                   </span>
                 )}
@@ -108,8 +107,8 @@ function BajoPedidoConfirmModal({
           ))}
         </div>
 
-        <div className="mb-7 border-l-2 border-accent bg-bg-alt px-4 py-3">
-          <p className="font-body text-xs leading-relaxed text-text-soft">
+        <div className="mb-6 rounded-md bg-gold-light px-4 py-3">
+          <p className="font-body text-sm leading-relaxed text-text-soft">
             Las unidades bajo pedido llegan en <span className="text-text">13 a 17 días</span> tras confirmar el pago. El resto se prepara de inmediato. Se cobra el total ahora y generamos tu orden.
           </p>
         </div>
@@ -119,7 +118,7 @@ function BajoPedidoConfirmModal({
             type="button"
             onClick={onConfirm}
             disabled={isPending}
-            className="flex-1 bg-text px-6 py-3.5 font-body text-[11px] uppercase tracking-[0.18em] text-bg transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-[54px] flex-1 rounded-sm bg-text px-6 font-body text-[15px] font-semibold text-bg transition-colors hover:bg-text-soft disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending ? 'Procesando…' : 'Sí, confirmar pedido'}
           </button>
@@ -127,7 +126,7 @@ function BajoPedidoConfirmModal({
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="flex-1 border border-border px-6 py-3.5 font-body text-[11px] uppercase tracking-[0.18em] text-text-soft transition-colors hover:border-text hover:text-text disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-[54px] flex-1 rounded-sm border-[1.5px] border-text px-6 font-body text-[15px] font-semibold text-text transition-colors hover:bg-bg-alt disabled:cursor-not-allowed disabled:opacity-50"
           >
             Volver
           </button>

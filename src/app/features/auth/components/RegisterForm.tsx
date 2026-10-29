@@ -56,7 +56,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="mb-2 font-display text-3xl font-light text-text">Revisa tu bandeja de entrada</h2>
+        <h2 className="mb-2 font-display text-3xl font-normal text-text">Revisa tu bandeja de entrada</h2>
         <p className="mb-6 font-body text-sm text-text-soft">
           Te enviamos un enlace de verificación a <span className="text-text">{email}</span>
         </p>
@@ -82,7 +82,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
   return (
     <div>
       {/* Title */}
-      <h2 className="mb-1 text-center font-display text-3xl font-light text-text">Crear cuenta</h2>
+      <h2 className="mb-1 text-center font-display text-3xl font-normal text-text">Crear cuenta</h2>
       <p className="mb-7 text-center font-body text-sm text-text-soft">Regístrate para empezar a comprar</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -191,7 +191,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
         {/* Divider */}
         <div className="my-1 flex items-center gap-4">
           <div className="h-px flex-1 bg-border" />
-          <span className="font-body text-[10px] uppercase tracking-[0.2em] text-text-muted">o</span>
+          <span className="font-body text-[13px] font-semibold text-text-muted">o</span>
           <div className="h-px flex-1 bg-border" />
         </div>
 

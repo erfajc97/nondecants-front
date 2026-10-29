@@ -1,0 +1,9 @@
+# Ambiente de revisión (rama `dev`): el front corre con datos de prueba, sin backend ni .env.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # Lo lee astro.config.mjs (vite.define) y activa el adaptador de axios con datos de prueba.
+  VITE_DEMO = "true"

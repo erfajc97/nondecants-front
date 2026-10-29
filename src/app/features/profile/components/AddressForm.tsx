@@ -7,7 +7,7 @@ import type { Address, AddressPayload } from '../types';
 
 const INPUT =
   'w-full border border-border bg-surface px-3.5 py-3 font-body text-sm text-text placeholder:text-text-muted focus:border-text focus:outline-none transition-colors';
-const LABEL = 'mb-2 block font-body text-[10px] uppercase tracking-[0.18em] text-text-muted';
+const LABEL = 'mb-2 block font-body text-[13px] font-semibold text-text-muted';
 
 const EMPTY_FORM: AddressPayload = {
   alias: '',
@@ -156,7 +156,7 @@ export default function AddressForm({ initial, isPending, onSubmit, onCancel }: 
         <button
           type="submit"
           disabled={isPending}
-          className="bg-text px-8 py-3.5 font-body text-xs font-medium uppercase tracking-[0.2em] text-bg transition-colors hover:bg-accent disabled:opacity-50"
+          className="rounded-[3px] bg-text px-8 py-3.5 font-body text-[14.5px] font-semibold tracking-[0.01em] text-bg transition-colors hover:bg-text-soft disabled:opacity-50"
         >
           {isPending ? <Loader size={16} color="#fff" /> : initial ? 'Guardar cambios' : 'Guardar dirección'}
         </button>
@@ -164,7 +164,7 @@ export default function AddressForm({ initial, isPending, onSubmit, onCancel }: 
           type="button"
           onClick={onCancel}
           disabled={isPending}
-          className="border border-border px-8 py-3.5 font-body text-xs uppercase tracking-[0.2em] text-text-soft transition-colors hover:border-text hover:text-text disabled:opacity-50"
+          className="border border-border px-8 py-3.5 font-body text-[14.5px] font-semibold tracking-[0.01em] text-text-soft transition-colors hover:border-text hover:text-text disabled:opacity-50"
         >
           Cancelar
         </button>

@@ -9,13 +9,13 @@ const { eyebrow = 'Legal', title, updated, intro } = Astro.props;
 ---
 
 <section class="bg-bg">
-  <div class="mx-auto max-w-[820px] px-6 py-12 md:px-8 md:py-32">
-    <span class="eyebrow">{eyebrow}</span>
-    <h1 class="mt-4 font-heading text-4xl italic leading-[1.05] text-text md:text-5xl">
+  <div class="mx-auto max-w-[820px] px-[max(16px,3.4vw)] py-12 md:py-24">
+    <span class="eyebrow k">{eyebrow}</span>
+    <h1 class="mt-2 font-heading text-[clamp(40px,5vw,64px)] font-normal leading-[0.98] tracking-[-0.025em] text-balance text-text">
       {title}
     </h1>
     {updated && (
-      <p class="mt-5 font-body text-[12px] uppercase tracking-[0.18em] text-text-muted">
+      <p class="mt-5 font-body text-[13px] text-text-muted">
         Última actualización: {updated}
       </p>
     )}
@@ -25,9 +25,9 @@ const { eyebrow = 'Legal', title, updated, intro } = Astro.props;
       </p>
     )}
 
-    <div class="mt-14 h-px bg-border"></div>
+    <div class="mt-12 h-px bg-border"></div>
 
-    <article class="legal-prose mt-14">
+    <article class="legal-prose mt-12">
       <slot />
     </article>
   </div>
@@ -48,10 +48,8 @@ const { eyebrow = 'Legal', title, updated, intro } = Astro.props;
   }
   .legal-prose :global(h3) {
     font-family: var(--font-body);
-    font-size: 0.8125rem;
+    font-size: 1rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
     color: var(--color-text);
     margin-top: 1.75rem;
     margin-bottom: 0.5rem;
@@ -93,19 +91,19 @@ const { eyebrow = 'Legal', title, updated, intro } = Astro.props;
     font-weight: 600;
   }
   .legal-prose :global(a) {
-    color: var(--color-accent);
+    color: var(--color-accent-hover);
     text-decoration: underline;
     text-underline-offset: 2px;
   }
   .legal-prose :global(a:hover) {
-    color: var(--color-accent-hover);
+    color: var(--color-text);
   }
   .legal-prose :global(.legal-contact) {
     margin-top: 2.5rem;
     padding: 1.5rem 1.75rem;
     background-color: var(--color-bg-alt);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
+    border-radius: 4px;
   }
   .legal-prose :global(.legal-contact p) {
     margin-bottom: 0.35rem;
