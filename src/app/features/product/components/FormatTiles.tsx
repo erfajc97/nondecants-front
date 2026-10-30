@@ -56,7 +56,7 @@ export default function FormatTiles({
                   : `border-border text-text hover:border-text-muted/50 ${f.backorder ? 'border-dashed' : ''}`
             }`}
           >
-            <b className={`${size === 'feature' ? 'text-[15px]' : 'text-[11px] sm:text-xs'} font-bold`}>{label}</b>
+            <b className={`${size === 'feature' ? 'text-[15px]' : 'text-[15px]'} font-bold`}>{label}</b>
             <small
               className={`${size === 'feature' ? 'text-[13px]' : 'text-[10.5px] sm:text-[11.5px]'} ${
                 f.backorder ? 'text-warning' : isSelected ? 'text-accent' : 'text-text-muted'

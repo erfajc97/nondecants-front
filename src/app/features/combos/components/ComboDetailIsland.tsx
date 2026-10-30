@@ -304,9 +304,10 @@ function ComboDetailContent({ combo }: ComboDetailIslandProps) {
                         {notes.map((n) => (
                           <li
                             key={n.name}
-                            className="inline-flex items-center gap-1.5 rounded-full bg-bg-alt py-1 pl-1.5 pr-2.5 font-body text-[12.5px] text-text-soft"
+                            className="inline-flex h-[30px] items-center gap-1.5 rounded-full bg-bg-alt py-0 pl-2.5 pr-3 font-body text-[12.5px] text-text-soft"
+                            style={n.color ? { background: `color-mix(in srgb, ${n.color} 13%, transparent)` } : undefined}
                           >
-                            <i aria-hidden="true" className="block h-3 w-3 rounded-full" style={{ background: n.color }} />
+                            <i aria-hidden="true" className="block h-2 w-2 rounded-full" style={{ background: n.color }} />
                             {n.name}
                           </li>
                         ))}
@@ -345,7 +346,7 @@ function ComboDetailContent({ combo }: ComboDetailIslandProps) {
         <section className="mt-14 border-t border-border pt-10 md:mt-20 md:pt-14">
           <span className="eyebrow">La historia</span>
           <h2 className="mt-2 font-display text-[28px] leading-[1.05] tracking-[-0.02em] text-text md:text-4xl">
-            Por qué van juntos.
+            {combo.name}
           </h2>
           <p className="mt-5 max-w-[64ch] whitespace-pre-line font-body text-base leading-[1.7] text-text-soft">{story}</p>
         </section>

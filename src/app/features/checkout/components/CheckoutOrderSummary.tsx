@@ -1,3 +1,5 @@
+import { DEMO_ENABLED } from '@/app/lib/mock';
+import { comboTitle, comboSubtitle } from '@/app/helpers/comboLabels';
 import CouponField from './CouponField';
 import TermsAcceptance from './TermsAcceptance';
 import Loader from '@/app/components/Loader';
@@ -21,11 +23,13 @@ interface CheckoutOrderSummaryProps {
   couponLoading?: boolean;
   couponMessage?: string;
   onCouponCodeChange?: (code: string) => void;
-  onApplyCoupon?: () => void;
+  onApplyCoupon?: () => void | Promise<unknown>;
   onRemoveCoupon?: () => void;
   payphoneSurcharge?: number;
   /** El envío ya se puede calcular (ciudad o punto de retiro elegido en el paso 1). */
   shippingReady?: boolean;
+  /** Mostrar la casilla de términos (solo en el paso 3). */
+  showTerms?: boolean;
   termsAccepted?: boolean;
   onTermsChange?: (accepted: boolean) => void;
   canConfirm?: boolean;
@@ -51,6 +55,7 @@ export default function CheckoutOrderSummary({
   onRemoveCoupon,
   payphoneSurcharge = 0,
   shippingReady = true,
+  showTerms = false,
   termsAccepted = false,
   onTermsChange,
   canConfirm = false,
@@ -101,7 +106,7 @@ export default function CheckoutOrderSummary({
               </div>
               <div className="flex-1">
                 <div className="flex items-start justify-between">
-                  <h3 className="pr-4 font-display text-[17px] leading-tight text-text">{item.name}</h3>
+                  <h3 className="pr-4 font-display text-[17px] leading-tight text-text">{item.comboId ? comboTitle(item) : item.name}</h3>
                   <button onClick={() => removeItem(item.variantId)} className="text-text-muted hover:text-error transition-colors" aria-label="Eliminar producto">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="3 6 5 6 21 6" />
@@ -111,7 +116,7 @@ export default function CheckoutOrderSummary({
                 </div>
                 {item.comboId ? (
                   <p className="mt-1 font-body text-[13px] text-text-muted">
-                    Combo · {item.comboProducts?.length ?? 0} decants{item.ml > 0 && item.ml < 30 ? ` de ${item.ml} ml` : ''}
+                    {comboSubtitle(item)}
                   </p>
                 ) : (
                   <p className="mt-1 font-body text-[13px] text-text-muted">
@@ -154,7 +159,7 @@ export default function CheckoutOrderSummary({
         )}
       </div>
 
-      {onApplyCoupon && hasNonComboItems && (
+      {onApplyCoupon && (DEMO_ENABLED || hasNonComboItems) && (
         <div className="mb-6">
           <CouponField
             couponCode={couponCode}
@@ -211,7 +216,7 @@ export default function CheckoutOrderSummary({
 
       {onConfirm && (
         <div className="mt-5 flex flex-col gap-4">
-          <TermsAcceptance checked={termsAccepted} onChange={onTermsChange ?? (() => {})} />
+          {showTerms && <TermsAcceptance checked={termsAccepted} onChange={onTermsChange ?? (() => {})} />}
           <button
             type="button"
             onClick={onConfirm}

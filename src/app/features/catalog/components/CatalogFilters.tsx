@@ -38,14 +38,14 @@ function OptionPill({ option, selected, count, onPress, leading, serif }: Option
       onClick={onPress}
       disabled={off}
       aria-pressed={selected}
-      className={`inline-flex h-10 items-center gap-2 rounded-full border px-3.5 transition-colors ${
+      className={`inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-full border px-3.5 transition-colors ${
         selected ? 'border-text bg-text text-white' : 'border-border bg-white text-text hover:border-text'
       } ${off ? 'pointer-events-none opacity-35' : ''} ${serif ? 'font-display text-[15px]' : 'font-body text-sm font-semibold'}`}
     >
       {selected && <Check className="text-accent" />}
       {leading}
       {option.label}
-      <span className={`font-body text-[11px] font-medium ${selected ? 'text-white/70' : 'text-text-muted'}`}>{count}</span>
+      {!selected && <span className="font-body text-[11px] font-medium text-text-muted">{count}</span>}
     </button>
   );
 }
@@ -69,7 +69,7 @@ function CasaRow({ option, selected, count, onPress }: OptionButtonProps) {
         {selected && <Check />}
       </span>
       <span className={`flex-1 ${selected ? 'font-semibold' : ''}`}>{option.label}</span>
-      <span className="text-[11px] text-text-muted">{count}</span>
+      {!selected && <span className="text-[11px] text-text-muted">{count}</span>}
     </button>
   );
 }

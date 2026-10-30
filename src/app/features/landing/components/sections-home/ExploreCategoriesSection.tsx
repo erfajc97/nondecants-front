@@ -89,11 +89,13 @@ function HouseBanner({ kind, category }: { kind: HouseKind; category: NavCategor
         </div>
 
         <div className="absolute inset-x-0 bottom-0 p-5 min-[821px]:p-7">
-          <p className="k font-body text-[13px] font-semibold tabular-nums text-accent">
+          <p className="k font-body text-[13px] font-semibold tabular-nums text-[#F1E6C8]">
             {count} casas
           </p>
-          <h3 className="mt-1.5 font-display text-[clamp(28px,3vw,44px)] font-normal leading-none text-bg">{heading}</h3>
-          <span className="nd-house-line mt-3 block h-0.5 w-14 bg-accent" aria-hidden="true" />
+          <div className="mt-1.5 w-fit">
+            <h3 className="font-display text-[clamp(28px,3vw,44px)] font-normal leading-none text-bg">{heading}</h3>
+            <span className="nd-house-line mt-3 block h-0.5 w-full bg-accent" aria-hidden="true" />
+          </div>
           <span className="mt-3.5 inline-flex items-center gap-2 font-body text-[13.5px] font-semibold text-bg">
             Explorar
             <span className="transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1" aria-hidden="true">→</span>

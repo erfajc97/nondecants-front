@@ -22,7 +22,7 @@ export default function MomentsSection() {
         <Reveal>
           <SectionHead eyebrow="¿No sabes cuál elegir?" title="Empieza por el momento" />
           <div className="grid grid-cols-2 gap-3 min-[821px]:grid-cols-3 min-[1181px]:grid-cols-5">
-            {MOMENTS.map((m) => (
+            {MOMENTS.map((m, i) => (
               <a
                 key={m.title}
                 href={m.href}
@@ -30,7 +30,8 @@ export default function MomentsSection() {
               >
                 <PhosphorIcon
                   name={m.icon}
-                  className="h-[34px] w-[34px] text-text transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-rotate-6 motion-reduce:transition-none"
+                  className={`nd-mi nd-mi-${m.icon} h-[34px] w-[34px] text-text`}
+                  style={{ '--nd-mi-d': `${i * 120}ms` } as React.CSSProperties}
                 />
                 <span className="font-display text-[21px] leading-[1.05] text-text-muted min-[821px]:text-2xl">{m.title}</span>
                 <span className="font-body text-[13.5px] text-text-muted">{m.text}</span>

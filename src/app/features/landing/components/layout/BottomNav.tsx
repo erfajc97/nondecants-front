@@ -48,7 +48,7 @@ export default function BottomNav({ pathname, isAuthenticated = false, onAuthOpe
   return (
     <nav
       aria-label="Navegación móvil"
-      className="fixed inset-x-2.5 z-40 rounded-[22px] bg-text shadow-[0_14px_34px_-12px_rgba(27,25,25,0.55)] min-[821px]:hidden"
+      className="fixed inset-x-2.5 z-40 rounded-[22px] bg-text p-1.5 shadow-[0_14px_34px_-12px_rgba(27,25,25,0.55)] min-[821px]:hidden"
       style={{ bottom: 'calc(10px + env(safe-area-inset-bottom, 0px))' }}
     >
       <div className="relative grid grid-cols-5">

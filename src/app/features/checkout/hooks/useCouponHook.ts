@@ -4,6 +4,9 @@ import { API_ENDPOINTS } from '@/app/api/endpoints';
 import { sonnerResponse } from '@/app/helpers/sonnerResponse';
 import { useCouponStore } from '@/app/store/coupon/couponStore';
 import { useCartStore } from '@/app/store/cart/cartStore';
+import { DEMO_ENABLED } from '@/app/lib/mock';
+
+const DEMO_COUPON_ERROR = 'Ese código no existe o ya venció.';
 
 interface CouponResult {
   valid: boolean;
@@ -32,8 +35,28 @@ export function useCouponHook() {
   const cartItems = useCartStore((s) => s.items);
   const hasNonComboItems = useCartStore((s) => s.items.some((i) => i.comboId == null));
 
-  const handleApply = async () => {
-    if (!code.trim()) return;
+  const allSubtotal = useCartStore((s) => s.items.reduce((acc, i) => acc + i.price * i.quantity, 0));
+
+  /** Demo sin backend: cupones fijos validados en cliente. Devuelve si fue válido. */
+  const applyDemo = (): boolean => {
+    const c = code.trim().toUpperCase();
+    const round = (n: number) => Math.round(n * 100) / 100;
+    let raw = 0;
+    if (c === 'NOD') raw = 5;
+    else if (c === 'NOD10') raw = allSubtotal * 0.1;
+    else {
+      useCouponStore.setState({ applied: false, discount: 0, freeShipping: false, message: DEMO_COUPON_ERROR, itemDiscounts: [] });
+      return false;
+    }
+    const discount = round(Math.min(raw, allSubtotal));
+    const message = c === 'NOD' ? 'Código NOD: $5 de descuento' : 'Código NOD10: 10% de descuento';
+    apply({ discount, freeShipping: false, message, itemDiscounts: [] });
+    return true;
+  };
+
+  const handleApply = async (): Promise<boolean> => {
+    if (!code.trim()) return false;
+    if (DEMO_ENABLED) return applyDemo();
     setLoading(true);
     try {
       const { data } = await axiosInstance.post(API_ENDPOINTS.COUPONS_VALIDATE, {
@@ -58,6 +81,7 @@ export function useCouponHook() {
           itemDiscounts: result.itemDiscounts,
         });
         sonnerResponse(result.message, 'success');
+        return true;
       } else {
         useCouponStore.setState({
           applied: false,
@@ -67,10 +91,12 @@ export function useCouponHook() {
           itemDiscounts: [],
         });
         sonnerResponse(result.message, 'error');
+        return false;
       }
     } catch {
       useCouponStore.setState({ message: 'Error al validar el cupón' });
       sonnerResponse('Error al validar el cupón', 'error');
+      return false;
     } finally {
       setLoading(false);
     }

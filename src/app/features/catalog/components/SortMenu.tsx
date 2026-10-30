@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { SORT_OPTIONS } from '../data';
 import type { SortKey } from '../types';
 
@@ -19,6 +20,8 @@ function GoldCheck() {
 export default function SortMenu({ value, onChange }: SortMenuProps) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!open) return;
@@ -29,8 +32,13 @@ export default function SortMenu({ value, onChange }: SortMenuProps) {
     document.addEventListener('keydown', onKey);
     document.addEventListener('mousedown', onDown);
     const prev = document.body.style.overflow;
-    if (!window.matchMedia('(min-width: 768px)').matches) document.body.style.overflow = 'hidden';
+    const mobile = !window.matchMedia('(min-width: 768px)').matches;
+    if (mobile) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.setAttribute('data-sheet-open', '');
+    }
     return () => {
+      document.documentElement.removeAttribute('data-sheet-open');
       document.removeEventListener('keydown', onKey);
       document.removeEventListener('mousedown', onDown);
       document.body.style.overflow = prev;
@@ -54,7 +62,7 @@ export default function SortMenu({ value, onChange }: SortMenuProps) {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
           <path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3" />
         </svg>
-        Ordenar
+        {SORT_OPTIONS.find((o) => o.value === value)?.label ?? 'Ordenar'}
       </button>
 
       {open && (
@@ -80,12 +88,13 @@ export default function SortMenu({ value, onChange }: SortMenuProps) {
           </ul>
 
           {/* Móvil */}
-          <div className="fixed inset-0 z-[86] md:hidden" role="dialog" aria-modal="true" aria-label="Ordenar perfumes">
+          {mounted && createPortal(
+          <div className="fixed inset-0 z-[90] md:hidden" role="dialog" aria-modal="true" aria-label="Ordenar por">
             <div className="absolute inset-0 bg-text/45" onClick={() => setOpen(false)} aria-hidden="true" />
             <div className="absolute inset-x-0 bottom-0 rounded-t-[18px] bg-white pb-[calc(12px+env(safe-area-inset-bottom,0px))]">
               <div className="relative border-b border-border px-5 pb-3 pt-[18px]">
                 <span className="absolute left-1/2 top-[7px] -ml-5 h-1 w-10 rounded-sm bg-border" aria-hidden />
-                <b className="font-display text-[26px] font-normal">Ordenar</b>
+                <b className="font-display text-[26px] font-normal">Ordenar por</b>
               </div>
               <ul>
                 {SORT_OPTIONS.map((o) => (
@@ -103,7 +112,9 @@ export default function SortMenu({ value, onChange }: SortMenuProps) {
                 ))}
               </ul>
             </div>
-          </div>
+          </div>,
+          document.body,
+          )}
         </>
       )}
     </div>

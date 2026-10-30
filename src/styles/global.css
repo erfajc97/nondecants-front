@@ -447,7 +447,7 @@ body {
 .fseal-bub b { display: block; font-weight: 700; color: #1c8f4a; }
 .fseal-bub.on { opacity: 1; transform: none; }
 @media (max-width: 820px) {
-  .fseal { width: 62px; height: 62px; right: max(14px, env(safe-area-inset-right, 0px)); bottom: calc(var(--bnav-h, 66px) + 20px + env(safe-area-inset-bottom, 0px)); }
+  .fseal { width: 62px; height: 62px; right: max(14px, env(safe-area-inset-right, 0px)); bottom: calc(var(--bnav-h, 78px) + 20px + env(safe-area-inset-bottom, 0px)); }
   .fseal-wa { width: 24px; height: 24px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -595,7 +595,7 @@ body.nd-lock { overflow: hidden; }
   --bnav-h: 0px; /* alto que ocupa la barra inferior móvil (ver BottomNav) */
 }
 @media (max-width: 820px) {
-  :root { --bnav-h: 66px; }
+  :root { --bnav-h: 78px; } /* barra 68 px (56 + 6 de relleno) + 10 px de separación inferior */
   :root[data-no-bnav] { --bnav-h: 0px; }
 }
 
@@ -626,3 +626,35 @@ a[role="button"]:active,
   animation: marq-twinkle 2.4s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) { .marq-item::after { animation: none; } }
+
+/* ── Momentos: animación propia por ícono (aparecer escalonado + hover) ── */
+@keyframes nd-mi-in { from { opacity: 0; transform: translateY(8px) scale(0.7); } to { opacity: 1; transform: none; } }
+@keyframes nd-mi-sway { 0%, 100% { transform: rotate(-14deg); } 50% { transform: rotate(14deg); } }
+@keyframes nd-mi-spin { to { transform: rotate(360deg); } }
+@keyframes nd-mi-tilt { 0%, 100% { transform: rotate(0); } 40% { transform: rotate(-22deg); } 70% { transform: rotate(8deg); } }
+@keyframes nd-mi-hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-9px); } 60% { transform: translateY(0); } 78% { transform: translateY(-3px); } }
+@keyframes nd-mi-shake { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-12deg); } 40% { transform: rotate(10deg); } 60% { transform: rotate(-8deg); } 80% { transform: rotate(6deg); } }
+.nd-mi { transform-origin: 50% 50%; --nd-mi-a: nd-mi-tilt 1.2s; --nd-mi-n: 1; animation: nd-mi-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--nd-mi-d, 0ms) both; }
+.nd-mi-moonStars { transform-origin: 50% 20%; }
+.nd-mi-wine { transform-origin: 50% 90%; }
+.nd-mi-briefcase { transform-origin: 50% 100%; }
+/* una pasada al terminar de entrar; en hover, en bucle */
+.nd-mi-moonStars { animation: nd-mi-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--nd-mi-d, 0ms) both, nd-mi-sway 2.4s ease-in-out calc(var(--nd-mi-d, 0ms) + 0.5s) 1; }
+.nd-mi-sun { animation: nd-mi-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--nd-mi-d, 0ms) both, nd-mi-spin 6s linear calc(var(--nd-mi-d, 0ms) + 0.5s) infinite; }
+.nd-mi-wine { animation: nd-mi-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--nd-mi-d, 0ms) both, nd-mi-tilt 1.2s ease-in-out calc(var(--nd-mi-d, 0ms) + 0.5s) 1; }
+.nd-mi-briefcase { animation: nd-mi-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--nd-mi-d, 0ms) both, nd-mi-hop 0.8s ease-out calc(var(--nd-mi-d, 0ms) + 0.5s) 1; }
+.nd-mi-gift { animation: nd-mi-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--nd-mi-d, 0ms) both, nd-mi-shake 0.7s ease-in-out calc(var(--nd-mi-d, 0ms) + 0.5s) 1; }
+.group:hover .nd-mi-moonStars { animation: nd-mi-sway 2.4s ease-in-out infinite; }
+.group:hover .nd-mi-sun { animation: nd-mi-spin 3s linear infinite; }
+.group:hover .nd-mi-wine { animation: nd-mi-tilt 1.2s ease-in-out infinite; }
+.group:hover .nd-mi-briefcase { animation: nd-mi-hop 0.8s ease-out infinite; }
+.group:hover .nd-mi-gift { animation: nd-mi-shake 0.7s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .nd-mi, .group:hover .nd-mi { animation: none !important; }
+}
+
+/* Hoja de filtros/ordenar abierta (móvil): oculta barra inferior y sello flotante */
+:root[data-sheet-open] #bottom-nav,
+:root[data-sheet-open] nav[aria-label="Navegación móvil"],
+:root[data-sheet-open] .fseal,
+:root[data-sheet-open] .fseal-bub { display: none !important; }

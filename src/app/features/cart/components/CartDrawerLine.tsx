@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { comboTitle, comboSubtitle } from '@/app/helpers/comboLabels';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
 import { useCouponStore } from '@/app/store/coupon/couponStore';
 import { lineCouponDiscount } from '@/app/helpers/couponItemDiscount';
@@ -47,7 +48,7 @@ export default function CartDrawerLine({ row, group, index, onSetTotal, onRemove
   const minusDisabled = group === 'immediate' && split;
 
   const variantLabel = isCombo
-    ? `Combo · ${item.comboProducts?.length ?? 0} decants${item.ml > 0 && item.ml < 30 ? ` de ${item.ml} ml` : ''}`
+    ? comboSubtitle(item)
     : `${item.ml} ml · ${item.ml >= 30 ? 'Botella original' : 'Decant'}`;
 
   const gone = (fn: () => void) => {
@@ -84,7 +85,7 @@ export default function CartDrawerLine({ row, group, index, onSetTotal, onRemove
       </div>
 
       <div className="min-w-0">
-        <p className="line-clamp-2 font-display text-[17px] leading-[1.15] text-text">{item.name}</p>
+        <p className="line-clamp-2 font-display text-[17px] leading-[1.15] text-text">{isCombo ? comboTitle(item) : item.name}</p>
         <p className="mt-[3px] font-body text-[13px] text-text-muted">{variantLabel}</p>
         {isBajo && (
           <span className="mt-1.5 inline-flex items-center rounded-full bg-warning-muted px-2 py-0.5 font-body text-[11.5px] font-semibold text-warning">

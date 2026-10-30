@@ -52,10 +52,18 @@ export default function CartUpsell3ml({ candidates }: { candidates: Product[] })
   const inCart = useCartStore((s) => s.items);
 
   const offers: Offer[] = [];
+  const seen = new Set<string>(inCart.map((i) => String(i.productId)));
+  const seenNames = new Set<string>(inCart.map((i) => i.name.trim().toLowerCase()));
   for (const p of candidates) {
-    if (inCart.some((i) => i.variantId === offerFor(p)?.variantId)) continue;
+    const pid = String(p.id);
+    const pname = String(p.name ?? '').trim().toLowerCase();
+    if (seen.has(pid) || seenNames.has(pname)) continue;
     const o = offerFor(p);
-    if (o) offers.push(o);
+    if (o) {
+      offers.push(o);
+      seen.add(pid);
+      seenNames.add(pname);
+    }
     if (offers.length === 2) break;
   }
   if (offers.length === 0) return null;

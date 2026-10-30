@@ -60,6 +60,12 @@ export function notesOf(p: Any): { name: string; color?: string }[] {
 
 /** Precio del decant de 3 ml (o el formato más barato si no existe). */
 export function price3ml(p: Any): number {
+  const d = Number(p?.discount);
+  const k = d > 0 ? 1 - d / 100 : 1;
+  return rawPrice3ml(p) * k;
+}
+
+function rawPrice3ml(p: Any): number {
   const vars: Any[] = p?.variants ?? p?.variations ?? [];
   const v3 = vars.find((v) => Number(v.mlSize ?? v.ml) === 3);
   if (v3 && Number(v3.price) > 0) return Number(v3.price);
@@ -157,7 +163,7 @@ export function searchProducts<P = Any>(
     if (numeric !== null) {
       const pr = price3ml(p);
       if (pr > 0 && pr <= numeric) {
-        set({ kind: 'price', label: `Decant 3 ml · $${pr.toFixed(2).replace('.', ',')}` }, 100 - pr / 1000);
+        set({ kind: 'price', label: `3 ml · $${pr.toFixed(2).replace('.', ',')}` }, 100 - pr / 1000);
       }
     } else {
       const all = (hay: string) => toks.every((t) => hay.includes(t));

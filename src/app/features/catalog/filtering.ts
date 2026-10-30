@@ -48,7 +48,11 @@ function metaOf(p: Product): Meta {
   const meta: Meta = {
     momentos,
     notas,
-    price3: three && Number.isFinite(Number(three.price)) ? Number(three.price) : null,
+    // Precio final (con descuento), igual que muestra la tarjeta.
+    price3:
+      three && Number.isFinite(Number(three.price))
+        ? Number(three.price) * (Number(p.discount) > 0 ? 1 - Number(p.discount) / 100 : 1)
+        : null,
     text: norm(`${p.name} ${p.marca?.name ?? ''}`),
   };
   metaCache.set(p, meta);

@@ -1,3 +1,4 @@
+import { comboTitle, comboSubtitle } from '@/app/helpers/comboLabels';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
 import DeliveryEta from '@/app/components/UI/DeliveryEta';
 import { DEFAULT_DISPATCH_CUTOFF_HOUR } from '@/app/helpers/deliveryWindow';
@@ -35,7 +36,7 @@ export default function CartLine({ row, group, deliveryOffset = 0, cutoffHour = 
   const minusDisabled = group === 'immediate' && split;
 
   const variantLabel = isCombo
-    ? `Combo · ${item.comboProducts?.length ?? 0} productos`
+    ? comboSubtitle(item)
     : `${item.ml} ml · ${item.ml >= 30 ? 'Botella original' : 'Decant'}`;
 
   // Quitar: en la porción bajo pedido de un item partido, solo elimina esa
@@ -65,7 +66,7 @@ export default function CartLine({ row, group, deliveryOffset = 0, cutoffHour = 
       {/* Info */}
       <div className="min-w-0">
         <h3 className="line-clamp-2 font-display text-[17px] leading-[1.15] text-text sm:text-xl">
-          {item.name}
+          {isCombo ? comboTitle(item) : item.name}
         </h3>
         <p className="mt-1 font-body text-[13px] text-text-muted">{variantLabel}</p>
 

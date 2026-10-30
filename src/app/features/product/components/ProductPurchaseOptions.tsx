@@ -593,7 +593,7 @@ export default function ProductPurchaseOptions({
           <span>1. Elige tu tamaño</span>
           <span
             className={`flex items-center gap-2 text-sm font-semibold before:h-2 before:w-2 before:rounded-full before:bg-current before:content-[''] ${
-              statusLabel === 'En stock' ? 'text-success' : 'text-warning'
+              statusLabel === 'En stock' ? 'text-text-muted' : 'text-warning'
             }`}
           >
             {statusLabel}

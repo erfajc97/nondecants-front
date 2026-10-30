@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import AppProviders from '@/app/providers/AppProviders';
 import { useCatalogHook } from './hooks/useCatalogHook';
 import { CategoryHeader, BrandHeader } from './components/CatalogHeader';
@@ -28,16 +29,20 @@ const plural = (n: number) => `${n} ${n === 1 ? 'perfume' : 'perfumes'}`;
 function CatalogContent({ initialCategory, initialQuery }: CatalogProps) {
   const cat = useCatalogHook({ initialCategory, initialQuery });
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // Hoja móvil de filtros: bloquea el scroll del fondo y cierra con Escape.
   useEffect(() => {
     if (!sheetOpen) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    document.documentElement.setAttribute('data-sheet-open', '');
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setSheetOpen(false);
     document.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = prev;
+      document.documentElement.removeAttribute('data-sheet-open');
       document.removeEventListener('keydown', onKey);
     };
   }, [sheetOpen]);
@@ -79,14 +84,15 @@ function CatalogContent({ initialCategory, initialQuery }: CatalogProps) {
           <aside className="sticky top-24 hidden max-h-[calc(100vh-7rem)] overflow-y-auto pr-1.5 md:block" aria-label="Filtros">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <b className="font-display text-[26px] font-normal">Filtrar</b>
-              <button
-                type="button"
-                onClick={cat.clearFilters}
-                disabled={cat.activeCount === 0}
-                className="font-body text-sm font-semibold text-text-soft underline underline-offset-[3px] transition-colors hover:text-text disabled:opacity-40"
-              >
-                Limpiar
-              </button>
+              {cat.activeCount > 0 && (
+                <button
+                  type="button"
+                  onClick={cat.clearFilters}
+                  className="font-body text-sm font-semibold text-text-soft underline underline-offset-[3px] transition-colors hover:text-text"
+                >
+                  Limpiar
+                </button>
+              )}
             </div>
             {filtersNode}
           </aside>
@@ -154,9 +160,10 @@ function CatalogContent({ initialCategory, initialQuery }: CatalogProps) {
         </div>
       </div>
 
-      {/* Móvil: hoja de filtros (siempre montada para animar) */}
+      {/* Móvil: hoja de filtros (siempre montada para animar), en <body> para quedar sobre la barra inferior */}
+      {mounted && createPortal(
       <div
-        className={`fixed inset-0 z-[86] md:hidden ${sheetOpen ? 'visible pointer-events-auto' : 'invisible pointer-events-none'}`}
+        className={`fixed inset-0 z-[90] md:hidden ${sheetOpen ? 'visible pointer-events-auto' : 'invisible pointer-events-none'}`}
         role="dialog"
         aria-modal="true"
         aria-label="Filtrar"
@@ -185,15 +192,16 @@ function CatalogContent({ initialCategory, initialQuery }: CatalogProps) {
             </button>
           </div>
           <div className="overflow-auto overscroll-contain px-5">{filtersNode}</div>
-          <div className="grid grid-cols-[auto_1fr] gap-2.5 border-t border-border bg-white px-4 pb-[calc(12px+env(safe-area-inset-bottom,0px))] pt-3">
-            <button
-              type="button"
-              onClick={cat.clearFilters}
-              disabled={cat.activeCount === 0}
-              className="h-[54px] rounded-full border border-border px-5 font-body text-[15px] font-semibold text-text transition-colors hover:border-text disabled:opacity-40"
-            >
-              Limpiar
-            </button>
+          <div className={`grid gap-2.5 border-t border-border bg-white px-4 pb-[calc(12px+env(safe-area-inset-bottom,0px))] pt-3 ${cat.activeCount > 0 ? 'grid-cols-[auto_1fr]' : 'grid-cols-1'}`}>
+            {cat.activeCount > 0 && (
+              <button
+                type="button"
+                onClick={cat.clearFilters}
+                className="h-[54px] rounded-full border border-border px-5 font-body text-[15px] font-semibold text-text transition-colors hover:border-text"
+              >
+                Limpiar
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setSheetOpen(false)}
@@ -203,7 +211,9 @@ function CatalogContent({ initialCategory, initialQuery }: CatalogProps) {
             </button>
           </div>
         </div>
-      </div>
+      </div>,
+      document.body,
+      )}
     </div>
   );
 }

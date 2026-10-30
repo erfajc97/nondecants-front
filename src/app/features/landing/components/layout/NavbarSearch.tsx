@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
 import { productUrl } from '@/app/helpers/productUrl';
 import type { Product } from '@/app/types/global.types';
-import type { Reason } from '@/app/lib/searchIndex';
-import { minPriceOf, useNavbarSearchHook } from '../../hooks/useNavbarSearchHook';
+import { price3ml, type Reason } from '@/app/lib/searchIndex';
+import { useNavbarSearchHook } from '../../hooks/useNavbarSearchHook';
 import { useDialogBehavior } from './useDialogBehavior';
 import { IconSearch, IconClose, IconPlane } from './NavIcons';
 
@@ -98,7 +98,7 @@ function ResultRow({ p, q, i, onNavigate, reason }: { p: Product; q: string; i: 
         <b className="truncate font-display text-[19px] font-normal leading-[1.15] text-text">
           <Highlight text={p.name} q={q} />
         </b>
-        {reason && reason.kind !== 'name' && (
+        {reason && reason.kind !== 'name' && reason.kind !== 'price' && (
           <span className="flex items-center gap-1.5 font-body text-[12.5px] font-semibold text-accent-hover">
             {reason.color ? (
               <i className="inline-block h-2 w-2 rounded-full border border-border" style={{ background: reason.color }} aria-hidden="true" />
@@ -110,9 +110,8 @@ function ResultRow({ p, q, i, onNavigate, reason }: { p: Product; q: string; i: 
           <span className="font-body text-[12.5px] font-semibold text-warning">Por encargo · 13–17 días</span>
         )}
       </span>
-      <span className="grid justify-items-end font-body text-xs text-text-muted">
-        Desde
-        <b className="font-body text-[15px] font-bold tabular-nums text-text">{formatCurrency(minPriceOf(p))}</b>
+      <span className="whitespace-nowrap font-body text-[13px] text-text-muted">
+        3 ml · <b className="font-body text-[15px] font-bold tabular-nums text-text">{formatCurrency(price3ml(p))}</b>
       </span>
     </a>
   );

@@ -24,11 +24,12 @@ interface PhosphorIconProps {
   className?: string;
   /** Tamaño en px (si no se pasa className de tamaño). */
   size?: number;
+  style?: React.CSSProperties;
 }
 
-export default function PhosphorIcon({ name, className, size }: PhosphorIconProps) {
+export default function PhosphorIcon({ name, className, size, style }: PhosphorIconProps) {
   return (
-    <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" className={className} width={size} height={size}>
+    <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" className={className} width={size} height={size} style={style}>
       <path d={PATHS[name]} />
     </svg>
   );

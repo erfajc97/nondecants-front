@@ -62,6 +62,7 @@ function CheckoutContent() {
             onApplyCoupon={c.handleApplyCoupon}
             onRemoveCoupon={c.handleRemoveCoupon}
             shippingReady={c.step1Done}
+            showTerms={c.step === 3}
             termsAccepted={c.termsAccepted}
             onTermsChange={c.setTermsAccepted}
             canConfirm={c.canConfirm}

@@ -74,34 +74,35 @@ function BannerSlide({ banner, active, first }: { banner: Banner; active: boolea
   const [lead, tail] = splitTitle(banner.title ?? '', banner.highlight);
   const paragraph = banner.paragraph ?? banner.subtitle;
   const ctaCls = dark
-    ? 'bg-accent text-text hover:bg-accent/85'
-    : 'bg-text text-bg hover:bg-text-soft';
+    ? 'bg-black text-bg hover:bg-black/80'
+    : 'bg-[#C3A658] text-black hover:bg-[#C3A658]/85';
+  const Heading = first ? 'h1' : 'h2';
 
   return (
     <div
-      className={`${wrap} flex flex-col min-[821px]:grid min-[821px]:h-full min-[821px]:grid-cols-2`}
+      className={`${wrap} flex flex-col min-[821px]:grid min-[821px]:h-full min-[821px]:grid-cols-[2fr_3fr] min-[821px]:grid-rows-[minmax(0,1fr)]`}
       style={banner.bgColor ? { backgroundColor: banner.bgColor } : undefined}
       aria-hidden={!active}
     >
-      <div className="nd-hero-photo relative order-first h-[clamp(230px,60vw,330px)] overflow-hidden min-[821px]:order-last min-[821px]:h-full">
+      <div className="nd-hero-photo relative order-first aspect-[1/0.82] w-full overflow-hidden [mask-image:linear-gradient(180deg,#000_70%,transparent)] min-[821px]:order-last min-[821px]:aspect-auto min-[821px]:h-full min-[821px]:[mask-image:linear-gradient(90deg,transparent_0,#000_26%)]">
         {picture}
         {banner.showSeal && (
           <NodSeal size={104} className="absolute bottom-3.5 left-3.5 z-[2] min-[821px]:bottom-6 min-[821px]:left-6" />
         )}
       </div>
-      <div className="flex flex-1 items-center px-[max(16px,3.4vw)] pb-14 pt-7 min-[821px]:py-0 min-[821px]:pr-12">
-        <div className="nd-hero-copy flex max-w-[34rem] flex-col items-start gap-3.5 min-[821px]:gap-[18px]">
+      <div className="relative z-[1] -mt-[30px] flex flex-1 items-center px-[max(16px,3.4vw)] pb-14 min-[821px]:mt-0 min-[821px]:py-0 min-[821px]:pb-10 min-[821px]:pr-8">
+        <div className="nd-hero-copy flex max-w-[480px] flex-col items-start gap-3.5 min-[821px]:gap-[18px]">
           {banner.eyebrow && (
             <span className={`eyebrow k ${dark ? '!text-accent' : ''}`}>{banner.eyebrow}</span>
           )}
-          <h2
-            className={`font-display text-[clamp(34px,4.4vw,64px)] font-normal leading-[0.98] tracking-[-0.025em] text-balance ${
+          <Heading
+            className={`font-display text-[36px] font-normal leading-[0.98] tracking-[-0.025em] text-balance min-[821px]:text-[clamp(40px,4.4vw,66px)] ${
               dark ? 'text-bg' : 'text-text'
             }`}
           >
             {lead}
-            {tail && <em className={dark ? 'text-accent' : 'text-accent-hover'}>{tail}</em>}
-          </h2>
+            {tail && <em className={`not-italic ${dark ? 'text-[#C3A658]' : 'text-[#8C7330]'}`}>{tail}</em>}
+          </Heading>
           {paragraph && (
             <p className={`max-w-[42ch] font-body text-[15px] leading-relaxed min-[821px]:text-[17px] ${dark ? 'text-bg/80' : 'text-text-soft'}`}>
               {paragraph}
@@ -164,7 +165,7 @@ export default function BannerCarousel({ banners, isLoading = false }: BannerCar
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        <div className={`grid ${HERO_H}`}>
+        <div className={`grid min-[821px]:grid-rows-[minmax(0,1fr)] ${HERO_H}`}>
           {slides.map((s, i) => (
             <BannerSlide key={s.banner.id} banner={s.banner} active={i === index} first={i === 0} />
           ))}

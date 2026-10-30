@@ -21,7 +21,6 @@ const firstBannerImage = absoluteImageUrl(banners[0]?.imageUrl || banners[0]?.im
   ogImage={firstBannerImage ?? '/og-image.jpg'}
   jsonLd={[websiteJsonLd(), homepageBannersJsonLd(banners)]}
 >
-  <h1 class="sr-only">Perfumes originales y decants en Ecuador</h1>
   <BannerCarouselIsland initialBanners={banners} client:load />
   <Home client:load />
 </PublicLayout>

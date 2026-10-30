@@ -98,7 +98,7 @@ export default function Navbar() {
 
       <header
         data-scrolled={scrolled}
-        className="sticky top-0 z-30 border-b border-border bg-bg/95 text-text backdrop-blur-md transition-shadow duration-300 data-[scrolled=true]:shadow-[0_10px_26px_-18px_rgba(27,25,25,0.35)]"
+        className="sticky top-0 z-30 border-b border-border bg-bg/95 text-text backdrop-blur-md transition-shadow duration-300 data-[scrolled=true]:shadow-[0_8px_24px_-16px_rgba(27,25,25,0.35)]"
       >
         <div className="relative">
           <div className="mx-auto grid h-[58px] max-w-[1480px] grid-cols-[1fr_auto] items-center gap-1 px-[max(16px,3.4vw)] min-[821px]:h-[66px] min-[821px]:grid-cols-[1fr_auto_1fr] min-[821px]:gap-4 min-[821px]:px-[min(52px,3.4vw)]">

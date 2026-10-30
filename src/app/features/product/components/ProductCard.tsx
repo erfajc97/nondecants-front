@@ -129,7 +129,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <span className="mt-1 font-body text-xs text-text-muted line-through">{formatCurrency(basePrice)}</span>
         )}
 
-        <div className="mt-auto pt-2">
+        <div className="mt-auto pt-2.5">
         {canPurchase ? (
           <button
             type="button"
