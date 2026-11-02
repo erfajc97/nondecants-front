@@ -17,9 +17,8 @@ const combos = await fetchActiveCombos();
     <h1 class="sr-only">Combos de perfumes originales en Ecuador</h1>
     <CombosSection client:load />
     {combos.length > 0 && (
-      <nav class="mx-auto max-w-[1480px] border-t border-border px-4 py-10 md:px-[clamp(16px,3.4vw,52px)]" aria-label="Índice de combos">
-        <h2 class="font-display text-2xl text-text">Todos los combos</h2>
-        <ul class="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+      <nav class="sr-only" aria-label="Índice de combos">
+        <ul>
           {combos.map((combo) => (
             <li>
               <a href={`/combo/${combo.id}`} class="font-body text-sm text-text-soft underline-offset-4 hover:text-text hover:underline">

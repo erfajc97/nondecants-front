@@ -39,7 +39,7 @@ export default function CombosSection() {
               <>
                 <RoundArrow direction="prev" onClick={scrollPrev} disabled={!canPrev} label="Anterior" />
                 <RoundArrow direction="next" onClick={scrollNext} disabled={!canNext} label="Siguiente" />
-                <span className="max-md:hidden"><PillLink href="/catalogo/combos">Ver todos →</PillLink></span>
+                <PillLink href="/catalogo/combos">Ver más →</PillLink>
               </>
             }
           />
@@ -51,9 +51,6 @@ export default function CombosSection() {
                 </div>
               ))}
             </div>
-          </div>
-          <div className="mt-6 text-center min-[821px]:hidden">
-            <PillLink href="/catalogo/combos">Ver todos →</PillLink>
           </div>
         </Reveal>
       </div>

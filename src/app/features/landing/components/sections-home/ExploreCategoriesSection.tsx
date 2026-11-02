@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import { useRef, type MouseEvent } from 'react';
 import { useRawCategoriesQuery, type NavCategory } from '@/app/tanstack-queries/categoriesQuery';
 import { useProductsQuery } from '@/app/tanstack-queries/productsQuery';
 import { useReveal } from '@/app/components/Reveal';
@@ -16,33 +16,10 @@ function findHouse(categories: NavCategory[], kind: HouseKind): NavCategory | un
   return categories.find((c) => (kind === 'nicho' ? /nicho|niche/ : /arab/).test(norm(c.name)));
 }
 
-/** Número que cuenta de 0 a `to` cuando `run` pasa a true. */
-function useCountUp(to: number, run: boolean, ms = 1100) {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (!run) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setValue(to);
-      return;
-    }
-    let raf = 0;
-    const t0 = performance.now();
-    const tick = (now: number) => {
-      const p = Math.min(1, (now - t0) / ms);
-      setValue(Math.round(to * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [to, run, ms]);
-  return run ? value : 0;
-}
-
 function HouseBanner({ kind, category }: { kind: HouseKind; category: NavCategory }) {
   const [rootRef, shown] = useReveal<HTMLAnchorElement>('0px 0px -18% 0px');
   const tiltRef = useRef<HTMLDivElement>(null);
   const houses = category.marcas.length;
-  const count = useCountUp(houses, shown);
 
   const { data } = useProductsQuery({
     queryParams: { categoryId: Number(category.id), limit: 3, sortBy: 'salesCount', sortOrder: 'DESC' },
@@ -89,9 +66,11 @@ function HouseBanner({ kind, category }: { kind: HouseKind; category: NavCategor
         </div>
 
         <div className="absolute inset-x-0 bottom-0 p-5 min-[821px]:p-7">
-          <p className="k font-body text-[13px] font-semibold tabular-nums text-[#F1E6C8]">
-            {count} casas
-          </p>
+          {houses > 0 && (
+            <p className="k font-body text-[13px] font-semibold tabular-nums text-[#F1E6C8]">
+              ✦ {houses} casas
+            </p>
+          )}
           <div className="mt-1.5 w-fit">
             <h3 className="font-display text-[clamp(28px,3vw,44px)] font-normal leading-none text-bg">{heading}</h3>
             <span className="nd-house-line mt-3 block h-0.5 w-full bg-accent" aria-hidden="true" />

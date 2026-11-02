@@ -50,7 +50,9 @@ function ProductGallery({
   return (
     <div
       ref={railRef}
-      className="grid grid-cols-2 gap-2.5 max-md:-mr-4 max-md:auto-cols-[86%] max-md:grid-flow-col max-md:grid-cols-none max-md:snap-x max-md:snap-mandatory max-md:overflow-x-auto max-md:pr-4 max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden"
+      className={`grid grid-cols-2 gap-2.5 ${
+        list.length > 1 ? 'max-md:-mr-4 max-md:auto-cols-[86%] max-md:pr-4' : 'max-md:auto-cols-[100%]'
+      } max-md:grid-flow-col max-md:grid-cols-none max-md:snap-x max-md:snap-mandatory max-md:overflow-x-auto max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden`}
     >
       {list.map((img, i) => {
         const first = i === 0;

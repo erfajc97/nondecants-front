@@ -107,7 +107,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Tamaños: ml + precio del formato; seleccionan y actualizan el CTA. */}
         {chipFormats.length > 0 && (
-          <div className="mt-3">
+          <div className="mt-auto pt-3">
             <FormatTiles
               formats={chipFormats}
               selectedId={selected?.id}
@@ -129,7 +129,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <span className="mt-1 font-body text-xs text-text-muted line-through">{formatCurrency(basePrice)}</span>
         )}
 
-        <div className="mt-auto pt-2.5">
+        <div className={`${chipFormats.length > 0 ? '' : 'mt-auto'} pt-2.5`}>
         {canPurchase ? (
           <button
             type="button"

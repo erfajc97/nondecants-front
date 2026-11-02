@@ -11,6 +11,9 @@ import {
   productSeoTitle,
 } from '@/app/helpers/seoMeta';
 import { productShareImagePath } from '@/app/helpers/ogCard';
+import axiosInstance from '@/app/config/axiosConfig';
+import { API_ENDPOINTS } from '@/app/api/endpoints';
+import { keyFromName } from '@/app/features/catalog/filtering';
 import ProductDetailIsland from '@/app/features/product/components/ProductDetailIsland';
 import ProductEditorial from '@/app/features/product/components/ProductEditorial.astro';
 import { getEditorialFlags } from '@/app/features/product/editorialFlags';
@@ -50,8 +53,23 @@ const jumpLinks = [
   relatedProducts.length > 0 && { id: 'p-rel', label: 'Similares' },
 ].filter(Boolean) as { id: string; label: string }[];
 
-const listingHref = product.bajoPedido ? '/bajo-pedido' : '/catalogo/perfumes';
-const listingLabel = product.bajoPedido ? 'Bajo Pedido' : 'Perfumes';
+let listingHref = product.bajoPedido ? '/bajo-pedido' : '/catalogo/perfumes';
+let listingLabel = product.bajoPedido ? 'Bajo Pedido' : 'Perfumes';
+// Migas: Inicio / categoría del producto / casa.
+try {
+  const res = await axiosInstance.get(API_ENDPOINTS.CATEGORIES);
+  const cats: any[] = res.data?.data ?? res.data ?? [];
+  const cat = cats.find((c) => Number(c.id) === Number(product.categoryId));
+  if (cat?.name) {
+    listingLabel = cat.name;
+    const key = keyFromName(cat.name);
+    if (!product.bajoPedido) {
+      listingHref = key && key !== 'todos' ? `/catalogo/perfumes?categoria=${key}` : '/catalogo/perfumes';
+    }
+  }
+} catch {
+  /* sin categorías: queda el enlace genérico */
+}
 ---
 
 
@@ -116,7 +134,7 @@ const listingLabel = product.bajoPedido ? 'Bajo Pedido' : 'Perfumes';
 
     {/* Reseñas verificadas (solo aprobadas) + formulario */}
     <div id="p-rev" data-rv class="pdp-anchor border-b border-border py-[clamp(36px,5vw,64px)]">
-      <ProductReviews productId={product.id} productName={product.name} client:visible />
+      <ProductReviews productId={product.id} productName={product.name} client:idle />
     </div>
 
     <ProductEditorial product={product} part="autenticidad" />

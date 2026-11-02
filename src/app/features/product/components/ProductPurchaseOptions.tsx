@@ -521,8 +521,10 @@ export default function ProductPurchaseOptions({
 
   // Misma fuente y mismo criterio que la sección de reseñas (ProductReviews).
   const hasReviews = !!reviewsData && reviewsData.count > 0 && (reviewsData.reviews?.length ?? 0) > 0;
-  const reviewCount = hasReviews ? reviewsData!.count : 0;
-  const reviewAvg = hasReviews ? reviewsData!.average : 0;
+  const reviewCount = hasReviews ? reviewsData!.reviews.length : 0;
+  const reviewAvg = hasReviews
+    ? Math.round((reviewsData!.reviews.reduce((s, r) => s + Number(r.rating), 0) / reviewsData!.reviews.length) * 10) / 10
+    : 0;
 
   return (
     <div className="grid gap-4 text-text">
@@ -560,18 +562,14 @@ export default function ProductPurchaseOptions({
       </h1>
 
       {/* Valoración → ancla a las reseñas */}
-      <a href="#p-rev" className="inline-flex w-fit items-center gap-2 font-body text-[13.5px] text-text-soft">
-        {reviewCount > 0 ? (
-          <>
-            <Stars rating={reviewAvg} />
-            <u className="underline-offset-[3px]">
-              {reviewAvg.toFixed(1).replace('.', ',')} · {reviewCount} {reviewCount === 1 ? 'reseña' : 'reseñas'}
-            </u>
-          </>
-        ) : (
-          <u className="underline-offset-[3px]">Sé el primero en dejar una reseña</u>
-        )}
-      </a>
+      {reviewCount > 0 && (
+        <a href="#p-rev" className="inline-flex w-fit items-center gap-2 font-body text-[13.5px] text-text-soft">
+          <Stars rating={reviewAvg} />
+          <u className="underline-offset-[3px]">
+            {reviewAvg.toFixed(1).replace('.', ',')} · {reviewCount} {reviewCount === 1 ? 'reseña' : 'reseñas'}
+          </u>
+        </a>
+      )}
 
       {chips.length > 0 && (
         <div className="flex flex-wrap gap-1.5">

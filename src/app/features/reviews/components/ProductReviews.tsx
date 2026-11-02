@@ -273,10 +273,12 @@ function ProductReviewsContent({ productId, productName }: ProductReviewsProps) 
             </div>
           </div>
         </>
-      ) : (
+      ) : data ? (
         <p className="py-6 text-left font-body text-[15px] text-text-muted">
           Sé el primero en dejar una reseña. Las compras verificadas pueden dejar la primera.
         </p>
+      ) : (
+        <div className="min-h-[120px]" aria-hidden="true" />
       )}
 
       {/* Formulario: se abre con "Escribir una reseña" (misma lógica de antes). */}

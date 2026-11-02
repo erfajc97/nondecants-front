@@ -87,7 +87,7 @@ function BannerSlide({ banner, active, first }: { banner: Banner; active: boolea
       <div className="nd-hero-photo relative order-first aspect-[1/0.82] w-full overflow-hidden [mask-image:linear-gradient(180deg,#000_70%,transparent)] min-[821px]:order-last min-[821px]:aspect-auto min-[821px]:h-full min-[821px]:[mask-image:linear-gradient(90deg,transparent_0,#000_26%)]">
         {picture}
         {banner.showSeal && (
-          <NodSeal size={104} className="absolute bottom-3.5 left-3.5 z-[2] min-[821px]:bottom-6 min-[821px]:left-6" />
+          <NodSeal size={104} className="absolute right-3.5 top-3.5 z-[2] min-[821px]:bottom-6 min-[821px]:left-6 min-[821px]:right-auto min-[821px]:top-auto" />
         )}
       </div>
       <div className="relative z-[1] -mt-[30px] flex flex-1 items-center px-[max(16px,3.4vw)] pb-14 min-[821px]:mt-0 min-[821px]:py-0 min-[821px]:pb-10 min-[821px]:pr-8">

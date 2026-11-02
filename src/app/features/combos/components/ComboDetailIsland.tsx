@@ -54,7 +54,7 @@ function ComboDetailContent({ combo }: ComboDetailIslandProps) {
     const item = buildComboCartItem(combo, size);
     addItem(item);
     sonnerResponse(`${combo.name} agregado al carrito.`, 'success');
-    // El carrito lateral se abre solo; el cliente sigue en el combo.
+    useCartStore.getState().setDrawerOpen(true);
     flyToCart(e.currentTarget, item.image);
   };
 
@@ -134,26 +134,19 @@ function ComboDetailContent({ combo }: ComboDetailIslandProps) {
           </h1>
           {shortStory && <p className="font-body text-base leading-normal text-text-soft">{shortStory}</p>}
 
-          {/* Una nota de color por perfume */}
+          {/* Un chip por nota, con el color de la nota */}
           {products.length > 0 && (
             <ul className="flex flex-wrap gap-1.5">
-              {products.map((cp) => {
-                const note = comboProductNotes(cp, 1)[0];
-                return (
-                  <li
-                    key={cp.id}
-                    className="inline-flex items-center gap-2 rounded-full bg-bg-alt py-[5px] pl-2 pr-3 font-body text-[12.5px] text-text-soft"
-                  >
-                    <i
-                      aria-hidden="true"
-                      className="block h-3.5 w-3.5 rounded-full bg-border"
-                      style={note?.color ? { background: note.color } : undefined}
-                    />
-                    <span className="font-semibold text-text">{cp.product?.name ?? 'Producto'}</span>
-                    {note && <span className="text-text-muted">· {note.name}</span>}
-                  </li>
-                );
-              })}
+              {products.flatMap((cp) => comboProductNotes(cp, 1).map((n) => ({ ...n, key: `${cp.id}-${n.name}` }))).map((n) => (
+                <li
+                  key={n.key}
+                  className="inline-flex h-[30px] items-center gap-1.5 rounded-full bg-bg-alt py-0 pl-2.5 pr-3 font-body text-[12.5px] text-text-soft"
+                  style={n.color ? { background: `color-mix(in srgb, ${n.color} 13%, transparent)` } : undefined}
+                >
+                  <i aria-hidden="true" className="block h-2 w-2 rounded-full" style={{ background: n.color }} />
+                  {n.name}
+                </li>
+              ))}
             </ul>
           )}
 

@@ -233,7 +233,9 @@ function buildProduct(s: Seed) {
       presentationType: v.presentationType,
     })),
     variations,
-    images: [{ id: String(s.id), productId: String(s.id), url: image, key: image, alt: s.name, displayOrder: 0, isActive: true }],
+    images: [image, IMAGES[(s.id + 2) % IMAGES.length]]
+      .filter((url, i, all) => all.indexOf(url) === i)
+      .map((url, i) => ({ id: `${s.id}-${i}`, productId: String(s.id), url, key: url, alt: s.name, displayOrder: i, isActive: true })),
     createdAt: new Date(Date.parse(NOW) - Math.max(0, 20 - s.id) * 86_400_000).toISOString(),
     updatedAt: NOW,
     _hasStock: hasStock,

@@ -39,7 +39,7 @@ function OptionPill({ option, selected, count, onPress, leading, serif }: Option
       disabled={off}
       aria-pressed={selected}
       className={`inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-full border px-3.5 transition-colors ${
-        selected ? 'border-text bg-text text-white' : 'border-border bg-white text-text hover:border-text'
+        selected ? '!border-text !bg-text !text-white hover:!bg-text' : 'border-border bg-white text-text hover:border-text'
       } ${off ? 'pointer-events-none opacity-35' : ''} ${serif ? 'font-display text-[15px]' : 'font-body text-sm font-semibold'}`}
     >
       {selected && <Check className="text-accent" />}
@@ -63,7 +63,7 @@ function CasaRow({ option, selected, count, onPress }: OptionButtonProps) {
     >
       <span
         className={`grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[4px] border ${
-          selected ? 'border-text bg-text text-accent' : 'border-border bg-white'
+          selected ? '!border-text !bg-text text-accent' : 'border-border bg-white'
         }`}
       >
         {selected && <Check />}

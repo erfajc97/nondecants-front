@@ -48,15 +48,15 @@ export default function FormatTiles({
             aria-pressed={isSelected}
             aria-label={`${label}${f.soldOut ? ', agotado' : f.backorder ? ', bajo pedido' : ''}`}
             style={{ ['--lv' as string]: f.level }}
-            className={`size-tile flex ${h} flex-col items-center justify-center rounded-[3px] border font-body leading-[1.15] transition-[border-color,background-color] duration-200 ${
+            className={`size-tile flex ${h} min-w-0 flex-col items-center justify-center whitespace-nowrap rounded-[3px] border px-0.5 font-body leading-[1.15] transition-[border-color,background-color] duration-200 ${
               isSelected
                 ? 'border-text bg-text text-white'
                 : f.soldOut
                   ? 'border-border text-text-muted/70 line-through'
-                  : `border-border text-text hover:border-text-muted/50 ${f.backorder ? 'border-dashed' : ''}`
+                  : `border-border text-text hover:border-text-muted/50 ${f.backorder || f.isFullBottle ? 'border-dashed' : ''}`
             }`}
           >
-            <b className={`${size === 'feature' ? 'text-[15px]' : 'text-[15px]'} font-bold`}>{label}</b>
+            <b className={`${size === 'feature' ? 'text-[15px]' : 'text-[11px] sm:text-[12px]'} font-bold`}>{label}</b>
             <small
               className={`${size === 'feature' ? 'text-[13px]' : 'text-[10.5px] sm:text-[11.5px]'} ${
                 f.backorder ? 'text-warning' : isSelected ? 'text-accent' : 'text-text-muted'

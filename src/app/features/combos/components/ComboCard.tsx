@@ -30,7 +30,7 @@ export default function ComboCard({ combo }: ComboCardProps) {
   const handleAdd = (e: { currentTarget: Element }) => {
     const item = buildComboCartItem(combo, size);
     addItem(item);
-    // El carrito lateral se abre solo; el cliente sigue en el catálogo.
+    useCartStore.getState().setDrawerOpen(true);
     flyToCart(e.currentTarget, item.image);
   };
 
