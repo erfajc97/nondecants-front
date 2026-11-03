@@ -28,7 +28,7 @@ export default function FormatTiles({
     <div
       role="group"
       aria-label="Tamaño"
-      className="grid gap-1"
+      className="grid gap-1 [container-type:inline-size]"
       style={{
         gridTemplateColumns:
           size === 'feature' && formats.length > 3
@@ -56,9 +56,9 @@ export default function FormatTiles({
                   : `border-border text-text hover:border-text-muted/50 ${f.backorder || f.isFullBottle ? 'border-dashed' : ''}`
             }`}
           >
-            <b className={`${size === 'feature' ? 'text-[15px]' : 'text-[11px] sm:text-[12px]'} font-bold`}>{label}</b>
+            <b className={`${size === 'feature' ? 'text-[15px]' : 'text-[clamp(8.5px,6cqw,12px)]'} font-bold`}>{label}</b>
             <small
-              className={`${size === 'feature' ? 'text-[13px]' : 'text-[10.5px] sm:text-[11.5px]'} ${
+              className={`${size === 'feature' ? 'text-[13px]' : 'text-[clamp(8px,5cqw,11.5px)]'} ${
                 f.backorder ? 'text-warning' : isSelected ? 'text-accent' : 'text-text-muted'
               }`}
             >

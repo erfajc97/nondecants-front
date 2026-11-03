@@ -1,5 +1,4 @@
 ---
-import { PAYMENT_LOGOS } from '@/app/components/paymentLogos';
 import { FOOTER_LINKS_COL1 } from '../../data';
 
 // Cuentas reales de la casa. Sin parámetros de rastreo: así el enlace es
@@ -10,9 +9,6 @@ const SOCIAL = [
 ];
 
 const WHATSAPP_URL = 'https://wa.me/593992305463';
-
-// Catálogo compartido: mismos logos y alturas que ficha de producto, carrito y combos.
-const PAYMENT_ICONS = PAYMENT_LOGOS;
 
 const HELP_LINKS = [
   { href: '/faq', label: 'Preguntas frecuentes' },
@@ -90,20 +86,6 @@ const year = new Date().getFullYear();
           ))}
         </ul>
       </div>
-    </div>
-
-    <!-- Medios de pago: los logos oficiales traen fondo propio, van sobre una
-         franja clara para que se lean sobre el negro. -->
-    <div class="mt-10 flex flex-wrap items-center gap-x-3 gap-y-2.5 rounded-[4px] bg-bg px-4 py-3 md:gap-x-4 md:self-start md:inline-flex">
-      {PAYMENT_ICONS.map((icon) => (
-        <img
-          src={icon.src}
-          alt={icon.alt}
-          title={icon.alt}
-          loading="lazy"
-          class:list={['w-auto object-contain', icon.cls]}
-        />
-      ))}
     </div>
 
     <div class="mt-8 flex flex-col items-start justify-between gap-4 border-t border-bg/15 pt-5 font-body text-[12.5px] text-bg/55 md:flex-row md:items-center md:flex-wrap">
