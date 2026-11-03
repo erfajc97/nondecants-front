@@ -100,7 +100,8 @@ export default function ComboCard({ combo }: ComboCardProps) {
                     type="button"
                     onClick={() => setMl(s.ml)}
                     aria-pressed={active}
-                    className={`h-[42px] rounded-[3px] border font-body text-[13.5px] font-bold transition-[border-color,background-color,transform] duration-200 active:scale-[0.97] ${
+                    style={{ ['--lv' as string]: Math.min(1, s.ml / 10) }}
+                    className={`size-tile h-[42px] rounded-[3px] border font-body text-[13.5px] font-bold transition-[border-color,background-color,transform] duration-200 active:scale-[0.97] ${
                       active ? 'border-text bg-text text-white' : 'border-border text-text hover:border-text-muted/50'
                     }`}
                   >

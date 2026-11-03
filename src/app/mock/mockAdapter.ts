@@ -105,7 +105,15 @@ function listProducts(q: Record<string, any>) {
 }
 
 function productReviews(productId: string) {
-  const reviews = MOCK_REVIEWS_RAW.filter((r) => String(r.productId) === productId);
+  let reviews = MOCK_REVIEWS_RAW.filter((r) => String(r.productId) === productId);
+  // Demo: todos los perfumes muestran reseñas de ejemplo para ver la sección completa.
+  if (reviews.length === 0) {
+    const id = Number(productId);
+    reviews = [
+      { id: 1000 + id * 2, productId: id, productName: '', customerName: 'C. M.', variantLabel: '3 ml', rating: 5, comment: 'Lo pedí en 3 ml para probar y a la semana volví por el de 10. Dura toda la noche.', createdAt: '2026-10-12T15:00:00.000Z', verified: true },
+      { id: 1001 + id * 2, productId: id, productName: '', customerName: 'D. R.', variantLabel: '10 ml', rating: 4, comment: 'Muy duradero, es otra liga. Llegó rápido y bien empacado.', createdAt: '2026-10-08T11:30:00.000Z', verified: true },
+    ];
+  }
   const count = reviews.length;
   const average = count ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / count) * 10) / 10 : 0;
   return { average, count, reviews };

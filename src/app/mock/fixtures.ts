@@ -206,7 +206,6 @@ function buildProduct(s: Seed) {
     discount: (s.discount ?? 0).toFixed(2),
     detailDescription: `${s.description} Una fragancia ${s.projection === 'ALTA' ? 'de gran proyección' : 'de proyección equilibrada'} para quien busca dejar huella.`,
     benefits: JSON.stringify(['Larga duración', 'Versátil', 'Autenticidad garantizada']),
-    scentProfileTitle: `La pirámide de ${s.name}`,
     scentSections: [
       { title: 'Notas de salida', notes: notes(s.top), description: 'La primera impresión.' },
       { title: 'Notas de corazón', notes: notes(s.heart), description: 'El alma de la fragancia.' },

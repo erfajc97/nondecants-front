@@ -361,7 +361,6 @@ export default function ProductPurchaseOptions({
     addItem(item);
     // Se queda en la ficha: agregar no debería sacar al cliente de lo que está
     // mirando. Para ir a pagar está el ícono del carrito.
-    sonnerResponse(`${product.name} agregado al carrito.`, 'success');
     spritz(btn ?? null, item.image);
     onAddToCartSuccess({ productName: product.name });
   };

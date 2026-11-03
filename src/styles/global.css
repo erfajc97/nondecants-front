@@ -512,8 +512,18 @@ body {
   transform-origin: left;
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.size-tile[aria-pressed="true"]::after { transform: scaleX(var(--lv, 1)); }
-@media (prefers-reduced-motion: reduce) { .size-tile::after { transition: none; } }
+.size-tile[aria-pressed="true"]::after {
+  transform: scaleX(var(--lv, 1));
+  animation: size-tile-fill 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes size-tile-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(var(--lv, 1)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .size-tile::after { transition: none; }
+  .size-tile[aria-pressed="true"]::after { animation: none; }
+}
 
 /* Secciones consecutivas del home comparten un solo respiro (prototipo .sec + .sec). */
 .sec + .sec { padding-top: 0; }

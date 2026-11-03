@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import AppProviders from '@/app/providers/AppProviders';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
 import { flyToCart } from '@/app/helpers/flyToCart';
-import { sonnerResponse } from '@/app/helpers/sonnerResponse';
 import { BACKORDER_LABEL, DEFAULT_DISPATCH_CUTOFF_HOUR } from '@/app/helpers/deliveryWindow';
 import { useActiveCombosQuery } from '@/app/tanstack-queries/combosQuery';
 import { useDeliveryOffsetQuery, useDispatchCutoffQuery } from '@/app/tanstack-queries/settingsQuery';
@@ -53,7 +52,6 @@ function ComboDetailContent({ combo }: ComboDetailIslandProps) {
   const handleAddToCart = (e: { currentTarget: Element }) => {
     const item = buildComboCartItem(combo, size);
     addItem(item);
-    sonnerResponse(`${combo.name} agregado al carrito.`, 'success');
     useCartStore.getState().setDrawerOpen(true);
     flyToCart(e.currentTarget, item.image);
   };

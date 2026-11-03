@@ -29,7 +29,6 @@ export function useProductDetailHook(productId: string) {
       price:     selectedVariant.price,
       quantity,
     });
-    sonnerResponse(`${product.name} agregado al carrito.`, 'success');
     window.location.href = '/carrito';
   };
 
