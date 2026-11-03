@@ -1,7 +1,6 @@
 import { formatCurrency } from '@/app/helpers/formatCurrency';
 import { useCartStore } from '@/app/store/cart/cartStore';
 import { flyToCart } from '@/app/helpers/flyToCart';
-import { sonnerResponse } from '@/app/helpers/sonnerResponse';
 import type { Product } from '@/app/types/global.types';
 
 const MAX_PRICE = 5;
@@ -82,7 +81,6 @@ export default function CartUpsell3ml({ candidates }: { candidates: Product[] })
       availableMl: o.availableMl,
     });
     flyToCart(el, o.image);
-    sonnerResponse(`${o.product.name} · 3 ml añadido al carrito.`, 'success');
   };
 
   return (

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { productUrl as productUrlHelper } from '@/app/helpers/productUrl';
 import { useCartStore, type CartItem } from '@/app/store/cart/cartStore';
 import { flyToCart } from '@/app/helpers/flyToCart';
-import { sonnerResponse } from '@/app/helpers/sonnerResponse';
 import type { Product } from '@/app/types/global.types';
 
 export interface CardFormat {
@@ -153,7 +152,6 @@ export function useProductCardHook(product: Product) {
     }
     addItem(item);
     flyToCart(e?.currentTarget ?? null, item.image);
-    sonnerResponse(`${product.name} · ${item.ml} ml añadido al carrito.`, 'success');
   };
 
   return {

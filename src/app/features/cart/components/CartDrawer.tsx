@@ -38,7 +38,7 @@ export default function CartDrawer() {
   useDialogBehavior(open, panelRef, () => (confirming ? setConfirming(false) : close()));
 
   // Al agregar un producto (desde cualquier island) se abre solo en desktop,
-  // como en el prototipo. En mobile ya sale el toast de "añadido".
+  // como en el prototipo. En mobile solo corre la animación del carrito.
   useEffect(() => {
     if (!hydrated) return;
     if (prevCount.current === null) {
