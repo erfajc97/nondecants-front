@@ -14,6 +14,7 @@ import { ECUADOR_PROVINCES, ALL_CANTONS } from '@/app/data/ecuadorLocations';
 import { isPickupMethod, PICKUP_METHODS, type DeliveryMode } from '../components/DeliverySection';
 import type { CustomerFormData, PaymentMethod, DeliveryMethod } from '../types';
 import { useCouponHook } from './useCouponHook';
+import { usePricingSettings } from '@/app/lib/pricingSettings';
 import { useFreeShippingThresholdQuery } from '@/app/tanstack-queries/settingsQuery';
 
 const PREFS_KEY = 'nondecants-checkout-prefs';
@@ -178,8 +179,9 @@ export function useCheckoutHook() {
     handleRemoveCoupon,
   } = useCouponHook();
   const { data: freeShippingThreshold = 0 } = useFreeShippingThresholdQuery();
+  const { payphoneSurchargePct } = usePricingSettings();
 
-  const items    = useCartStore((s) => s.items);
+  const items   = useCartStore((s) => s.items);
   const subtotal = useCartStore((s) => s.total());
 
   const { methods: deliveryOptions, isLoading: deliveryLoading } = useDeliveryMethodsHook(
@@ -206,7 +208,7 @@ export function useCheckoutHook() {
       ? (deliveryOptions.find((m) => m.method === deliveryMethod)?.cost ?? 0)
       : 0;
   const isPayphone = paymentMethod === 'PAYPHONE';
-  const payphoneSurcharge = isPayphone ? calcPayphoneSurcharge(afterDiscount + deliveryCost) : 0;
+  const payphoneSurcharge = isPayphone ? calcPayphoneSurcharge(afterDiscount + deliveryCost, payphoneSurchargePct) : 0;
   const total = afterDiscount + deliveryCost + payphoneSurcharge;
 
   const clearCart = useCartStore((s) => s.clearCart);
@@ -245,8 +247,8 @@ export function useCheckoutHook() {
   // ── Paso 1: entrega ─────────────────────────────────────────────────
   const isPickup = deliveryMode === 'pickup';
 
-  // Envío: la ciudad define el método y el costo ($3 Guayaquil/Durán/Samborondón,
-  // $6,50 resto). Quita la selección si cambia a una ciudad que no admite el método.
+  // Envío: la ciudad define el método y el costo (ajustes shipping_gye /
+  // shipping_nacional). Quita la selección si cambia a una ciudad que no admite el método.
   // La ciudad debe ser un cantón de la lista (el buscador deja escribir texto libre).
   const cityIsValid = ALL_CANTONS.some((k) => k.toLowerCase() === customer.city.trim().toLowerCase());
 

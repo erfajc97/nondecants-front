@@ -1,16 +1,18 @@
+import { PRICING_DEFAULTS, type PricingSettings } from '@/app/lib/pricingSettings';
+
 // Costo de envío según zona de entrega
 export type DeliveryZone = 'retiro' | 'gye' | 'provincias';
 
-const DELIVERY_COSTS: Record<DeliveryZone, number> = {
-  retiro:     0,   // Retiro en tienda
-  gye:        3,   // Guayaquil / Samborondón / Durán
-  provincias: 6.5, // Resto del país
-};
-
-// Ciudades de la zona GYE ($3)
+// Ciudades de la zona GYE
 const GYE_CITIES = ['guayaquil', 'samborondon', 'samborondón', 'duran', 'durán'];
 
-export const getDeliveryCost = (zone: DeliveryZone): number => DELIVERY_COSTS[zone];
+export const getDeliveryCost = (
+  zone: DeliveryZone,
+  pricing: PricingSettings = PRICING_DEFAULTS,
+): number => {
+  if (zone === 'retiro') return 0; // Retiro en tienda
+  return zone === 'gye' ? pricing.shippingGye : pricing.shippingNacional;
+};
 
 export const getDeliveryZoneByCity = (city: string): DeliveryZone => {
   const normalized = city.toLowerCase().trim();

@@ -1,5 +1,6 @@
 ---
 import DecantsCategoryExits from '@/app/features/landing/components/decants/DecantsCategoryExits';
+import { getCatalogServer, minDecantPrice, pricesByName, formatPriceEs } from '@/app/lib/decantPrices';
 
 interface Props {
   faq: { question: string; answer: string }[];
@@ -28,11 +29,39 @@ const SIZES = [
   },
 ];
 
-const COMPARE = [
+// Valores por defecto; se reemplazan por los precios reales del catálogo si existen.
+const COMPARE_DEFAULTS = [
   { name: 'Lattafa Khamrah', try: '$4,15', miss: '$72,99' },
   { name: 'Xerjoff Naxos', try: '$11,50', miss: '$284,99' },
   { name: 'Parfums de Marly Layton', try: '$11,75', miss: '$294,99' },
 ];
+
+const catalog = await getCatalogServer();
+
+const COMPARE = COMPARE_DEFAULTS.map((row) => {
+  const p = pricesByName(catalog, row.name);
+  return {
+    name: row.name,
+    try: p?.ml3 != null ? formatPriceEs(p.ml3) : row.try,
+    miss: p?.bottle != null ? formatPriceEs(p.bottle) : row.miss,
+  };
+});
+
+const min3 = minDecantPrice(catalog, 3);
+const fromPrice = min3 !== null ? formatPriceEs(min3) : '$3,75';
+
+const naxosBottle = pricesByName(catalog, 'Xerjoff Naxos')?.bottle;
+const mistakePrice = naxosBottle != null ? `$${Math.round(naxosBottle)}` : '$285';
+
+// Precio por ml de la fila "Lattafa Khamrah" (3 ml, 10 ml, frasco).
+const khamrah = pricesByName(catalog, 'Lattafa Khamrah');
+const perMl = (price: number | null | undefined, ml: number, fallback: string) =>
+  price != null && ml > 0 ? formatPriceEs(price / ml) : fallback;
+const KHAMRAH_PER_ML = {
+  ml3: perMl(khamrah?.ml3, 3, '$1,38'),
+  ml10: perMl(khamrah?.ml10, 10, '$1,02'),
+  bottle: perMl(khamrah?.bottle, khamrah?.bottleMl ?? 100, '$0,73'),
+};
 ---
 
 <div class="bg-bg">
@@ -50,7 +79,7 @@ const COMPARE = [
       Decants de perfumes originales en Ecuador
     </h1>
     <p class="mt-3 max-w-[52ch] font-body text-[15.5px] leading-relaxed text-text-soft">
-      3, 5 o 10 ml de la misma botella original · desde $3,75
+      3, 5 o 10 ml de la misma botella original · desde {fromPrice}
     </p>
   </section>
 
@@ -61,7 +90,7 @@ const COMPARE = [
       líquido en un frasco más pequeño.
     </p>
     <p class="mt-4 font-body text-[17px] leading-relaxed text-text-soft">
-      Existe por una razón simple: nadie debería pagar $285 para descubrir que un perfume no era para él.
+      Existe por una razón simple: nadie debería pagar {mistakePrice} para descubrir que un perfume no era para él.
     </p>
   </section>
 
@@ -163,9 +192,9 @@ const COMPARE = [
       </div>
       <div class="grid grid-cols-4 items-center">
         <div class="px-3 py-3.5 font-body text-[13px] text-text-muted sm:px-[18px]">Precio por ml</div>
-        <div class="px-3 py-3.5 font-body text-sm text-text sm:px-[18px]">$1,38</div>
-        <div class="px-3 py-3.5 font-body text-sm text-text sm:px-[18px]">$1,02</div>
-        <div class="px-3 py-3.5 font-body text-sm font-semibold text-success sm:px-[18px]">$0,73</div>
+        <div class="px-3 py-3.5 font-body text-sm text-text sm:px-[18px]">{KHAMRAH_PER_ML.ml3}</div>
+        <div class="px-3 py-3.5 font-body text-sm text-text sm:px-[18px]">{KHAMRAH_PER_ML.ml10}</div>
+        <div class="px-3 py-3.5 font-body text-sm font-semibold text-success sm:px-[18px]">{KHAMRAH_PER_ML.bottle}</div>
       </div>
     </div>
   </section>

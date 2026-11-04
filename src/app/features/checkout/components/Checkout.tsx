@@ -2,16 +2,26 @@ import AppProviders from '@/app/providers/AppProviders';
 import AuthModalIsland from '@/app/features/auth/AuthModalIsland';
 import OrderPlaced from '@/app/features/order/components/OrderPlaced';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
+import { useSetting } from '@/app/lib/siteSettings';
 import { useCheckoutHook, type BackorderLine } from '../hooks/useCheckoutHook';
 import CheckoutForm from './CheckoutForm';
 import CheckoutOrderSummary from './CheckoutOrderSummary';
 import '../checkout.css';
 
-const WA_PHONE = '+593 99 230 5463';
-const WA_URL = 'https://wa.me/593992305463';
+const DEFAULT_WHATSAPP = '593992305463';
+
+/** 593992305463 → "+593 99 230 5463" (otros países: "+dígitos"). */
+function formatWhatsapp(digits: string): string {
+  return /^593\d{9}$/.test(digits)
+    ? `+593 ${digits.slice(3, 5)} ${digits.slice(5, 8)} ${digits.slice(8)}`
+    : `+${digits}`;
+}
 
 function CheckoutContent() {
   const c = useCheckoutHook();
+  const whatsapp = useSetting('contact_whatsapp', DEFAULT_WHATSAPP).replace(/\D/g, '') || DEFAULT_WHATSAPP;
+  const WA_PHONE = formatWhatsapp(whatsapp);
+  const WA_URL = `https://wa.me/${whatsapp}`;
 
   if (c.placed) {
     return (

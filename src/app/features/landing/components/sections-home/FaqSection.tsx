@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import SectionHead from '../shared/SectionHead';
 import Reveal from '@/app/components/Reveal';
-import { HOME_FAQ, type FaqItem } from '../../data/faqItems';
+import type { FaqItem } from '../../data/faqItems';
+import { useHomeFaq } from '@/app/lib/homeContent';
 
 function FaqRow({ item, id }: { item: FaqItem; id: string }) {
   const [open, setOpen] = useState(false);
@@ -46,6 +47,7 @@ function FaqRow({ item, id }: { item: FaqItem; id: string }) {
 /** "Lo que más nos preguntan": acordeón de 2 columnas en escritorio y 1 en móvil. */
 export default function FaqSection() {
   // Dos pilas independientes: al abrir una respuesta no se estira la otra columna.
+  const HOME_FAQ = useHomeFaq();
   const left = HOME_FAQ.filter((_, i) => i % 2 === 0);
   const right = HOME_FAQ.filter((_, i) => i % 2 === 1);
 

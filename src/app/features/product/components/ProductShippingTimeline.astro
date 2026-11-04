@@ -1,17 +1,15 @@
 ---
 // Shipping timeline — compact design, dates computed client-side
-// Fetch delivery_days_offset from settings API at build/SSR time
-const apiBase = import.meta.env.VITE_API_BASE_URL || 'https://stgapi.nondecants.com/api'
-let deliveryOffset = 0
-try {
-  const res = await fetch(`${apiBase}/settings/delivery_days_offset`)
-  if (res.ok) {
-    const json = await res.json()
-    deliveryOffset = Number(json?.data?.value ?? json?.value) || 0
-  }
-} catch {
-  deliveryOffset = 0
-}
+// delivery_days_offset y dispatch_cutoff_hour desde ajustes (SSR)
+import { getSettingsServer, getSetting } from '@/app/lib/siteSettings'
+import { DEFAULT_DISPATCH_CUTOFF_HOUR } from '@/app/helpers/deliveryWindow'
+
+const settings = await getSettingsServer()
+const deliveryOffset = getSetting(settings, 'delivery_days_offset', 0)
+const cutoffRaw = getSetting(settings, 'dispatch_cutoff_hour', DEFAULT_DISPATCH_CUTOFF_HOUR)
+const cutoffHour =
+  Number.isInteger(cutoffRaw) && cutoffRaw >= 0 && cutoffRaw <= 23 ? cutoffRaw : DEFAULT_DISPATCH_CUTOFF_HOUR
+const cutoffLabel = `${String(cutoffHour).padStart(2, '0')}:00`
 ---
 
 <div class="border border-border p-5 mt-10" data-delivery-offset={deliveryOffset}>
@@ -21,7 +19,7 @@ try {
       <polyline points="12 6 12 12 16 14" />
     </svg>
     <span>
-      Si hace hoy su pedido antes de las <strong>14:00 PM</strong>&nbsp; recibirá su pedido entre el <strong id="timeline-date-1">--/--/----</strong> al <strong id="timeline-date-2">--/--/----</strong>
+      Si hace hoy su pedido antes de las <strong>{cutoffLabel}</strong>&nbsp; recibirá su pedido entre el <strong id="timeline-date-1">--/--/----</strong> al <strong id="timeline-date-2">--/--/----</strong>
     </span>
   </div>
 

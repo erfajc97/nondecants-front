@@ -4,6 +4,7 @@ import CouponField from './CouponField';
 import TermsAcceptance from './TermsAcceptance';
 import Loader from '@/app/components/Loader';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
+import { usePricingSettings, formatPct } from '@/app/lib/pricingSettings';
 import { useCouponStore } from '@/app/store/coupon/couponStore';
 import { lineCouponDiscount } from '@/app/helpers/couponItemDiscount';
 import { useCartStore, type CartItem } from '@/app/store/cart/cartStore';
@@ -63,6 +64,7 @@ export default function CheckoutOrderSummary({
   isPending = false,
   missingText = '',
 }: CheckoutOrderSummaryProps) {
+  const { payphoneSurchargePct } = usePricingSettings();
   const removeItem = useCartStore((s) => s.removeItem);
   const updateQty = useCartStore((s) => s.updateQty);
   const lineCouponApplied = useCouponStore((s) => s.applied);
@@ -201,7 +203,7 @@ export default function CheckoutOrderSummary({
 
         {payphoneSurcharge > 0 && (
           <div className="flex items-center justify-between text-text-muted">
-            <span>Recargo de tarjeta (6%)</span>
+            <span>Recargo de tarjeta ({formatPct(payphoneSurchargePct)}%)</span>
             <span className="tabular-nums">{formatCurrency(payphoneSurcharge)}</span>
           </div>
         )}

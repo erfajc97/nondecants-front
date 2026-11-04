@@ -1,5 +1,6 @@
 import { productUrl } from '@/app/helpers/productUrl';
 import type { Combo, Product } from '@/app/types/global.types';
+import { CONTACT_DEFAULTS, type Contact } from '@/app/lib/contact';
 
 export const SITE_ORIGIN = 'https://nondecants.com';
 
@@ -48,20 +49,17 @@ const CONCENTRATION_LABEL: Record<string, string> = {
   EXTRAIT_DE_PARFUM: 'Extrait de Parfum',
 };
 
-export function organizationJsonLd() {
+export function organizationJsonLd(contact: Contact = CONTACT_DEFAULTS) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'NonDecants',
     url: SITE_ORIGIN,
     logo: absoluteUrl('/favicon.png'),
-    sameAs: [
-      'https://www.instagram.com/nondecants',
-      'https://www.tiktok.com/@nondecants_',
-    ],
+    sameAs: [contact.instagram, contact.tiktok],
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: '+593992305463',
+      telephone: `+${contact.whatsapp}`,
       contactType: 'customer service',
       areaServed: 'EC',
       availableLanguage: ['Spanish'],

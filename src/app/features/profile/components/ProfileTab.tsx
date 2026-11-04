@@ -5,6 +5,7 @@ import { useResendVerificationMutation } from '@/app/features/auth/mutations/use
 import { sonnerResponse } from '@/app/helpers/sonnerResponse';
 import axiosInstance from '@/app/config/axiosConfig';
 import { API_ENDPOINTS } from '@/app/api/endpoints';
+import { usePricingSettings, formatUsdText } from '@/app/lib/pricingSettings';
 import Loader from '@/app/components/Loader';
 import SearchableSelect from '@/app/components/UI/SearchableSelect';
 import { PROVINCE_NAMES, cantonsOf, ALL_CANTONS } from '@/app/data/ecuadorLocations';
@@ -18,6 +19,7 @@ const SELECT =
 const LABEL = 'mb-2 block font-body text-[13px] font-semibold text-text-muted';
 
 export default function ProfileTab() {
+  const { shippingGye, shippingNacional } = usePricingSettings();
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const { mutate: logout, isPending: isLoggingOut } = useLogoutMutation();
@@ -241,8 +243,8 @@ export default function ProfileTab() {
               <option value="">Sin preferencia</option>
               <option value="ENTREGA_PERSONAL">Entrega personal Plaza Tía — Gratis</option>
               <option value="RETIRO_PIWU">Retiro en Piwu Market (Urdesa) — $2</option>
-              <option value="SERVIENTREGA_GYE">Servientrega (GYE - Durán - Samborondón) — $3</option>
-              <option value="SERVIENTREGA_NACIONAL">Servientrega Nacional (Provincias) — $6.50</option>
+              <option value="SERVIENTREGA_GYE">Servientrega (GYE - Durán - Samborondón) — {formatUsdText(shippingGye)}</option>
+              <option value="SERVIENTREGA_NACIONAL">Servientrega Nacional (Provincias) — ${shippingNacional.toFixed(2)}</option>
             </select>
           </div>
         </div>

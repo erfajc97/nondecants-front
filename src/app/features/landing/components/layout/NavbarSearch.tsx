@@ -4,11 +4,11 @@ import { formatCurrency } from '@/app/helpers/formatCurrency';
 import { productUrl } from '@/app/helpers/productUrl';
 import type { Product } from '@/app/types/global.types';
 import { price3ml, type Reason } from '@/app/lib/searchIndex';
+import { useContact, whatsappUrl } from '@/app/lib/contact';
 import { useNavbarSearchHook } from '../../hooks/useNavbarSearchHook';
 import { useDialogBehavior } from './useDialogBehavior';
 import { IconSearch, IconClose, IconPlane } from './NavIcons';
 
-const WHATSAPP_URL = 'https://wa.me/593992305463';
 const EXAMPLES = ['vainilla', 'Valentino', 'algo fresco', 'para la noche', 'Yara', 'oud'];
 
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -135,6 +135,7 @@ export default function NavbarSearch() {
   const panelRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
+  const contact = useContact();
   const s = useNavbarSearchHook(open);
   const { txt, reduced } = useTypingPlaceholder(open && !s.q);
 
@@ -432,7 +433,7 @@ export default function NavbarSearch() {
                   Lo traemos bajo pedido en 13 a 17 días.
                 </div>
                 <a
-                  href={`${WHATSAPP_URL}?text=${encodeURIComponent('Hola NonDecants, busco el perfume: ' + s.term)}`}
+                  href={whatsappUrl(contact.whatsapp, 'Hola NonDecants, busco el perfume: ' + s.term)}
                   target="_blank"
                   rel="noopener"
                   className="col-span-full mt-1 flex h-12 items-center justify-center rounded-lg bg-text font-body text-[15px] font-semibold text-bg transition-colors hover:bg-text-soft"

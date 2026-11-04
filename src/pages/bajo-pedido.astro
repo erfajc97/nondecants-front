@@ -4,10 +4,10 @@ export const prerender = false;
 import PublicLayout from '@/layouts/PublicLayout.astro';
 import Catalog from '@/app/features/catalog/Catalog';
 import CatalogProductIndex from '@/app/features/catalog/components/CatalogProductIndex.astro';
-import { fetchProducts } from '@/app/tanstack-queries/productsQuery';
+import { fetchAllProducts } from '@/app/tanstack-queries/productsQuery';
 
 const robots = Astro.url.search ? 'noindex,follow' : 'index,follow';
-const indexed = await fetchProducts({ limit: 200, page: 1, bajoPedido: true });
+const indexed = await fetchAllProducts({ bajoPedido: true });
 ---
 
 <PublicLayout

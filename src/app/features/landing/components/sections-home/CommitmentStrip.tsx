@@ -1,4 +1,6 @@
-import PhosphorIcon, { type PhosphorIconName } from '@/assets/svg/PhosphorIcon';
+import { useEffect, useState } from 'react';
+import PhosphorIcon from '@/assets/svg/PhosphorIcon';
+import { COMMITMENT_ICONS, resolveCommitmentValue, useCommitment } from '@/app/lib/homeContent';
 
 interface CommitmentStripProps {
   /** Total real de perfumes del catálogo (API). Sin dato se oculta el número. */
@@ -10,17 +12,15 @@ interface CommitmentStripProps {
  * Gloock en dorado, título y apoyo. 4 columnas en desktop, 2×2 hasta 1180 px.
  */
 export default function CommitmentStrip({ catalogCount }: CommitmentStripProps) {
-  const items: { icon: PhosphorIconName; big: string; title: string; text: string }[] = [
-    { icon: 'sealCheck', big: '100%', title: 'Originales y sellados', text: 'De boutiques y distribuidores oficiales' },
-    { icon: 'dropHalf', big: '3 · 5 · 10', title: 'ml en decant', text: 'Con la etiqueta de la casa' },
-    { icon: 'truck', big: '24–72 h', title: 'Envío a todo Ecuador', text: 'Por Servientrega' },
-    {
-      icon: 'sprayBottle',
-      big: catalogCount ? String(catalogCount) : '+100',
-      title: 'Perfumes en catálogo',
-      text: 'Diseñador, nicho y árabes',
-    },
-  ];
+  // El conteo puede llegar ya cacheado: se usa tras montar para coincidir con el HTML del servidor.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const items = useCommitment().map((c, i) => ({
+    icon: COMMITMENT_ICONS[i % COMMITMENT_ICONS.length],
+    big: resolveCommitmentValue(c.value, mounted ? catalogCount : null),
+    title: c.label,
+    text: c.text ?? '',
+  }));
 
   return (
     <section aria-label="Nuestro compromiso" className="shrink-0 bg-text text-cream">

@@ -5,6 +5,7 @@ import WhatsAppBand from '@/app/features/landing/components/layout/WhatsAppBand.
 import FloatingSeal from '@/app/features/landing/components/layout/FloatingSeal';
 import Footer from '@/app/features/landing/components/layout/Footer.astro';
 import { organizationJsonLd } from '@/app/helpers/seoMeta';
+import { getContactServer } from '@/app/lib/contact';
 
 interface Props {
   title?: string;
@@ -29,6 +30,8 @@ const {
   ogType,
   jsonLd = [],
 } = Astro.props;
+
+const contact = await getContactServer();
 ---
 
 <BaseLayout
@@ -40,7 +43,7 @@ const {
   robots={robots}
   canonical={canonical}
   ogType={ogType}
-  jsonLd={[organizationJsonLd(), ...jsonLd]}
+  jsonLd={[organizationJsonLd(contact),...jsonLd]}
 >
   <Navbar client:load />
   <main>

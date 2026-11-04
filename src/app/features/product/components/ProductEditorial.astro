@@ -1,6 +1,8 @@
 ---
 import type { Product } from '@/app/types/global.types';
 import { getEditorialFlags } from '../editorialFlags';
+import { getSettingsServer } from '@/app/lib/siteSettings';
+import { getPromiseFrom } from '@/app/lib/homeContent';
 import '../product-detail.css';
 
 /**
@@ -63,21 +65,11 @@ const sigImage =
   product.image ||
   '';
 
-// Promesa de autenticidad — quemada en todos los productos
-const TRUST = [
-  {
-    title: 'El frasco original',
-    desc: 'Solo trabajamos con perfumes reales, de boutiques oficiales y distribuidores autorizados. Cada frasco es verificado por nosotros.',
-  },
-  {
-    title: 'El proceso',
-    desc: 'Cada decant se extrae de una botella 100% auténtica y se decanta con su propio instrumento, para que ningún aroma se mezcle con otro.',
-  },
-  {
-    title: 'La etiqueta',
-    desc: 'Cada decant lleva su etiqueta personalizada con el sello de la casa.',
-  },
-];
+// Promesa de autenticidad — misma fuente que PromiseBand del home (ajuste `home_promise`)
+const TRUST = getPromiseFrom(part === 'autenticidad' ? await getSettingsServer() : {}).map((p) => ({
+  title: p.title,
+  desc: p.text,
+}));
 
 const stageCols = sections.length >= 3 ? 'md:grid-cols-3' : sections.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-1';
 const ticks = Array.from({ length: 10 }, (_, i) => {

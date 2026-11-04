@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useProductsQuery } from '@/app/tanstack-queries/productsQuery';
+import { useAllProductsQuery } from '@/app/tanstack-queries/productsQuery';
 import { useRawCategoriesQuery } from '@/app/tanstack-queries/categoriesQuery';
 import { GENDER_OPTIONS, LEGACY_MOMENTO, MOMENTO_OPTIONS, NOTE_OPTIONS, PRICE3_OPTIONS } from '../data';
 import { countWith, filterProducts, keyFromName, norm, price3Of, sortProducts } from '../filtering';
@@ -65,7 +65,7 @@ export function useCatalogHook({ initialCategory, initialQuery }: UseCatalogHook
   const [visible, setVisible] = useState(PAGE_SIZE);
 
   const { data: rawCategories = [] } = useRawCategoriesQuery();
-  const productsQuery = useProductsQuery({ queryParams: { page: 1, limit: 200 } });
+  const productsQuery = useAllProductsQuery();
   const all = useMemo(() => productsQuery.data?.content ?? [], [productsQuery.data]);
 
   // Categoría (id) → clave del catálogo, por nombre normalizado (no depende de IDs por entorno).

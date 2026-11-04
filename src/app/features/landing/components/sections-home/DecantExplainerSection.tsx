@@ -1,12 +1,15 @@
+import { useEffect, useState } from 'react';
 import Reveal from '../shared/Reveal';
+import { useAllProductsQuery } from '@/app/tanstack-queries/productsQuery';
+import { minBottlePrice, minDecantPrice, formatPriceEs } from '@/app/lib/decantPrices';
 
-/* Copy del prototipo de marca. Los "desde $X" son orientativos: el precio real
-   de cada formato se ve en cada ficha. */
+/* Copy del prototipo de marca. Los "desde $X" salen del mínimo real del catálogo;
+   el valor de `from` es el respaldo mientras carga o si no hay datos. */
 const SIZES = [
-  { v: '3', unit: 'ml', title: 'Para conocerlo', text: 'Unas 35 pulverizaciones, más de una semana', from: 'desde $4,15' },
-  { v: '5', unit: 'ml', title: 'Para confirmarlo', text: 'Unas 60 pulverizaciones, unas 3 semanas', from: 'desde $5,90' },
-  { v: '10', unit: 'ml', title: 'Para llevarlo contigo', text: 'Unas 120 pulverizaciones, más de un mes', from: 'desde $10,15' },
-  { v: 'Frasco', unit: '', title: 'Cuando ya lo sabes', text: 'Sellado y original, o bajo pedido en 13 a 17 días', from: 'desde $59,99' },
+  { v: '3', ml: 3 as number | null, unit: 'ml', title: 'Para conocerlo', text: 'Unas 35 pulverizaciones, más de una semana', from: 'desde $4,15' },
+  { v: '5', ml: 5, unit: 'ml', title: 'Para confirmarlo', text: 'Unas 60 pulverizaciones, unas 3 semanas', from: 'desde $5,90' },
+  { v: '10', ml: 10, unit: 'ml', title: 'Para llevarlo contigo', text: 'Unas 120 pulverizaciones, más de un mes', from: 'desde $10,15' },
+  { v: 'Frasco', ml: null, unit: '', title: 'Cuando ya lo sabes', text: 'Sellado y original, o bajo pedido en 13 a 17 días', from: 'desde $59,99' },
 ];
 
 const STEPS = [
@@ -20,6 +23,17 @@ const STEPS = [
  * izquierda; a la derecha eyebrow, título, párrafo, cuatro tamaños y 3 pasos.
  */
 export default function DecantExplainerSection() {
+  const { data } = useAllProductsQuery();
+  // El catálogo puede llegar ya cargado desde la caché: se usa recién tras montar
+  // para que el primer render coincida con el HTML del servidor.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const catalog = (mounted && data?.content) || [];
+  const fromLabel = (ml: number | null, fallback: string) => {
+    const min = ml === null ? minBottlePrice(catalog) : minDecantPrice(catalog, ml);
+    return min === null ? fallback : `desde ${formatPriceEs(min)}`;
+  };
+
   return (
     <section className="bg-bg py-[clamp(44px,5.5vw,76px)]">
       <div className="mx-auto max-w-[1480px] px-[max(16px,3.4vw)]">
@@ -52,7 +66,7 @@ export default function DecantExplainerSection() {
                   </span>
                   <b className="font-body text-[13.5px] font-semibold">{s.title}</b>
                   <span className="font-body text-[13px] leading-[1.35] text-text-muted">{s.text}</span>
-                  <em className="mt-1 font-body text-[13px] font-semibold not-italic text-accent-hover">{s.from}</em>
+                  <em className="mt-1 font-body text-[13px] font-semibold not-italic text-accent-hover">{fromLabel(s.ml, s.from)}</em>
                 </div>
               ))}
             </div>

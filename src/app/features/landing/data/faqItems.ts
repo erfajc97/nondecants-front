@@ -1,3 +1,9 @@
+import { PRICING_DEFAULTS, formatUsdText, formatPct } from '@/app/lib/pricingSettings';
+
+const GYE = formatUsdText(PRICING_DEFAULTS.shippingGye);
+const NAC = formatUsdText(PRICING_DEFAULTS.shippingNacional);
+const PCT = formatPct(PRICING_DEFAULTS.payphoneSurchargePct);
+
 export interface FaqItem {
   question: string;
   answer: string;
@@ -37,7 +43,7 @@ export const SITE_FAQ: FaqItem[] = [
   {
     question: '¿Hacen envíos a todo Ecuador?',
     answer:
-      'Sí. Servientrega a Guayaquil cuesta $3 y al resto de provincias $7. El plazo habitual es 24 a 72 horas hábiles. También puedes retirar en tienda sin costo de envío.',
+      `Sí. Servientrega a Guayaquil cuesta ${GYE} y al resto de provincias ${NAC}. El plazo habitual es 24 a 72 horas hábiles. También puedes retirar en tienda sin costo de envío.`,
   },
   {
     question: '¿Hasta qué hora despachan el mismo día?',
@@ -52,7 +58,7 @@ export const SITE_FAQ: FaqItem[] = [
   {
     question: '¿Qué métodos de pago aceptan?',
     answer:
-      'Transferencia bancaria, Payphone y tarjetas. En Payphone se aplica un recargo del 6% que verás desglosado en el checkout antes de pagar.',
+      `Transferencia bancaria, Payphone y tarjetas. En Payphone se aplica un recargo del ${PCT}% que verás desglosado en el checkout antes de pagar.`,
   },
   {
     question: '¿Cuánto tarda un perfume bajo pedido?',
@@ -71,7 +77,7 @@ export const HOME_FAQ: FaqItem[] = [
   {
     question: '¿Cuánto tarda el envío y cuánto cuesta?',
     answer:
-      'Llega en 24 a 72 horas hábiles con Servientrega. A Guayaquil cuesta $3 y al resto de provincias $7. Los pedidos confirmados hasta las 15:00 salen el mismo día.',
+      `Llega en 24 a 72 horas hábiles con Servientrega. A Guayaquil cuesta ${GYE} y al resto de provincias ${NAC}. Los pedidos confirmados hasta las 15:00 salen el mismo día.`,
   },
   {
     question: '¿Qué significa "bajo pedido"?',
@@ -91,7 +97,7 @@ export const HOME_FAQ: FaqItem[] = [
   {
     question: '¿Cómo puedo pagar?',
     answer:
-      'Con transferencia bancaria, Payphone o tarjeta. En Payphone se aplica un recargo del 6 % que verás desglosado en el checkout antes de pagar.',
+      `Con transferencia bancaria, Payphone o tarjeta. En Payphone se aplica un recargo del ${PCT} % que verás desglosado en el checkout antes de pagar.`,
   },
   {
     question: '¿Puedo retirar mi pedido en tienda?',

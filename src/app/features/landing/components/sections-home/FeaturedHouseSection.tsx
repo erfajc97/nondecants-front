@@ -3,6 +3,7 @@ import NodSeal from '@/app/components/UI/NodSeal';
 import FormatTiles, { ctaLabel } from '@/app/features/product/components/FormatTiles';
 import { useProductCardHook } from '@/app/features/product/hooks/useProductCardHook';
 import { useLandingSectionsActiveQuery } from '@/app/tanstack-queries/landingSectionsQuery';
+import { useSetting } from '@/app/lib/siteSettings';
 import SectionHead, { PillLink } from '../shared/SectionHead';
 import Reveal from '../shared/Reveal';
 import type { Product } from '@/app/types/global.types';
@@ -25,14 +26,22 @@ function formatCountdown(ms: number) {
   return `${d}d ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m`;
 }
 
+/** `featured_end_at` (ISO) si es válido y futuro; si no, el próximo domingo. */
+function resolveEnd(endAt: string): Date {
+  const custom = endAt ? new Date(endAt) : null;
+  if (custom && !Number.isNaN(custom.getTime()) && custom.getTime() > Date.now()) return custom;
+  return endOfWeek();
+}
+
 function Countdown() {
+  const endAt = useSetting('featured_end_at', '');
   const [label, setLabel] = useState('--');
   useEffect(() => {
-    const tick = () => setLabel(formatCountdown(endOfWeek().getTime() - Date.now()));
+    const tick = () => setLabel(formatCountdown(resolveEnd(endAt).getTime() - Date.now()));
     tick();
     const id = window.setInterval(tick, 30000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [endAt]);
   return (
     <div className="flex items-baseline gap-2.5 font-body text-[13.5px] tabular-nums text-text-muted">
       Termina en <b className="font-display text-2xl font-normal text-text">{label}</b>

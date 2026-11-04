@@ -4,8 +4,11 @@
  * muy claro, título Gloock, teléfono y botón de WhatsApp. Mismo número oficial
  * que el footer y el botón de WhatsApp de la ficha.
  */
-const WHATSAPP_URL = 'https://wa.me/593992305463';
-const PHONE = '+593 99 230 5463';
+import { formatPhone, getContactServer, whatsappUrl } from '@/app/lib/contact';
+
+const contact = await getContactServer();
+const WHATSAPP_URL = whatsappUrl(contact.whatsapp);
+const PHONE = formatPhone(contact.whatsapp);
 ---
 
 <section class="bg-gold-light py-[clamp(44px,5vw,72px)] text-center" aria-labelledby="wa-band-title">
@@ -14,7 +17,7 @@ const PHONE = '+593 99 230 5463';
     <h2 id="wa-band-title" class="mt-2.5 font-display text-[clamp(32px,4vw,54px)] font-normal leading-none text-text">
       ¿Dudas con tu perfume? Escríbenos.
     </h2>
-    <p class="mt-2.5 font-body text-text-muted">Te ayudamos a elegir por WhatsApp, de lunes a sábado.</p>
+    <p class="mt-2.5 font-body text-text-muted">Te ayudamos a elegir por WhatsApp. {contact.hours}</p>
     <div class="mt-[18px] select-all font-body text-[22px] font-semibold tracking-[0.04em] tabular-nums text-text">{PHONE}</div>
     <a
       href={WHATSAPP_URL}

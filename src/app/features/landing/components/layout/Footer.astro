@@ -1,14 +1,17 @@
 ---
 import { FOOTER_LINKS_COL1 } from '../../data';
+import FooterNewsletter from '@/app/features/newsletter/components/FooterNewsletter';
+import { formatPhone, getContactServer, whatsappUrl } from '@/app/lib/contact';
 
 // Cuentas reales de la casa. Sin parámetros de rastreo: así el enlace es
 // indexable y no arrastra la sesión de quien lo compartió.
+const contact = await getContactServer();
 const SOCIAL = [
-  { label: 'Instagram', href: 'https://www.instagram.com/nondecants' },
-  { label: 'TikTok', href: 'https://www.tiktok.com/@nondecants_' },
+  { label: 'Instagram', href: contact.instagram },
+  { label: 'TikTok', href: contact.tiktok },
 ];
 
-const WHATSAPP_URL = 'https://wa.me/593992305463';
+const WHATSAPP_URL = whatsappUrl(contact.whatsapp);
 
 const HELP_LINKS = [
   { href: '/faq', label: 'Preguntas frecuentes' },
@@ -18,7 +21,7 @@ const HELP_LINKS = [
   { href: '/privacidad', label: 'Privacidad' },
 ];
 
-const CONTACT = ['+593 99 230 5463', 'contacto@nondecants.com'];
+const CONTACT = [formatPhone(contact.whatsapp), contact.email];
 
 const year = new Date().getFullYear();
 ---
@@ -37,6 +40,7 @@ const year = new Date().getFullYear();
         <p class="mt-3 max-w-[38ch] font-body text-sm leading-relaxed text-bg/60">
           Perfumes originales de diseñador, nicho y árabes, en decant y en frasco sellado. Guayaquil, Ecuador.
         </p>
+        <FooterNewsletter client:visible />
       </div>
 
       <!-- Tienda -->

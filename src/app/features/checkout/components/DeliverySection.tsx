@@ -1,6 +1,7 @@
 import SearchableSelect from '@/app/components/UI/SearchableSelect';
 import { ALL_CANTONS } from '@/app/data/ecuadorLocations';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
+import { usePricingSettings, formatUsdFixed } from '@/app/lib/pricingSettings';
 import type { DeliveryMethod, DeliveryOption } from '../types';
 import { SELECT_CLASS, optionClass, radioDotClass } from '../classes';
 
@@ -61,6 +62,7 @@ export default function DeliverySection({
   canContinue,
   onContinue,
 }: DeliverySectionProps) {
+  const { shippingGye, shippingNacional } = usePricingSettings();
   const pickupOptions = options.filter((o) => PICKUP_METHODS.includes(o.method));
 
   return (
@@ -107,7 +109,7 @@ export default function DeliverySection({
             </p>
           )}
           <p className="mt-2.5 font-body text-sm text-text-muted">
-            $3,00 a Guayaquil, Durán y Samborondón. $6,50 al resto del país.
+            {formatUsdFixed(shippingGye)} a Guayaquil, Durán y Samborondón. {formatUsdFixed(shippingNacional)} al resto del país.
           </p>
         </div>
       ) : (

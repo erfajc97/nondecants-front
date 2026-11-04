@@ -6,6 +6,7 @@ import { BACKORDER_LABEL, DEFAULT_DISPATCH_CUTOFF_HOUR } from '@/app/helpers/del
 import { useActiveCombosQuery } from '@/app/tanstack-queries/combosQuery';
 import { useDeliveryOffsetQuery, useDispatchCutoffQuery } from '@/app/tanstack-queries/settingsQuery';
 import { useCartStore } from '@/app/store/cart/cartStore';
+import { useContact, whatsappUrl } from '@/app/lib/contact';
 import PaymentMethodIcons from '@/app/components/PaymentMethodIcons';
 import { DispatchCountdown, TrustRow } from '@/app/features/product/components/ProductPurchaseOptions';
 import type { Combo } from '@/app/types/global.types';
@@ -28,6 +29,7 @@ const BTN =
 
 function ComboDetailContent({ combo }: ComboDetailIslandProps) {
   const addItem = useCartStore((s) => s.addItem);
+  const contact = useContact();
   const { data: allCombos = [] } = useActiveCombosQuery();
   const others = allCombos.filter((c) => String(c.id) !== String(combo.id) && !c.parentComboId).slice(0, 4);
   const { data: deliveryOffset = 0 } = useDeliveryOffsetQuery();
@@ -59,7 +61,7 @@ function ComboDetailContent({ combo }: ComboDetailIslandProps) {
   const handleWhatsapp = () => {
     const url = typeof window !== 'undefined' ? window.location.href : `https://nondecants.com/combo/${combo.id}`;
     const msg = `Hola, estoy interesado/a en el combo "${combo.name}"${hasPicker ? ` (decants de ${size.ml} ml)` : ''}: ${url}`;
-    window.open(`https://wa.me/593992305463?text=${encodeURIComponent(msg)}`, '_blank');
+    window.open(whatsappUrl(contact.whatsapp, msg), '_blank');
   };
 
   const waIcon = (

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import NodSeal from '@/app/components/UI/NodSeal';
 import PhosphorIcon from '@/assets/svg/PhosphorIcon';
+import { useContact, whatsappUrl } from '@/app/lib/contact';
 
-const WHATSAPP_URL = 'https://wa.me/593992305463';
 
 /**
  * Botón flotante de WhatsApp (prototipo de marca): el sello NöD girando, con la
@@ -12,6 +12,7 @@ const WHATSAPP_URL = 'https://wa.me/593992305463';
 export default function FloatingSeal() {
   const [shown, setShown] = useState(false);
   const [bubble, setBubble] = useState(false);
+  const contact = useContact();
 
   useEffect(() => {
     const show = window.setTimeout(() => setShown(true), 900);
@@ -36,7 +37,7 @@ export default function FloatingSeal() {
 
   return (
     <a
-      href={WHATSAPP_URL}
+      href={whatsappUrl(contact.whatsapp)}
       target="_blank"
       rel="noopener"
       aria-label="Escríbenos por WhatsApp"

@@ -12,7 +12,7 @@ export const fetchVisibleBanners = async (): Promise<Banner[]> => {
     const result = data?.data ?? data;
     return Array.isArray(result) ? result : [];
   } catch {
-    return MOCK_BANNERS;
+    return [];
   }
 };
 

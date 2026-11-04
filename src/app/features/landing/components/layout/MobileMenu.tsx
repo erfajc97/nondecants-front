@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatPhone, useContact } from '@/app/lib/contact';
 import { NAV_LINKS, isLinkActive } from '../../hooks/useNavbarHook';
 import { useNormalCategoriesQuery, useBajoPedidoCategoriesQuery, sortCategoriesByHierarchy } from '@/app/tanstack-queries/categoriesQuery';
 
@@ -20,6 +21,7 @@ export default function MobileMenu({ pathname, onClose }: MobileMenuProps) {
   const [expandedCat, setExpandedCat] = useState<string | null>(null);
   const { data: normalCategories = [] } = useNormalCategoriesQuery();
   const { data: bajoPedidoCategories = [] } = useBajoPedidoCategoriesQuery();
+  const contact = useContact();
 
   return (
     <div className="border-t border-border bg-bg min-[821px]:hidden max-h-[calc(100dvh-58px)] overflow-y-auto pb-24">
@@ -170,7 +172,7 @@ export default function MobileMenu({ pathname, onClose }: MobileMenuProps) {
           className="h-12 w-auto object-contain"
         />
         <p className="w-full font-body text-sm text-text-muted">
-          WhatsApp +593 99 230 5463 · contacto@nondecants.com
+          WhatsApp {formatPhone(contact.whatsapp)} · {contact.email}
         </p>
       </div>
     </div>

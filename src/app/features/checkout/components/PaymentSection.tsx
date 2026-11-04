@@ -1,6 +1,9 @@
 import { useRef, useState } from 'react';
-import { BANK_LOGO_SRC, PAYMENT_LOGOS } from '@/app/components/paymentLogos';
+import { PAYMENT_LOGOS } from '@/app/components/paymentLogos';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
+import { useSetting } from '@/app/lib/siteSettings';
+import { usePricingSettings, formatPct } from '@/app/lib/pricingSettings';
+import { DEFAULT_BANK_ACCOUNTS, bankLogo, bankRows, type BankAccount } from '../bankAccounts';
 import type { PaymentMethod } from '../types';
 import { optionClass, radioDotClass } from '../classes';
 
@@ -11,51 +14,6 @@ interface PaymentSectionProps {
   receiptFile: File | null;
   onReceiptChange: (file: File | null) => void;
 }
-
-type BankRow = [string, string, boolean?];
-
-const BANKS: { id: string; name: string; logo: string; logoCls: string; rows: BankRow[] }[] = [
-  {
-    id: 'pichincha',
-    name: 'Banco Pichincha',
-    logo: BANK_LOGO_SRC.pichincha,
-    logoCls: 'h-4 md:h-5',
-    rows: [
-      ['Tipo de cuenta', 'Cuenta de Ahorros'],
-      ['Número de cuenta', '2213099079', true],
-      ['Titular', 'Jean Philippe Wong'],
-      ['Cédula', '0951454917', true],
-      ['Correo', 'nondecants@gmail.com'],
-    ],
-  },
-  {
-    id: 'produbanco',
-    name: 'Produbanco',
-    logo: BANK_LOGO_SRC.produbanco,
-    logoCls: 'h-5 md:h-6',
-    rows: [
-      ['Tipo de cuenta', 'Cuenta de Ahorros'],
-      ['Número de cuenta', '20009323889', true],
-      ['Titular', 'Wong Diaz Jean Philippe'],
-      ['RUC / Identificación', '0951454917', true],
-      ['Correo', 'nondecants@gmail.com'],
-      ['Celular', '0992305463', true],
-    ],
-  },
-  {
-    id: 'guayaquil',
-    name: 'Banco Guayaquil',
-    logo: BANK_LOGO_SRC.guayaquil,
-    logoCls: 'h-5 md:h-6',
-    rows: [
-      ['Tipo de cuenta', 'Cuenta de Ahorros'],
-      ['Número de cuenta', '0060453629', true],
-      ['CI', '0951454917', true],
-      ['Correo', 'nondecants@gmail.com'],
-      ['Celular', '0992305463', true],
-    ],
-  },
-];
 
 const CARD_LOGOS = PAYMENT_LOGOS.filter((l) => ['Payphone', 'Visa', 'Mastercard', 'Diners Club', 'Discover'].includes(l.alt));
 const BANK_LOGOS = PAYMENT_LOGOS.filter((l) => ['Banco Pichincha', 'Banco Guayaquil', 'Produbanco'].includes(l.alt));
@@ -72,7 +30,12 @@ function LogoRow({ logos }: { logos: typeof PAYMENT_LOGOS }) {
 
 /** Paso 3 — ¿Cómo quieres pagar? */
 export default function PaymentSection({ selected, onSelect, total, receiptFile, onReceiptChange }: PaymentSectionProps) {
-  const [openBank, setOpenBank] = useState<string | null>('pichincha');
+  const { payphoneSurchargePct } = usePricingSettings();
+  const accounts = useSetting<BankAccount[]>('bank_accounts', DEFAULT_BANK_ACCOUNTS);
+  const BANKS = accounts
+    .filter((a) => a && typeof a.bank === 'string' && a.bank && a.accountNumber)
+    .map((a, i) => ({ id: String(i), name: a.bank, logo: bankLogo(a.bank), rows: bankRows(a) }));
+  const [openBank, setOpenBank] = useState<string | null>('0');
   const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -121,7 +84,7 @@ export default function PaymentSection({ selected, onSelect, total, receiptFile,
                       className="flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors hover:bg-bg-alt"
                     >
                       <span className="flex items-center gap-3">
-                        <img src={bank.logo} alt="" className={`${bank.logoCls} w-auto object-contain`} />
+                        {bank.logo && <img src={bank.logo.src} alt="" className={`${bank.logo.cls} w-auto object-contain`} />}
                         <span className="font-body text-base font-semibold text-text">{bank.name}</span>
                       </span>
                       <svg
@@ -217,7 +180,7 @@ export default function PaymentSection({ selected, onSelect, total, receiptFile,
         </span>
         <span className="min-w-0">
           <span className="block font-body text-[17px] font-bold leading-tight text-text">Tarjeta de crédito o débito</span>
-          <span className="mt-1 block font-body text-[14.5px] text-text-muted">Recargo del 6% por procesamiento (Payphone)</span>
+          <span className="mt-1 block font-body text-[14.5px] text-text-muted">Recargo del {formatPct(payphoneSurchargePct)}% por procesamiento (Payphone)</span>
           <LogoRow logos={CARD_LOGOS} />
         </span>
       </button>

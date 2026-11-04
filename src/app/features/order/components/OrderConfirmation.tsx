@@ -1,4 +1,5 @@
 import { formatCurrency } from '@/app/helpers/formatCurrency';
+import { usePricingSettings, formatPct } from '@/app/lib/pricingSettings';
 import OrderStatusBadge from './OrderStatusBadge';
 import OrderTracking from './OrderTracking';
 import GoogleReviewOptIn from './GoogleReviewOptIn';
@@ -21,6 +22,7 @@ const DELIVERY_LABELS: Record<string, string> = {
 };
 
 export default function OrderConfirmation({ order }: OrderConfirmationProps) {
+  const { payphoneSurchargePct } = usePricingSettings();
   return (
     <div className="mx-auto max-w-3xl space-y-5">
       <GoogleReviewOptIn
@@ -68,7 +70,7 @@ export default function OrderConfirmation({ order }: OrderConfirmationProps) {
           </div>
           {order.payphoneSurcharge > 0 && (
             <div className="flex justify-between">
-              <span className="text-text-muted">Recargo Payphone (6%)</span>
+              <span className="text-text-muted">Recargo Payphone ({formatPct(payphoneSurchargePct)}%)</span>
               <span className="tabular-nums text-text-muted">+{formatCurrency(order.payphoneSurcharge)}</span>
             </div>
           )}

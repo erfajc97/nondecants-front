@@ -1,5 +1,11 @@
 ---
 import PublicLayout from '@/layouts/PublicLayout.astro';
+import { formatPhone, getContactServer, whatsappUrl } from '@/app/lib/contact';
+
+import { getPricingServer, formatUsdText } from '@/app/lib/pricingSettings';
+
+const contact = await getContactServer();
+const pricing = await getPricingServer();
 ---
 
 <PublicLayout
@@ -22,32 +28,31 @@ import PublicLayout from '@/layouts/PublicLayout.astro';
         <div>
           <p class="font-body text-[13px] font-semibold text-accent-hover">WhatsApp</p>
           <a
-            href="https://wa.me/593992305463"
+            href={whatsappUrl(contact.whatsapp)}
             class="mt-1 inline-block font-display text-3xl text-text transition-colors hover:text-accent-hover"
           >
-            +593 99 230 5463
+            {formatPhone(contact.whatsapp)}
           </a>
         </div>
         <div>
           <p class="font-body text-[13px] font-semibold text-accent-hover">Correo</p>
           <a
-            href="mailto:contacto@nondecants.com"
+            href={`mailto:${contact.email}`}
             class="mt-1 inline-block font-body text-lg font-medium text-text transition-colors hover:text-accent-hover"
           >
-            contacto@nondecants.com
+            {contact.email}
           </a>
         </div>
         <div>
           <p class="font-body text-[13px] font-semibold text-accent-hover">Horario</p>
           <p class="mt-1 font-body text-[15px] leading-relaxed text-text-soft">
-            Lunes a domingo, 08:00 a 24:00 (hora de Ecuador). Los pedidos confirmados hasta las
-            15:00 salen el mismo día.
+            {contact.hours}
           </p>
         </div>
         <div>
           <p class="font-body text-[13px] font-semibold text-accent-hover">Envíos</p>
           <p class="mt-1 font-body text-[15px] leading-relaxed text-text-soft">
-            Servientrega a todo el país: Guayaquil $3, provincias $7, retiro en tienda sin costo.
+            Servientrega a todo el país: Guayaquil {formatUsdText(pricing.shippingGye)}, provincias {formatUsdText(pricing.shippingNacional)}, retiro en tienda sin costo.
             Plazo habitual 24 a 72 horas. Encargos bajo pedido, 13 a 17 días.
           </p>
         </div>

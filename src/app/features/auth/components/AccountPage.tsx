@@ -4,6 +4,7 @@ import AppProviders from '@/app/providers/AppProviders';
 import axiosInstance from '@/app/config/axiosConfig';
 import { API_ENDPOINTS } from '@/app/api/endpoints';
 import { DEMO_ENABLED } from '@/app/lib/mock';
+import { useContact, whatsappUrl } from '@/app/lib/contact';
 import { useAuthStore } from '@/app/store/auth/authStore';
 import GoogleIcon from '@/assets/svg/GoogleIcon';
 import Loader from '@/app/components/Loader';
@@ -364,7 +365,7 @@ const LINKS: { icon: IconName; label: string; href?: string; external?: boolean 
   { icon: 'heart', label: 'Favoritos' },
   { icon: 'pin', label: 'Direcciones', href: '/mi-cuenta' },
   { icon: 'star', label: 'Mis reseñas' },
-  { icon: 'help', label: 'Ayuda', href: 'https://wa.me/593992305463', external: true },
+  { icon: 'help', label: 'Ayuda', external: true },
 ];
 
 /** Panel con sesión (A3): "Hola, [nombre]." y accesos. */
@@ -372,6 +373,7 @@ function AccountPanel() {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const { mutate: logout, isPending } = useLogoutMutation();
+  const contact = useContact();
 
   // Tras recargar la página el usuario no está en memoria: se pide el perfil.
   useEffect(() => {
@@ -398,7 +400,9 @@ function AccountPanel() {
       {email && <p className="mt-2 break-all font-body text-base text-text-muted">{email}</p>}
 
       <ul className="mt-8 divide-y divide-border border-y border-border">
-        {LINKS.map((l) => {
+        {LINKS.map((link) => {
+          // "Ayuda" abre el WhatsApp configurado en el admin.
+          const l = link.icon === 'help' ? { ...link, href: whatsappUrl(contact.whatsapp) } : link;
           const inner = (
             <>
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-text text-bg">

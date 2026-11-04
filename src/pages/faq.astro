@@ -1,8 +1,11 @@
 ---
 import PublicLayout from '@/layouts/PublicLayout.astro';
 import LegalLayout from '@/app/features/landing/pages/legal/LegalLayout.astro';
-import { SITE_FAQ } from '@/app/features/landing/data/faqItems';
+import { getSettingsServer } from '@/app/lib/siteSettings';
+import { getSiteFaqFrom } from '@/app/lib/homeContent';
 import { breadcrumbJsonLd, faqPageJsonLd } from '@/app/helpers/seoMeta';
+
+const SITE_FAQ = getSiteFaqFrom(await getSettingsServer());
 ---
 
 <PublicLayout

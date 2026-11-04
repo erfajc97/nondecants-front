@@ -1,5 +1,5 @@
 import { useCartStore, type CartItem } from '@/app/store/cart/cartStore';
-import { ESTIMATED_SHIPPING } from '@/app/features/checkout/data';
+import { usePricingSettings } from '@/app/lib/pricingSettings';
 import { splitCartStock, getSplit } from '@/app/helpers/cartStockSplit';
 import { DEFAULT_DISPATCH_CUTOFF_HOUR } from '@/app/helpers/deliveryWindow';
 import {
@@ -34,6 +34,7 @@ export function useCartPageHook() {
   const { data: deliveryOffset = 0 } = useDeliveryOffsetQuery();
   const { data: cutoffHour = DEFAULT_DISPATCH_CUTOFF_HOUR } = useDispatchCutoffQuery();
   const { data: freeShippingThreshold = 0 } = useFreeShippingThresholdQuery();
+  const { shippingGye } = usePricingSettings();
   const couponDiscount = useCouponStore((s) => (s.applied ? s.discount : 0));
   const couponFreeShipping = useCouponStore((s) => s.applied && s.freeShipping);
 
@@ -64,7 +65,7 @@ export function useCartPageHook() {
   const qualifiesFreeShipping =
     couponFreeShipping ||
     (freeShippingThreshold > 0 && afterDiscount >= freeShippingThreshold);
-  const shipping = items.length > 0 && !qualifiesFreeShipping ? ESTIMATED_SHIPPING : 0;
+  const shipping = items.length > 0 && !qualifiesFreeShipping ? shippingGye : 0;
   const total = afterDiscount + shipping;
   const itemCount = items.reduce((a, i) => a + i.quantity, 0);
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - afterDiscount);

@@ -3,6 +3,7 @@ import { flyToCart } from '@/app/helpers/flyToCart';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
 import { productUrl } from '@/app/helpers/productUrl';
 import { useCartStore } from '@/app/store/cart/cartStore';
+import { useContact, whatsappUrl } from '@/app/lib/contact';
 import { sonnerResponse } from '@/app/helpers/sonnerResponse';
 import {
   BACKORDER_LABEL,
@@ -171,6 +172,7 @@ export default function ProductPurchaseOptions({
   const [hasHydrated, setHasHydrated] = useState(false);
 
   const addItem = useCartStore((s) => s.addItem);
+  const contact = useContact();
 
   // Notify parent when selection changes (for gallery image switching)
   const handleSelectFull = () => {
@@ -436,7 +438,7 @@ export default function ProductPurchaseOptions({
         ? window.location.href
         : `https://nondecants.com${productUrl(product)}`;
     const msg = `Hola, estoy interesado/a en el perfume ${product.name}: ${url}`;
-    window.open(`https://wa.me/593992305463?text=${encodeURIComponent(msg)}`, '_blank');
+    window.open(whatsappUrl(contact.whatsapp, msg), '_blank');
   };
 
   // ── Presentación ───────────────────────────────────────────────────────

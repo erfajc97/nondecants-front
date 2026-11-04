@@ -186,11 +186,34 @@ export const fetchProducts = async (params: ProductQueryParams): Promise<Paginat
       };
     }
 
-    return responseData || applyMockFilters(params);
+    return responseData || EMPTY_PAGE(params);
   } catch (error: any) {
-    console.error('[fetchProducts] API error — falling back to mock filters:', error?.response?.status, error?.response?.data ?? error?.message);
-    return applyMockFilters(params);
+    // Sin API no se inventan productos: un catálogo de mentira se podría comprar.
+    console.error('[fetchProducts] API error:', error?.response?.status, error?.response?.data ?? error?.message);
+    return EMPTY_PAGE(params);
   }
+};
+
+const EMPTY_PAGE = (params: ProductQueryParams): PaginatedResponse<Product> => ({
+  content: [],
+  pagination: { page: params.page ?? 1, limit: params.limit ?? 20, total: 0, totalPages: 1 },
+});
+
+/** El backend topa `limit` en 100: se pide por páginas y se junta todo el catálogo. */
+const API_MAX_LIMIT = 100;
+export const fetchAllProducts = async (
+  params: ProductQueryParams = {},
+): Promise<PaginatedResponse<Product>> => {
+  const first = await fetchProducts({ ...params, page: 1, limit: API_MAX_LIMIT });
+  const pages = first.pagination?.totalPages ?? 1;
+  if (pages <= 1) return first;
+  const rest = await Promise.all(
+    Array.from({ length: pages - 1 }, (_, i) =>
+      fetchProducts({ ...params, page: i + 2, limit: API_MAX_LIMIT }),
+    ),
+  );
+  const content = [...first.content, ...rest.flatMap((r) => r.content)];
+  return { content, pagination: { page: 1, limit: content.length, total: content.length, totalPages: 1 } };
 };
 
 export const fetchProductById = async (id: string): Promise<Product> => {
@@ -211,8 +234,7 @@ export const fetchProductById = async (id: string): Promise<Product> => {
   } catch (error) {
     console.warn(`Error fetching product ${numericId}:`, error);
     // Sin mock habilitado no inventamos un producto: la página responde 404.
-    if (!MOCK_ENABLED) return null as unknown as Product;
-    return MOCK_PRODUCTS.find(p => p.id === numericId) ?? MOCK_PRODUCTS[0];
+    return null as unknown as Product;
   }
 };
 
@@ -226,6 +248,13 @@ export const useProductsQuery = ({ queryParams = {}, enabled = true }: UseProduc
     queryKey: ['products', queryParams],
     queryFn:  () => fetchProducts(queryParams),
     enabled,
+  });
+
+/** Catálogo completo (todas las páginas del backend). */
+export const useAllProductsQuery = (queryParams: ProductQueryParams = {}) =>
+  useQuery<PaginatedResponse<Product>>({
+    queryKey: ['products', 'all', queryParams],
+    queryFn:  () => fetchAllProducts(queryParams),
   });
 
 export const useProductByIdQuery = (id: string, enabled = true) =>
