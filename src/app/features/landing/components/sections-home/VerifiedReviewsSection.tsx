@@ -6,7 +6,7 @@ import Reveal from '../shared/Reveal';
 import type { Review } from '@/app/features/reviews/types';
 
 const SLIDE_CLS =
-  'min-w-0 shrink-0 basis-[83%] pl-3 min-[560px]:basis-1/2 min-[1181px]:basis-1/4 min-[1181px]:pl-[18px]';
+  'min-w-0 shrink-0 basis-[90%] pl-3 min-[560px]:basis-1/2 min-[1181px]:basis-1/4 min-[1181px]:pl-[18px]';
 
 const formatDate = (iso: string) =>
   new Date(iso)
@@ -81,14 +81,14 @@ function Summary({ reviews }: { reviews: Review[] }) {
 function ReviewTile({ review }: { review: Review }) {
   const product = [review.productName, review.variantLabel].filter(Boolean).join(' · ');
   return (
-    <article className="flex h-full flex-col rounded-[4px] border border-border bg-white p-6">
+    <article className="flex h-full flex-col rounded-[4px] border border-border bg-white p-5">
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <Stars rating={review.rating} />
         <span className="font-body text-[13px] font-semibold text-success">
           ✓ Compra verificada
         </span>
       </div>
-      <p className="mt-5 font-body text-[16px] leading-[1.65] text-text-soft whitespace-pre-line">
+      <p className="mt-3 font-body text-[15px] leading-[1.55] text-text-soft whitespace-pre-line">
         “{review.comment}”
       </p>
       {product && (
@@ -96,7 +96,7 @@ function ReviewTile({ review }: { review: Review }) {
           {product}
         </p>
       )}
-      <div className="mt-auto flex items-center gap-3 pt-6">
+      <div className="mt-auto flex items-center gap-3 pt-4">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-cream font-body text-[13px] font-bold text-text-muted">
           {initials(review.customerName)}
         </span>

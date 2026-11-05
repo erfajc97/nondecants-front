@@ -51,6 +51,7 @@ function HomeContent() {
         title={title}
         eyebrow={eyebrow}
         products={section.products}
+        viewAllHref={`/catalogo/perfumes?coleccion=${section.id}`}
       />
     );
   };

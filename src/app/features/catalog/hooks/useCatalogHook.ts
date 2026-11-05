@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAllProductsQuery } from '@/app/tanstack-queries/productsQuery';
 import { useRawCategoriesQuery } from '@/app/tanstack-queries/categoriesQuery';
+import { useLandingSectionsActiveQuery } from '@/app/tanstack-queries/landingSectionsQuery';
 import { GENDER_OPTIONS, LEGACY_MOMENTO, MOMENTO_OPTIONS, NOTE_OPTIONS, PRICE3_OPTIONS } from '../data';
 import { countWith, filterProducts, keyFromName, norm, price3Of, sortProducts } from '../filtering';
 import type {
@@ -43,6 +44,7 @@ function parseQuery(qs: string) {
     marca: p.get('marca'),
     search: p.get('search') ?? '',
     momento: p.get('momento') ?? '',
+    coleccion: p.get('coleccion'),
   };
 }
 
@@ -63,10 +65,23 @@ export function useCatalogHook({ initialCategory, initialQuery }: UseCatalogHook
   const [marcaParam, setMarcaParam] = useState<string | undefined>(q.marca ?? undefined);
   const [sort, setSortState] = useState<SortKey>('pedidos');
   const [visible, setVisible] = useState(PAGE_SIZE);
+  // Colección del home ("Ver más" de un carrusel): limita el catálogo a los productos de esa sección.
+  const [coleccion, setColeccion] = useState<string | undefined>(q.coleccion ?? undefined);
 
   const { data: rawCategories = [] } = useRawCategoriesQuery();
   const productsQuery = useAllProductsQuery();
-  const all = useMemo(() => productsQuery.data?.content ?? [], [productsQuery.data]);
+  const sectionsQuery = useLandingSectionsActiveQuery();
+  const section = useMemo(
+    () => (coleccion ? sectionsQuery.data?.find((s) => String(s.id) === coleccion) : undefined),
+    [coleccion, sectionsQuery.data],
+  );
+  const sectionLabel = section ? section.title.split(/\s+[·•]\s+/).pop()?.trim() || section.title : '';
+  const all = useMemo(() => {
+    const everything = productsQuery.data?.content ?? [];
+    if (!section) return everything;
+    const ids = new Set(section.products.map((p) => String(p.id)));
+    return everything.filter((p) => ids.has(String(p.id)));
+  }, [productsQuery.data, section]);
 
   // Categoría (id) → clave del catálogo, por nombre normalizado (no depende de IDs por entorno).
   const ctx = useMemo<FilterContext>(() => {
@@ -127,13 +142,15 @@ export function useCatalogHook({ initialCategory, initialQuery }: UseCatalogHook
     params.delete('momento');
     if (category !== 'todos') params.set('categoria', category);
     else params.delete('categoria');
+    if (coleccion) params.set('coleccion', coleccion);
+    else params.delete('coleccion');
     if (marca) params.set('marca', marca.slug);
     else if (!marcaPending) params.delete('marca');
     if (selections.search) params.set('search', selections.search);
     else params.delete('search');
     const qs = params.toString();
     window.history.replaceState(null, '', qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
-  }, [category, marca, marcaPending, selections.search]);
+  }, [category, marca, marcaPending, selections.search, coleccion]);
 
   const results = useMemo(() => sortProducts(filterProducts(all, criteria, ctx), sort), [all, criteria, ctx, sort]);
   const shown = useMemo(() => results.slice(0, visible), [results, visible]);
@@ -182,6 +199,7 @@ export function useCatalogHook({ initialCategory, initialQuery }: UseCatalogHook
 
   const clearFilters = useCallback(() => {
     setSelections(EMPTY);
+    setColeccion(undefined);
     setVisible(PAGE_SIZE);
   }, []);
 
@@ -194,6 +212,9 @@ export function useCatalogHook({ initialCategory, initialQuery }: UseCatalogHook
 
   const labelOf = (opts: FilterOption[], v: string) => opts.find((o) => o.value === v)?.label ?? v;
   const chips: ActiveChip[] = [
+    ...(coleccion && sectionLabel
+      ? [{ key: 'coleccion', label: sectionLabel, onRemove: () => setColeccion(undefined) }]
+      : []),
     ...selections.genders.map((v) => ({ key: `genders:${v}`, label: labelOf(GENDER_OPTIONS, v), onRemove: () => toggle('genders', v) })),
     ...selections.momentos.map((v) => ({ key: `momentos:${v}`, label: labelOf(MOMENTO_OPTIONS, v), onRemove: () => toggle('momentos', v) })),
     ...selections.precios.map((v) => ({ key: `precios:${v}`, label: `3 ml · ${labelOf(PRICE3_OPTIONS, v)}`, onRemove: () => toggle('precios', v) })),
@@ -230,7 +251,7 @@ export function useCatalogHook({ initialCategory, initialQuery }: UseCatalogHook
     shown,
     hasMore: results.length > shown.length,
     loadMore,
-    isLoading: productsQuery.isLoading || marcaPending,
+    isLoading: productsQuery.isLoading || marcaPending || (!!coleccion && sectionsQuery.isLoading),
     sort,
     setSort,
     setCategory,
