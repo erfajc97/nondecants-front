@@ -6,8 +6,8 @@ import { IconClose } from '@/app/features/landing/components/layout/NavIcons';
 import { splitCartStock, getSplit } from '@/app/helpers/cartStockSplit';
 import CartDrawerContent from './CartDrawerContent';
 
-/** Rutas donde el carrito ya es la página (no se abre el drawer solo). */
-const NO_AUTO_OPEN = ['/carrito', '/checkout', '/orden'];
+/** Rutas donde no se abre el drawer solo al agregar. */
+const NO_AUTO_OPEN = ['/checkout', '/orden'];
 
 /**
  * Carrito lateral (prototipo): entra por la derecha en desktop y a pantalla
@@ -29,6 +29,14 @@ export default function CartDrawer() {
   const prevCount = useRef<number | null>(null);
 
   useEffect(() => setMounted(true), []);
+  // Enlaces viejos a /carrito llegan como /?carrito=1: abren el drawer y limpian la URL.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has('carrito')) return;
+    url.searchParams.delete('carrito');
+    window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+    setOpen(true);
+  }, [setOpen]);
   useEffect(() => {
     if (open) setEverOpened(true);
     else setConfirming(false);

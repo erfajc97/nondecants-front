@@ -150,7 +150,7 @@ export function useProductCardHook(product: Product) {
       return;
     }
     addItem(item);
-    flyToCart(e?.currentTarget ?? null, item.image);
+    flyToCart(e?.currentTarget ?? null, item.image, item.name);
   };
 
   return {

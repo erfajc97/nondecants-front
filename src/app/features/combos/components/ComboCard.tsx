@@ -31,7 +31,7 @@ export default function ComboCard({ combo }: ComboCardProps) {
     const item = buildComboCartItem(combo, size);
     addItem(item);
     useCartStore.getState().setDrawerOpen(true);
-    flyToCart(e.currentTarget, item.image);
+    flyToCart(e.currentTarget, item.image, item.name);
   };
 
   return (

@@ -1,14 +1,7 @@
 ---
-import PublicLayout from '@/layouts/PublicLayout.astro';
-import CartPageIsland from '@/app/features/cart/CartPageIsland';
+// El carrito ya no es una página: vive en el drawer. Los enlaces viejos a
+// /carrito caen en el inicio con el drawer abierto (lo abre CartDrawer por el parámetro).
+export const prerender = false;
 
-export const prerender = false; // el carrito vive en localStorage (cliente)
+return Astro.redirect('/?carrito=1', 301);
 ---
-
-<PublicLayout
-  title="Carrito — NonDecants"
-  description="Revisa tu selección de perfumes: envío inmediato y referencias bajo pedido."
-  robots="noindex,nofollow"
->
-  <CartPageIsland client:load />
-</PublicLayout>

@@ -139,8 +139,6 @@ export default function Navbar() {
                 data-cart-target
                 aria-expanded={drawerOpen}
                 onClick={(e) => {
-                  // En /carrito y /checkout el carrito ya es la página: navega normal.
-                  if (/^\/(carrito|checkout)/.test(window.location.pathname)) return;
                   e.preventDefault();
                   setDrawerOpen(true);
                 }}

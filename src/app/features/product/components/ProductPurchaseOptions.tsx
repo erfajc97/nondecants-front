@@ -42,14 +42,14 @@ function onAddToCartSuccess(_ctx: { productName: string }) {
 }
 
 /** Chispas + miniatura que vuela al carrito (prototipo). */
-function spritz(btn: HTMLElement | null, thumb?: string) {
+function spritz(btn: HTMLElement | null, thumb?: string, name?: string) {
   if (!btn || typeof window === 'undefined') return;
   if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
     btn.classList.remove('pdp-pop');
     void btn.offsetWidth;
     btn.classList.add('pdp-pop');
   }
-  flyToCart(btn, thumb);
+  flyToCart(btn, thumb, name);
 }
 
 /** Fecha corta en Ecuador "mié 4 nov", sumando `days` desde hoy. */
@@ -363,7 +363,7 @@ export default function ProductPurchaseOptions({
     addItem(item);
     // Se queda en la ficha: agregar no debería sacar al cliente de lo que está
     // mirando. Para ir a pagar está el ícono del carrito.
-    spritz(btn ?? null, item.image);
+    spritz(btn ?? null, item.image, item.name);
     onAddToCartSuccess({ productName: product.name });
   };
 

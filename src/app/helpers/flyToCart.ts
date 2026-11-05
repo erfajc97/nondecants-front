@@ -65,12 +65,45 @@ function bump(target: HTMLElement) {
   );
 }
 
+let toastTimer: number | undefined;
+
+/** Tarjeta chica con la foto y el nombre de lo agregado; reemplaza a la anterior. */
+function addedToast(name: string, thumb?: string) {
+  document.querySelector('.added-toast')?.remove();
+  const el = document.createElement('div');
+  el.className = 'added-toast';
+  el.setAttribute('role', 'status');
+  if (thumb) {
+    const img = document.createElement('img');
+    img.src = thumb;
+    img.alt = '';
+    el.appendChild(img);
+  }
+  const text = document.createElement('span');
+  text.textContent = `Agregado: ${name}`;
+  el.appendChild(text);
+  document.body.appendChild(el);
+  window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => el.remove(), 2400);
+}
+
+/** El botón de compra se vuelve verde "Agregado ✓" (estilo en global.css). */
+function flashAdded(source: Element) {
+  if (!source.matches('button') || source.classList.contains('size-tile') || source.hasAttribute('data-no-flash')) return;
+  source.setAttribute('data-added', '');
+  window.setTimeout(() => source.removeAttribute('data-added'), 1600);
+}
+
 /**
  * @param source elemento desde el que sale (botón "Añadir", la card…); si es null no hace nada
  * @param thumb  imagen del producto que viaja; sin ella viaja un punto dorado
+ * @param name   nombre del producto: si viene, aparece la tarjeta "Agregado: nombre"
  */
-export function flyToCart(source: Element | null, thumb?: string) {
-  if (!source || typeof document === 'undefined' || reducedMotion()) return;
+export function flyToCart(source: Element | null, thumb?: string, name?: string) {
+  if (!source || typeof document === 'undefined') return;
+  flashAdded(source);
+  if (name) addedToast(name, thumb || undefined);
+  if (reducedMotion()) return;
   const r = source.getBoundingClientRect();
   if (r.width === 0 && r.height === 0) return;
   const x = r.left + r.width / 2;

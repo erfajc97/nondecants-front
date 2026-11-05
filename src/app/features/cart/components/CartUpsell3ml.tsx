@@ -81,7 +81,7 @@ export default function CartUpsell3ml({ candidates }: { candidates: Product[] })
       maxQty: o.maxQty,
       availableMl: o.availableMl,
     });
-    flyToCart(el, o.image);
+    flyToCart(el, o.image, o.product.name);
   };
 
   return (
@@ -93,6 +93,7 @@ export default function CartUpsell3ml({ candidates }: { candidates: Product[] })
             key={o.variantId}
             type="button"
             onClick={(e) => add(o, e.currentTarget)}
+            data-no-flash
             aria-label={`Agregar ${o.product.name} 3 ml por ${formatCurrency(o.price)}`}
             className="grid min-w-0 grid-rows-[auto_1fr] gap-2 rounded-[3px] border border-border p-2.5 text-left transition-[border-color,transform] duration-200 hover:border-text active:scale-[0.97]"
           >

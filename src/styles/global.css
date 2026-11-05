@@ -668,3 +668,69 @@ a[role="button"]:active,
 :root[data-sheet-open] nav[aria-label="Navegación móvil"],
 :root[data-sheet-open] .fseal,
 :root[data-sheet-open] .fseal-bub { display: none !important; }
+
+/* "Agregado ✓": el botón de compra se vuelve verde un instante tras añadir (lo pone flyToCart). */
+button[data-added] {
+  position: relative;
+  background-color: var(--color-success) !important;
+  border-color: var(--color-success) !important;
+  color: transparent !important;
+  transition: background-color 0.25s ease;
+}
+button[data-added]::after {
+  content: "Agregado ✓";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 600;
+  animation: added-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes added-pop {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Tarjeta chica "Agregado: nombre" con la foto (toast de compra). */
+.added-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(88px + env(safe-area-inset-bottom));
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(360px, calc(100vw - 32px));
+  padding: 8px 16px 8px 8px;
+  border-radius: 6px;
+  background: var(--color-text);
+  color: #fff;
+  font: 500 14px/1.3 var(--font-body, Inter, sans-serif);
+  box-shadow: 0 12px 32px -8px rgba(27, 25, 25, 0.45);
+  pointer-events: none;
+  animation: added-toast 2.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.added-toast img {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 4px;
+  background: #fff;
+  object-fit: contain;
+  padding: 3px;
+}
+.added-toast span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@keyframes added-toast {
+  0% { opacity: 0; transform: translate(-50%, 16px); }
+  12%, 82% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, 8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  button[data-added]::after, .added-toast { animation: none; }
+  .added-toast { transform: translateX(-50%); }
+}

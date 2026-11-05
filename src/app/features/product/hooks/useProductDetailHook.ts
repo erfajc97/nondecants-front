@@ -29,7 +29,7 @@ export function useProductDetailHook(productId: string) {
       price:     selectedVariant.price,
       quantity,
     });
-    window.location.href = '/carrito';
+    useCartStore.getState().setDrawerOpen(true);
   };
 
   return {
