@@ -407,7 +407,7 @@ export default function ProductPurchaseOptions({
         status: available ? '' : 'out',
         active: selectedDecant?.id === v.id,
         disabled: !available,
-        level: Math.min(1, v.ml / 10),
+        level: Math.min(0.85, Math.max(0.2, v.ml / 12)),
         onClick: available ? () => handleSelectDecant(v) : undefined,
       };
     }),

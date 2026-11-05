@@ -37,7 +37,7 @@ export default function ComboCard({ combo }: ComboCardProps) {
   return (
     <article className="group/card flex min-w-0 flex-col overflow-hidden rounded-sm border border-border bg-surface">
       {/* Imagen */}
-      <a href={href} className="relative block aspect-square overflow-hidden bg-bg-alt" tabIndex={-1} aria-hidden="true">
+      <a href={href} className="relative block aspect-square overflow-hidden bg-white" tabIndex={-1} aria-hidden="true">
         {comboImage ? (
           <img
             src={comboImage}
@@ -100,7 +100,7 @@ export default function ComboCard({ combo }: ComboCardProps) {
                     type="button"
                     onClick={() => setMl(s.ml)}
                     aria-pressed={active}
-                    style={{ ['--lv' as string]: Math.min(1, s.ml / 10) }}
+                    style={{ ['--lv' as string]: Math.min(0.85, Math.max(0.2, s.ml / 12)) }}
                     className={`size-tile h-[42px] rounded-[3px] border font-body text-[13.5px] font-bold transition-[border-color,background-color,transform] duration-200 active:scale-[0.97] ${
                       active ? 'border-text bg-text text-white' : 'border-border text-text hover:border-text-muted/50'
                     }`}

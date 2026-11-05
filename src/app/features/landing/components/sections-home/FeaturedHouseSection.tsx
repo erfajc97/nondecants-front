@@ -66,7 +66,7 @@ function FeaturedCard({ product }: { product: Product }) {
 
   return (
     <div className="grid grid-cols-1 overflow-hidden rounded-[4px] border border-border min-[821px]:grid-cols-2">
-      <div className="relative aspect-[4/5] max-h-[560px] w-full border-b border-border bg-bg-alt min-[821px]:aspect-auto min-[821px]:min-h-[480px] min-[821px]:border-b-0 min-[821px]:border-r">
+      <div className="relative aspect-[4/5] max-h-[560px] w-full border-b border-border bg-white min-[821px]:aspect-auto min-[821px]:min-h-[480px] min-[821px]:border-b-0 min-[821px]:border-r">
         <a href={c.productUrl} aria-label={product.name} className="absolute inset-0">
           {c.displayImage && (
             <img

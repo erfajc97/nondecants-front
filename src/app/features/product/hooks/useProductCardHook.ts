@@ -73,9 +73,8 @@ export function useProductCardHook(product: Product) {
         ...f,
         soldOut: !f.isFullBottle && units < 1,
         backorder: f.isFullBottle && fullIsBackorder,
-        level: f.isFullBottle
-          ? Math.min(1, Math.max(0.15, sealedStock / 5))
-          : Math.min(1, Math.max(0.15, totalMl > 0 ? availableMl / (totalMl * 2) : 0.3)),
+        // La franja es proporcional al tamaño: el frasco llena todo y el decant, una parte.
+        level: f.isFullBottle ? 1 : Math.min(0.85, Math.max(0.2, f.ml / 12)),
       };
     });
 

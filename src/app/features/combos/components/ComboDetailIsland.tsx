@@ -85,7 +85,7 @@ function ComboDetailContent({ combo }: ComboDetailIslandProps) {
       <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:gap-[clamp(24px,4.5vw,72px)]">
         {/* Foto + una miniatura por perfume (5 por fila) que baja a su tarjeta */}
         <div className="min-w-0 md:sticky md:top-24">
-          <div className="relative aspect-square overflow-hidden rounded-md bg-bg-alt">
+          <div className="relative aspect-square overflow-hidden rounded-md bg-white">
             {image ? (
               <img src={image} alt={combo.name} className="h-full w-full object-cover" />
             ) : (
@@ -168,7 +168,7 @@ function ComboDetailContent({ combo }: ComboDetailIslandProps) {
                       type="button"
                       onClick={() => setMl(s.ml)}
                       aria-pressed={active}
-                      style={{ ['--lv' as string]: Math.min(1, s.ml / 10) }}
+                      style={{ ['--lv' as string]: Math.min(0.85, Math.max(0.2, s.ml / 12)) }}
                       className={`size-tile flex h-[54px] flex-col items-center justify-center rounded-[3px] border font-body leading-[1.15] transition-[border-color,background-color] duration-200 active:scale-[0.97] ${
                         active
                           ? 'border-text bg-text text-white'
@@ -276,7 +276,7 @@ function ComboDetailContent({ combo }: ComboDetailIslandProps) {
                   id={`combo-p-${cp.id}`}
                   className="pdp-anchor flex flex-col overflow-hidden rounded-sm border border-border bg-surface"
                 >
-                  <a href={cp.product?.id != null ? `/producto/${cp.product.id}` : undefined} className="relative block aspect-[4/3] bg-bg-alt">
+                  <a href={cp.product?.id != null ? `/producto/${cp.product.id}` : undefined} className="relative block aspect-[4/3] bg-white">
                     {img ? <img src={img} alt={cp.product?.name ?? ''} loading="lazy" className="h-full w-full object-contain p-4" /> : null}
                     {size.ml > 0 && (
                       <span className="absolute bottom-2.5 left-2.5 rounded-full bg-text px-2.5 py-1 font-body text-xs font-bold tabular-nums text-bg">

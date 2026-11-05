@@ -38,7 +38,8 @@ function offerFor(product: Product): Offer | null {
   if (maxQty < 1) return null;
 
   const imgs = (product.images ?? []).map((i: any) => (typeof i === 'string' ? i : i?.url)).filter(Boolean);
-  const image = imgs[0] || product.image || product.imageUrl || '';
+  // Es un decant: se muestra la foto del decant si existe, no la del frasco.
+  const image = f.imageUrl || imgs[0] || product.image || product.imageUrl || '';
   return { product, variantId: f.id, price, image, maxQty, availableMl };
 }
 
@@ -95,7 +96,7 @@ export default function CartUpsell3ml({ candidates }: { candidates: Product[] })
             aria-label={`Agregar ${o.product.name} 3 ml por ${formatCurrency(o.price)}`}
             className="grid min-w-0 grid-rows-[auto_1fr] gap-2 rounded-[3px] border border-border p-2.5 text-left transition-[border-color,transform] duration-200 hover:border-text active:scale-[0.97]"
           >
-            <span className="grid aspect-[4/3] place-items-center overflow-hidden rounded-[3px] bg-bg-alt">
+            <span className="grid aspect-[4/3] place-items-center overflow-hidden rounded-[3px] bg-white">
               {o.image ? <img src={o.image} alt="" loading="lazy" className="h-full w-full object-contain p-2" /> : null}
             </span>
             <span className="min-w-0 font-body text-[12.5px] leading-[1.3]">
