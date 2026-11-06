@@ -3,7 +3,7 @@ export type CategoryKey = 'todos' | 'disenador' | 'nicho' | 'arabes' | 'bajo-ped
 /** Secciones del panel (sin Concentración, Proyección ni deslizador). */
 export type FilterSection = 'genders' | 'momentos' | 'precios' | 'notas' | 'casas';
 
-export type SortKey = 'pedidos' | 'menor' | 'mayor' | 'novedades';
+export type SortKey = 'az' | 'pedidos' | 'menor' | 'mayor' | 'novedades';
 
 export interface CatalogCriteria {
   category: CategoryKey;
@@ -16,6 +16,8 @@ export interface CatalogCriteria {
   search: string;
   /** Vista de marca: solo productos de esa casa. */
   marcaId?: number;
+  /** Incluye los «bajo pedido» fuera de su categoría (vista de marca o colección del home). */
+  includeBajoPedido?: boolean;
 }
 
 export interface FilterOption {

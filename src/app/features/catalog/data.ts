@@ -73,6 +73,7 @@ export const NOTE_OPTIONS: FilterOption[] = [
 ];
 
 export const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: 'az', label: 'Nombre A–Z' },
   { value: 'pedidos', label: 'Más pedidos' },
   { value: 'menor', label: 'Menor precio' },
   { value: 'mayor', label: 'Mayor precio' },

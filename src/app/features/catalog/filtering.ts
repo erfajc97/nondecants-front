@@ -73,8 +73,10 @@ export function matches(p: Product, c: CatalogCriteria, ctx: FilterContext): boo
   if (c.marcaId != null && p.marcaId !== c.marcaId) return false;
   if (c.category === 'bajo-pedido') {
     if (!p.bajoPedido) return false;
-  } else if (c.category !== 'todos') {
-    if (p.categoryId == null || ctx.catKeyById.get(p.categoryId) !== c.category) return false;
+  } else {
+    // Los «bajo pedido» tienen su propia sección: aquí solo lo que hay en stock.
+    if (p.bajoPedido && !c.includeBajoPedido && c.marcaId == null) return false;
+    if (c.category !== 'todos' && (p.categoryId == null || ctx.catKeyById.get(p.categoryId) !== c.category)) return false;
   }
   if (c.genders.length && !(p.gender && c.genders.includes(p.gender))) return false;
   const m = metaOf(p);
@@ -100,7 +102,8 @@ export function sortProducts(rows: Product[], sort: SortKey): Product[] {
   else if (sort === 'mayor') out.sort((a, b) => entryPrice(b) - entryPrice(a) || byName(a, b));
   else if (sort === 'novedades')
     out.sort((a, b) => (Date.parse(b.createdAt || '') || 0) - (Date.parse(a.createdAt || '') || 0) || byName(a, b));
-  else out.sort((a, b) => (b.salesCount ?? 0) - (a.salesCount ?? 0) || byName(a, b));
+  else if (sort === 'pedidos') out.sort((a, b) => (b.salesCount ?? 0) - (a.salesCount ?? 0) || byName(a, b));
+  else out.sort(byName);
   return out;
 }
 

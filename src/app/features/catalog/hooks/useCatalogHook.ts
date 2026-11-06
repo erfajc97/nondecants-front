@@ -63,7 +63,7 @@ export function useCatalogHook({ initialCategory, initialQuery }: UseCatalogHook
     momentos: LEGACY_MOMENTO[q.momento] ? [LEGACY_MOMENTO[q.momento]] : [],
   }));
   const [marcaParam, setMarcaParam] = useState<string | undefined>(q.marca ?? undefined);
-  const [sort, setSortState] = useState<SortKey>('pedidos');
+  const [sort, setSortState] = useState<SortKey>('az');
   const [visible, setVisible] = useState(PAGE_SIZE);
   // Colección del home ("Ver más" de un carrusel): limita el catálogo a los productos de esa sección.
   const [coleccion, setColeccion] = useState<string | undefined>(q.coleccion ?? undefined);
@@ -130,8 +130,8 @@ export function useCatalogHook({ initialCategory, initialQuery }: UseCatalogHook
   const isBrandView = !!marca;
 
   const criteria = useMemo<CatalogCriteria>(
-    () => ({ category: marca ? 'todos' : category, ...selections, marcaId: marca?.id }),
-    [category, selections, marca],
+    () => ({ category: marca ? 'todos' : category, ...selections, marcaId: marca?.id, includeBajoPedido: !!coleccion }),
+    [category, selections, marca, coleccion],
   );
 
   // URL legible: ?categoria=arabes&marca=creed (conserva el resto de parámetros).
