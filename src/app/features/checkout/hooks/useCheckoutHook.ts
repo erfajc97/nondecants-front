@@ -55,8 +55,9 @@ function buildInitialCustomer(): CustomerFormData {
 
 function getInitialDeliveryMethod(prefs: CheckoutPrefs): DeliveryMethod | null {
   const user = useAuthStore.getState().user;
-  const method = user?.preferredDeliveryMethod ?? prefs.deliveryMethod;
-  return (method as DeliveryMethod) ?? null;
+  const method = (user?.preferredDeliveryMethod ?? prefs.deliveryMethod) as DeliveryMethod | undefined;
+  // "Envíenmelo" es el modo por defecto: una preferencia de retiro no se restaura.
+  return method && !isPickupMethod(method) ? method : null;
 }
 
 interface OrderItemPayload {
@@ -160,7 +161,7 @@ export function useCheckoutHook() {
         city:      prev.city || u.city || prefs.city || '',
         address:   prev.address || u.address || prefs.address || '',
       }));
-      if (u.preferredDeliveryMethod && !deliveryMethod) {
+      if (u.preferredDeliveryMethod && !deliveryMethod && !isPickupMethod(u.preferredDeliveryMethod as DeliveryMethod)) {
         setDeliveryMethod(u.preferredDeliveryMethod as DeliveryMethod);
       }
     }).catch(() => {});

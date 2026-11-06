@@ -9,7 +9,7 @@ interface CheckoutStepCardProps {
   done: boolean;
   /** Resumen que se ve al cerrar un paso completado. */
   summary?: string;
-  /** Reabre el paso (solo si está completo). */
+  /** Abre el paso al tocar el encabezado (reabrir uno completo o avanzar a uno siguiente). */
   onEdit?: () => void;
   children: ReactNode;
 }
@@ -19,7 +19,8 @@ interface CheckoutStepCardProps {
  * verde con check al completarse. Sin stepper.
  */
 export default function CheckoutStepCard({ n, title, open, done, summary, onEdit, children }: CheckoutStepCardProps) {
-  const canEdit = done && !open && !!onEdit;
+  // Cualquier paso cerrado con acción es tocable; "Editar" solo aparece en los completos.
+  const canEdit = !open && !!onEdit;
   return (
     <section
       aria-labelledby={`ck-step-${n}`}
@@ -61,7 +62,7 @@ export default function CheckoutStepCard({ n, title, open, done, summary, onEdit
             <p className="mt-0.5 truncate font-body text-[14.5px] text-text-muted">{summary}</p>
           )}
         </div>
-        {canEdit && (
+        {canEdit && done && (
           <button
             type="button"
             onClick={(e) => {

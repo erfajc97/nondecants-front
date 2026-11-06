@@ -22,6 +22,16 @@ export default function CheckoutForm({ c, onLogin }: CheckoutFormProps) {
       : '';
   const step2Summary = [`${c.customer.name} ${c.customer.lastName}`.trim(), c.customer.phone].filter(Boolean).join(' · ');
 
+  // Tocar el encabezado del paso 3 equivale a "Continuar" en cada paso pendiente.
+  const goToPayment = () => {
+    if (!c.step1Done) {
+      c.continueStep1();
+      return;
+    }
+    setStep(2);
+    c.continueStep2();
+  };
+
   return (
     <div className="flex min-w-0 flex-col gap-3.5">
       <CheckoutStepCard
@@ -52,7 +62,7 @@ export default function CheckoutForm({ c, onLogin }: CheckoutFormProps) {
         open={step === 2}
         done={c.step2Done && step > 2}
         summary={step2Summary}
-        onEdit={c.step1Done ? () => setStep(2) : undefined}
+        onEdit={c.continueStep1}
       >
         <AddressSection
           customer={c.customer}
@@ -70,7 +80,7 @@ export default function CheckoutForm({ c, onLogin }: CheckoutFormProps) {
         />
       </CheckoutStepCard>
 
-      <CheckoutStepCard n={3} title="¿Cómo quieres pagar?" open={step === 3} done={false}>
+      <CheckoutStepCard n={3} title="¿Cómo quieres pagar?" open={step === 3} done={false} onEdit={goToPayment}>
         <PaymentSection
           selected={c.paymentMethod}
           onSelect={c.setPaymentMethod}
