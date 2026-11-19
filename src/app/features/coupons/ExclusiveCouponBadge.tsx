@@ -36,7 +36,7 @@ interface CouponPhotoBadgeProps {
 }
 
 const BASE =
-  'inline-flex w-fit max-w-full items-center rounded-full border border-accent bg-bg px-2.5 py-1.5 font-body text-[10.5px] font-semibold uppercase leading-none tracking-[0.08em] text-accent-hover shadow-[0_4px_12px_-6px_rgba(27,25,25,0.25)]';
+  'inline-flex w-fit max-w-full items-center rounded-full border border-error bg-error px-2.5 py-1.5 font-body text-[10.5px] font-semibold uppercase leading-none tracking-[0.08em] text-white shadow-[0_4px_12px_-6px_rgba(27,25,25,0.25)]';
 
 /**
  * Badge del cupón sobre la esquina superior izquierda de la foto (tarjetas y
@@ -64,7 +64,7 @@ export function CouponPhotoBadge({ productId, variantId, copyable = false }: Cou
       onClick={copy}
       title="Copiar código"
       aria-label={`${text}. Copiar código`}
-      className={`${BASE} pointer-events-auto cursor-pointer transition-colors duration-200 hover:bg-gold-light`}
+      className={`${BASE} pointer-events-auto cursor-pointer transition-colors duration-200 hover:bg-error/90`}
     >
       {text}
     </button>
