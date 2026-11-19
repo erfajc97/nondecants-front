@@ -4,6 +4,7 @@ import { formatCurrency } from '@/app/helpers/formatCurrency';
 import { useCouponStore } from '@/app/store/coupon/couponStore';
 import { lineCouponDiscount } from '@/app/helpers/couponItemDiscount';
 import type { CartRow } from '../hooks/useCartPageHook';
+import type { PromoLineInfo } from '@/app/features/promo/useDecantPromo';
 
 interface CartDrawerLineProps {
   row: CartRow;
@@ -11,6 +12,9 @@ interface CartDrawerLineProps {
   index: number;
   onSetTotal: (variantId: string, total: number) => void;
   onRemove: (variantId: string) => void;
+  /** Descuento de la promo de decants en esta línea (lo calcula el servidor). */
+  promoLine?: PromoLineInfo;
+  promoPercent?: number;
 }
 
 /** Hace "saltar" un valor cuando cambia (no en el primer render). */
@@ -33,7 +37,7 @@ const reducedMotion = () =>
  * Línea del carrito lateral (prototipo): miniatura, nombre, formato, stepper,
  * precio y "Quitar". Misma lógica de stock/bajo pedido que CartLine.
  */
-export default function CartDrawerLine({ row, group, index, onSetTotal, onRemove }: CartDrawerLineProps) {
+export default function CartDrawerLine({ row, group, index, onSetTotal, onRemove, promoLine, promoPercent = 50 }: CartDrawerLineProps) {
   const { item, portionQty, total, split } = row;
   const isBajo = group === 'bajo';
   const isCombo = item.comboId != null;
@@ -42,6 +46,7 @@ export default function CartDrawerLine({ row, group, index, onSetTotal, onRemove
 
   const lineDiscount = useCouponStore((s) => (s.applied ? lineCouponDiscount(item, s.itemDiscounts ?? []) : 0));
   const portionDiscount = total > 0 ? (lineDiscount * portionQty) / total : 0;
+  const promoPortion = promoLine && total > 0 ? (promoLine.discount * portionQty) / total : 0;
 
   const decantCapped = item.stockAvailable == null && item.maxQty != null;
   const plusDisabled = decantCapped && total >= (item.maxQty ?? Infinity);
@@ -114,9 +119,23 @@ export default function CartDrawerLine({ row, group, index, onSetTotal, onRemove
       </div>
 
       <div className="text-right font-body">
-        <p key={bump} className={`text-[15px] font-bold tabular-nums text-text ${bump ? 'nd-bump' : ''}`}>
-          {formatCurrency(item.price * portionQty)}
-        </p>
+        {promoPortion > 0 && promoLine ? (
+          <>
+            <p className="text-[12.5px] tabular-nums text-text-muted">
+              <s>{formatCurrency(item.price * portionQty)}</s>
+            </p>
+            <p key={bump} className={`text-[15px] font-bold tabular-nums text-text ${bump ? 'nd-bump' : ''}`}>
+              {formatCurrency(item.price * portionQty - promoPortion)}
+            </p>
+            <p className="mt-0.5 text-[12.5px] font-semibold text-success">
+              {promoLine.discountedUnits >= total ? `${promoPercent} %` : `${promoLine.discountedUnits} u. al ${promoPercent} %`}
+            </p>
+          </>
+        ) : (
+          <p key={bump} className={`text-[15px] font-bold tabular-nums text-text ${bump ? 'nd-bump' : ''}`}>
+            {formatCurrency(item.price * portionQty)}
+          </p>
+        )}
         {portionDiscount > 0 && (
           <p className="mt-0.5 text-[12.5px] font-semibold text-success">Cupón −{formatCurrency(portionDiscount)}</p>
         )}

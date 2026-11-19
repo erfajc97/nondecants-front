@@ -10,13 +10,17 @@ import { lineCouponDiscount } from '@/app/helpers/couponItemDiscount';
 import { useCartStore, type CartItem } from '@/app/store/cart/cartStore';
 import { splitCartStock, getSplit } from '@/app/helpers/cartStockSplit';
 import { lineDeliveryLabel, orderDeliveryLabel, DEFAULT_DISPATCH_CUTOFF_HOUR } from '@/app/helpers/deliveryWindow';
-import { useDeliveryOffsetQuery, useDispatchCutoffQuery } from '@/app/tanstack-queries/settingsQuery';
+import { useDeliveryOffsetQuery, useDispatchCutoffQuery, useFreeShippingThresholdQuery } from '@/app/tanstack-queries/settingsQuery';
+import { PromoStatusLine } from '@/app/features/promo/PromoNotes';
+import type { DecantPromoState } from '@/app/features/promo/useDecantPromo';
 
 interface CheckoutOrderSummaryProps {
   items: CartItem[];
   subtotal: number;
   deliveryCost: number;
   total: number;
+  /** Promo de decants calculada por el servidor. */
+  promo?: DecantPromoState;
   couponCode?: string;
   couponDiscount?: number;
   couponFreeShipping?: boolean;
@@ -45,6 +49,7 @@ export default function CheckoutOrderSummary({
   subtotal,
   deliveryCost,
   total,
+  promo,
   couponCode = '',
   couponDiscount = 0,
   couponFreeShipping = false,
@@ -80,6 +85,8 @@ export default function CheckoutOrderSummary({
 
   const { data: deliveryOffset = 0 } = useDeliveryOffsetQuery();
   const { data: cutoffHour = DEFAULT_DISPATCH_CUTOFF_HOUR } = useDispatchCutoffQuery();
+  const { data: freeShippingThreshold = 0 } = useFreeShippingThresholdQuery();
+  const promoDiscount = promo?.applied ? promo.total : 0;
 
   return (
     <div className="flex flex-col">
@@ -131,7 +138,21 @@ export default function CheckoutOrderSummary({
                     <span className="flex h-9 min-w-7 select-none items-center justify-center font-body text-sm tabular-nums text-text">{item.quantity}</span>
                     <button type="button" aria-label="Aumentar" disabled={item.maxQty != null && item.quantity >= item.maxQty} onClick={() => updateQty(item.variantId, item.quantity + 1)} className="flex h-9 w-9 items-center justify-center text-lg text-text-muted transition-colors hover:text-text disabled:cursor-not-allowed disabled:opacity-40">+</button>
                   </div>
-                  <p className="font-body text-[15px] font-bold tabular-nums text-text">{formatCurrency(item.price * item.quantity)}</p>
+                  {promo?.lineFor(item.variantId) ? (
+                    <div className="text-right font-body tabular-nums">
+                      <p className="text-[12.5px] text-text-muted"><s>{formatCurrency(item.price * item.quantity)}</s></p>
+                      <p className="text-[15px] font-bold text-text">
+                        {formatCurrency(item.price * item.quantity - (promo.lineFor(item.variantId)?.discount ?? 0))}
+                      </p>
+                      <p className="text-[12.5px] font-semibold text-success">
+                        {(promo.lineFor(item.variantId)?.discountedUnits ?? 0) >= item.quantity
+                          ? `${promo.config.percent} %`
+                          : `${promo.lineFor(item.variantId)?.discountedUnits} u. al ${promo.config.percent} %`}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="font-body text-[15px] font-bold tabular-nums text-text">{formatCurrency(item.price * item.quantity)}</p>
+                  )}
                 </div>
                 {lineCouponDiscount(item, itemDiscounts) > 0 && (
                   <p className="mt-1 text-right font-body text-[13px] font-semibold text-success">
@@ -161,6 +182,8 @@ export default function CheckoutOrderSummary({
         )}
       </div>
 
+      {promo && <PromoStatusLine promo={promo} className="mb-4" />}
+
       {onApplyCoupon && (DEMO_ENABLED || hasNonComboItems) && (
         <div className="mb-6">
           <CouponField
@@ -179,9 +202,16 @@ export default function CheckoutOrderSummary({
 
       <div className="flex flex-col gap-2.5 border-t border-border pt-4 font-body text-[15px]">
         <div className="flex items-center justify-between text-text">
-          <span>Subtotal</span>
+          <span>{promoDiscount > 0 ? 'Subtotal sin promo' : 'Subtotal'}</span>
           <span className="tabular-nums">{formatCurrency(subtotal)}</span>
         </div>
+
+        {promoDiscount > 0 && promo && (
+          <div className="flex items-center justify-between text-success">
+            <span>Promo {promo.config.every} decants</span>
+            <span className="tabular-nums">-{formatCurrency(promoDiscount)}</span>
+          </div>
+        )}
 
         {couponDiscount > 0 && (
           <div className="flex items-center justify-between text-success">
@@ -200,6 +230,17 @@ export default function CheckoutOrderSummary({
             <span className="text-text-muted">Se calcula en el paso 1</span>
           )}
         </div>
+
+        {promoDiscount > 0 && freeShippingThreshold > 0 && (
+          <p className="font-body text-[12.5px] text-text-muted">
+            Envío gratis desde {formatCurrency(freeShippingThreshold)}, calculado con el total ya con descuento.
+          </p>
+        )}
+        {promoDiscount > 0 && promo && !promo.config.combineWithCoupons && (
+          <p className="font-body text-[12.5px] text-text-muted">
+            Los cupones no se combinan con la promo {promo.config.every} decants.
+          </p>
+        )}
 
         {payphoneSurcharge > 0 && (
           <div className="flex items-center justify-between text-text-muted">

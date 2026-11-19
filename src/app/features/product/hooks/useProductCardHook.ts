@@ -9,6 +9,8 @@ export interface CardFormat {
   ml: number;
   price: number;
   isFullBottle: boolean;
+  /** Precio de referencia en tiendas del frasco (tachado; no cambia el cobro). */
+  referencePrice?: number;
   imageUrl?: string;
   /** Decant sin ml suficientes (no se puede preparar nunca bajo pedido). */
   soldOut: boolean;
@@ -56,6 +58,7 @@ export function useProductCardHook(product: Product) {
           ml: v.ml,
           price: v.price,
           isFullBottle: v.isFullBottle,
+          referencePrice: v.referencePrice,
           imageUrl: v.images?.[0],
         }))
   ).filter((f) => f.ml > 0 || f.price > 0);

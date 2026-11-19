@@ -5,12 +5,25 @@ import { API_ENDPOINTS } from '@/app/api/endpoints';
 export interface ExclusiveBadge {
   label: string;
   code: string | null;
+  /** 'percentage' | 'fixed_amount' | 'free_shipping' */
+  type: string;
+  value: number;
+  /** Monto mínimo de compra para que aplique (null = sin mínimo). */
+  minOrderAmount: number | null;
 }
 
 interface ExclusiveData {
   products: Record<string, ExclusiveBadge>;
   variations: Record<string, ExclusiveBadge>;
 }
+
+const toBadge = (r: any): ExclusiveBadge => ({
+  label: r.label,
+  code: r.code ?? null,
+  type: r.type ?? 'percentage',
+  value: Number(r.value ?? 0),
+  minOrderAmount: r.minOrderAmount != null ? Number(r.minOrderAmount) : null,
+});
 
 const EMPTY: ExclusiveData = { products: {}, variations: {} };
 let cache: Promise<ExclusiveData> | null = null;
@@ -25,12 +38,12 @@ function load(): Promise<ExclusiveData> {
         const r = data?.data ?? data ?? {};
         const out: ExclusiveData = { products: {}, variations: {} };
         for (const p of r.products ?? []) {
-          out.products[String(p.productId)] = { label: p.label, code: p.code ?? null };
+          out.products[String(p.productId)] = toBadge(p);
         }
         for (const v of r.variations ?? []) {
-          out.variations[String(v.variationId)] = { label: v.label, code: v.code ?? null };
+          out.variations[String(v.variationId)] = toBadge(v);
           // Un producto con variante exclusiva también muestra la etiqueta en el listado.
-          out.products[String(v.productId)] ??= { label: v.label, code: v.code ?? null };
+          out.products[String(v.productId)] ??= toBadge(v);
         }
         return out;
       })

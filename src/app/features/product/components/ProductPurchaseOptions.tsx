@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { flyToCart } from '@/app/helpers/flyToCart';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
+import ReferencePrice from './ReferencePrice';
+import { PromoDecantNote } from '@/app/features/promo/PromoNotes';
+import { CouponMinNote } from '@/app/features/coupons/ExclusiveCouponBadge';
 import { productUrl } from '@/app/helpers/productUrl';
 import { useCartStore } from '@/app/store/cart/cartStore';
 import { useContact, whatsappUrl } from '@/app/lib/contact';
@@ -634,6 +637,9 @@ export default function ProductPurchaseOptions({
         </div>
       </div>
 
+      {/* Promo de decants: aclaración bajo los tamaños (solo con un decant elegido). */}
+      {selectedDecant && <PromoDecantNote />}
+
       {/* Precio + ahorro */}
       <div>
         <div className="font-body text-[32px] font-bold leading-none">
@@ -642,6 +648,15 @@ export default function ProductPurchaseOptions({
           </span>
           <small className="ml-2 text-sm font-normal text-text-muted">{sizeLabel}</small>
         </div>
+        <CouponMinNote
+          productId={product.id}
+          variantId={selectedDecant?.id ?? selectedSealed?.id}
+          className="mt-2"
+        />
+        {/* Precio referencial: solo con el frasco sellado elegido. */}
+        {!hasDiscount && isFullSelected && (
+          <ReferencePrice reference={product.referencePrice} price={fullBottlePrice} className="mt-2" />
+        )}
         {hasDiscount && (
           <p className="mt-2 flex flex-wrap items-center gap-x-2.5 font-body text-[13.5px] text-text-muted">
             <s>{formatCurrency(currentPrice)}</s>

@@ -8,6 +8,7 @@ import {
   useFreeShippingThresholdQuery,
 } from '@/app/tanstack-queries/settingsQuery';
 import { useCouponStore } from '@/app/store/coupon/couponStore';
+import { useDecantPromo } from '@/app/features/promo/useDecantPromo';
 
 export interface CartRow {
   item: CartItem;
@@ -37,6 +38,8 @@ export function useCartPageHook() {
   const { shippingGye } = usePricingSettings();
   const couponDiscount = useCouponStore((s) => (s.applied ? s.discount : 0));
   const couponFreeShipping = useCouponStore((s) => s.applied && s.freeShipping);
+  // Promo de decants: el servidor la calcula; aquí solo se muestra y se resta.
+  const promo = useDecantPromo(items);
 
   const immediate: CartRow[] = [];
   const bajo: CartRow[] = [];
@@ -61,7 +64,7 @@ export function useCartPageHook() {
   const immediateCount = immediate.reduce((a, r) => a + r.portionQty, 0);
   const bajoCount = bajo.reduce((a, r) => a + r.portionQty, 0);
   const subtotal = immediateSubtotal + bajoSubtotal;
-  const afterDiscount = Math.max(0, subtotal - couponDiscount);
+  const afterDiscount = Math.max(0, subtotal - promo.total - couponDiscount);
   const qualifiesFreeShipping =
     couponFreeShipping ||
     (freeShippingThreshold > 0 && afterDiscount >= freeShippingThreshold);
@@ -92,5 +95,7 @@ export function useCartPageHook() {
     qualifiesFreeShipping,
     remainingForFreeShipping,
     couponDiscount,
+    promo,
+    promoDiscount: promo.total,
   };
 }

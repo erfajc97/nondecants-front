@@ -43,7 +43,12 @@ const extractImages = (images: any): string[] => {
 /** Maps backend product shape to frontend Product interface */
 export const mapProduct = (raw: any): Product => {
   const imageList = extractImages(raw.images);
+  // Precio de referencia del frasco: de formats (listado) o de las variaciones (ficha).
+  const refSource = [...(raw.formats ?? []), ...(raw.variations ?? raw.variants ?? [])].find(
+    (f: any) => f?.isFullBottle && Number(f.referencePrice) > Number(f.price),
+  );
   return {
+    referencePrice: refSource ? Number(refSource.referencePrice) : undefined,
     id: String(raw.id),
     name: raw.name ?? '',
     description: raw.description ?? '',
@@ -55,6 +60,7 @@ export const mapProduct = (raw: any): Product => {
       price: Number(v.price ?? 0),
       mlSize: Number(v.mlSize ?? extractMl(v)),
       isFullBottle: v.isFullBottle ?? false,
+      referencePrice: v.isFullBottle && Number(v.referencePrice) > 0 ? Number(v.referencePrice) : undefined,
       availableQuantity: Number(v.availableQuantity ?? 0),
       images: extractImages(v.images),
     })),
@@ -88,6 +94,7 @@ export const mapProduct = (raw: any): Product => {
           id: String(f.id),
           ml: Number(f.ml),
           price: Number(f.price),
+          referencePrice: f.isFullBottle && Number(f.referencePrice) > 0 ? Number(f.referencePrice) : undefined,
           isFullBottle: !!f.isFullBottle,
           imageUrl: f.imageUrl ?? undefined,
         }))

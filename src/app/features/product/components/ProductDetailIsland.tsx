@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import AppProviders from '@/app/providers/AppProviders';
 import ProductPurchaseOptions from './ProductPurchaseOptions';
-import ExclusiveCouponBadge from '@/app/features/coupons/ExclusiveCouponBadge';
+import { CouponPhotoBadge } from '@/app/features/coupons/ExclusiveCouponBadge';
 import type { Product, ProductVariant } from '@/app/types/global.types';
 import '../product-detail.css';
 
@@ -19,11 +19,15 @@ function ProductGallery({
   name,
   bajoPedido,
   discount,
+  productId,
+  variantId,
 }: {
   images: string[];
   name: string;
   bajoPedido?: boolean;
   discount?: number;
+  productId: string;
+  variantId?: string | null;
 }) {
   const list = images.filter(Boolean);
   const railRef = useRef<HTMLDivElement>(null);
@@ -72,11 +76,16 @@ function ProductGallery({
               loading={first ? 'eager' : 'lazy'}
               className="absolute inset-0 h-full w-full select-none object-contain p-[8%] transition-transform duration-700 ease-out md:group-hover:scale-[1.04]"
             />
-            {first && bajoPedido && (
-              <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white py-1.5 pl-2 pr-2.5 font-body text-[10.5px] font-semibold uppercase leading-none tracking-[0.08em] text-warning shadow-[0_0_0_1px_var(--color-border),0_4px_12px_-6px_rgba(27,25,25,0.25)]">
-                <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                Por encargo
-              </span>
+            {first && (
+              <div className="pointer-events-none absolute left-3 top-3 z-[2] flex flex-col items-start gap-1.5">
+                <CouponPhotoBadge productId={productId} variantId={variantId} copyable />
+                {bajoPedido && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white py-1.5 pl-2 pr-2.5 font-body text-[10.5px] font-semibold uppercase leading-none tracking-[0.08em] text-warning shadow-[0_0_0_1px_var(--color-border),0_4px_12px_-6px_rgba(27,25,25,0.25)]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                    Por encargo
+                  </span>
+                )}
+              </div>
             )}
             {first && !!discount && discount > 0 && (
               <span className="absolute right-3 top-3 rounded-full bg-accent px-2.5 py-1.5 font-body text-[11px] font-bold leading-none text-text">
@@ -125,11 +134,12 @@ function ProductDetailContent({ product }: ProductDetailIslandProps) {
           name={product.name}
           bajoPedido={product.bajoPedido}
           discount={Number(product.discount ?? 0)}
+          productId={product.id}
+          variantId={selectedVariant?.id}
         />
       </div>
       {/* Panel de compra pegajoso (desktop): se queda bajo el header al scrollear. */}
       <div className="grid min-w-0 gap-4 md:sticky md:top-[88px]">
-        <ExclusiveCouponBadge productId={product.id} variantId={selectedVariant?.id} />
         <ProductPurchaseOptions
           product={product}
           selectedVariant={selectedVariant}

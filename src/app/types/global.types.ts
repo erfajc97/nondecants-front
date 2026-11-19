@@ -35,6 +35,8 @@ export interface ProductVariant {
   price: number;
   mlSize: number;
   isFullBottle: boolean;
+  /** Precio de referencia en tiendas (solo frasco sellado; ya validado > price por la API). */
+  referencePrice?: number;
   availableQuantity: number;
   images?: string[];
 }
@@ -53,7 +55,9 @@ export interface Product {
   minFormatPrice?: number;
   maxFormatPrice?: number;
   /** Lista compacta de formatos (frasco + decants) para las cards. */
-  formats?: { id: string; ml: number; price: number; isFullBottle: boolean; imageUrl?: string }[];
+  formats?: { id: string; ml: number; price: number; referencePrice?: number; isFullBottle: boolean; imageUrl?: string }[];
+  /** Precio de referencia del frasco sellado (tachado en tarjeta y ficha). No cambia el cobro. */
+  referencePrice?: number;
   totalMl: number;
   openBottleMlRemaining: number;
   availableMl: number;

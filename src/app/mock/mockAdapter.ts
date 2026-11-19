@@ -119,12 +119,53 @@ function productReviews(productId: string) {
   return { average, count, reviews };
 }
 
+const DEMO_PROMO = { every: 3, percent: 50, combineWithCoupons: false };
+const DEMO_PROMO_BAR = 'Promo activa: por cada 3 decants, el de menor precio va al 50 %';
+
+/** Mismas reglas que el backend: solo decants, los más baratos de todo el carrito, mitad hacia arriba. */
+function demoPromoPreview(items: { productId?: number; productVariationId?: number; quantity: number }[]) {
+  const variations = MOCK_PRODUCTS_RAW.flatMap((p: any) => p.variations as any[]);
+  const lines = items.map((it, index) => {
+    const v = variations.find((x) => String(x.id) === String(it.productVariationId));
+    return { index, quantity: it.quantity, price: v && !v.isFullBottle ? Number(v.price) : 0, isDecant: !!v && !v.isFullBottle };
+  });
+  const decants = lines.filter((l) => l.isDecant);
+  const decantUnits = decants.reduce((a, l) => a + l.quantity, 0);
+  const discountedUnits = Math.floor(decantUnits / DEMO_PROMO.every);
+  const out = lines.map((l) => ({ index: l.index, discountedUnits: 0, discount: 0, unitDiscount: 0 }));
+  let left = discountedUnits;
+  let total = 0;
+  for (const l of [...decants].sort((a, b) => a.price - b.price || a.index - b.index)) {
+    if (left <= 0) break;
+    const take = Math.min(left, l.quantity);
+    const unit = Math.floor(l.price * DEMO_PROMO.percent + 0.5 + 1e-9) / 100;
+    out[l.index] = { index: l.index, discountedUnits: take, discount: Math.round(unit * take * 100) / 100, unitDiscount: unit };
+    total = Math.round((total + unit * take) * 100) / 100;
+    left -= take;
+  }
+  return {
+    active: true,
+    applied: total > 0,
+    ...DEMO_PROMO,
+    barText: DEMO_PROMO_BAR,
+    decantUnits,
+    discountedUnits,
+    total,
+    lines: out,
+  };
+}
+
 export async function mockAdapter(config: InternalAxiosRequestConfig): Promise<AxiosResponse> {
   const method = (config.method ?? 'get').toLowerCase();
   const url = new URL(config.url ?? '', 'http://mock');
   const path = url.pathname.replace(/\/+$/, '');
   const q: Record<string, any> = { ...Object.fromEntries(url.searchParams), ...(config.params ?? {}) };
   let m: RegExpMatchArray | null;
+
+  // Demo: la promo "3 decants" se calcula aquí con la misma regla que el servidor.
+  if (method === 'post' && path === '/promotions/decants/preview') {
+    return ok(config, demoPromoPreview(JSON.parse(String(config.data ?? '{}')).items ?? []));
+  }
 
   if (method !== 'get') {
     return Promise.reject(fail(config, 503, 'Ambiente de demostración: esta acción está deshabilitada.'));
@@ -161,7 +202,12 @@ export async function mockAdapter(config: InternalAxiosRequestConfig): Promise<A
   if (path === '/reviews/latest') return ok(config, MOCK_REVIEWS_RAW.slice(0, num(q.limit) ?? 9));
   if ((m = path.match(/^\/reviews\/product\/(\d+)$/))) return ok(config, productReviews(m[1]));
 
-  if (path === '/coupons/exclusive') return ok(config, { products: [], variations: [] });
+  if (path === '/promotions/decants') return ok(config, { active: true, ...DEMO_PROMO, barText: DEMO_PROMO_BAR });
+
+  if (path === '/coupons/exclusive') return ok(config, {
+    products: [{ productId: 2, label: 'Black Month', code: 'EXTRA5', type: 'percentage', value: 5, minOrderAmount: 100 }],
+    variations: [],
+  });
 
   if (path === '/settings') {
     return ok(config, Object.entries(MOCK_SETTINGS_RAW).map(([key, value]) => ({ key, value })));

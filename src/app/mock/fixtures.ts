@@ -157,6 +157,8 @@ function buildProduct(s: Seed) {
     isFullBottle: true,
     presentationType: 'sellada',
     price: s.price.toFixed(2),
+    // Demo: algunos frascos llevan precio referencial en tiendas.
+    referencePrice: s.id % 2 === 0 ? round2(s.price * 1.25).toFixed(2) : null,
     sku: `mock-${s.id}-bottle`,
     name: `${s.name} - Botella ${s.ml}ml`,
     optionValues: [],
@@ -228,6 +230,7 @@ function buildProduct(s: Seed) {
       id: Number(v.id),
       ml: v.mlSize,
       price: Number(v.price),
+      referencePrice: (v as any).referencePrice ? Number((v as any).referencePrice) : null,
       isFullBottle: v.isFullBottle,
       presentationType: v.presentationType,
     })),

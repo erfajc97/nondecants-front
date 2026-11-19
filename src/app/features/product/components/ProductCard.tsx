@@ -1,8 +1,10 @@
 import { useProductCardHook } from '../hooks/useProductCardHook';
 import type { Product } from '@/app/types/global.types';
-import ExclusiveCouponBadge from '@/app/features/coupons/ExclusiveCouponBadge';
+import { CouponPhotoBadge } from '@/app/features/coupons/ExclusiveCouponBadge';
 import FormatTiles, { ctaLabel } from './FormatTiles';
 import { formatCurrency } from '@/app/helpers/formatCurrency';
+import ReferencePrice from './ReferencePrice';
+import { PromoTag } from '@/app/features/promo/PromoNotes';
 
 interface ProductCardProps {
   product: Product;
@@ -75,6 +77,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Etiquetas: píldoras del prototipo (NUEVO negro, estados en blanco con punto) */}
         <div className="pointer-events-none absolute left-2.5 top-2.5 z-[2] flex flex-col items-start gap-[5px]">
+          <CouponPhotoBadge productId={product.id} />
           {product.bajoPedido ? (
             <span className={`${PILL} ${PILL_DOT} text-warning`}>Por encargo</span>
           ) : c.decantsSoldOut ? (
@@ -95,7 +98,6 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* Info */}
       <div className="flex flex-1 flex-col gap-0.5 p-2.5 sm:p-3.5">
-        <ExclusiveCouponBadge productId={product.id} className="mb-1" />
         {brandName && (
           <span className="font-body text-xs font-medium text-text-muted">{brandName}</span>
         )}
@@ -127,6 +129,12 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
         {hasDiscount && (
           <span className="mt-1 font-body text-xs text-text-muted line-through">{formatCurrency(basePrice)}</span>
+        )}
+        {/* Promo de decants: etiqueta discreta bajo los tamaños; nunca en frascos sellados. */}
+        {selected && !selected.isFullBottle && <PromoTag className="mt-1.5" />}
+        {/* Precio referencial: solo con el frasco sellado elegido (nunca en decants). */}
+        {!hasDiscount && selected?.isFullBottle && (
+          <ReferencePrice reference={selected.referencePrice} price={finalPrice} className="mt-1.5" />
         )}
 
         <div className={`${chipFormats.length > 0 ? '' : 'mt-auto'} pt-2.5`}>

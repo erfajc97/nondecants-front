@@ -7,6 +7,7 @@ import CartSuggestion from './CartSuggestion';
 import CartDrawerLine from './CartDrawerLine';
 import CartUpsell3ml from './CartUpsell3ml';
 import CartDispatchCountdown from './CartDispatchCountdown';
+import { PromoStatusLine } from '@/app/features/promo/PromoNotes';
 
 interface CartDrawerContentProps {
   onClose: () => void;
@@ -109,6 +110,8 @@ export default function CartDrawerContent({ onClose, onCheckout }: CartDrawerCon
             index={i}
             onSetTotal={cart.updateQty}
             onRemove={cart.removeItem}
+            promoLine={cart.promo.lineFor(r.item.variantId)}
+            promoPercent={cart.promo.config.percent}
           />
         ))}
         {hasBajo && (
@@ -116,10 +119,23 @@ export default function CartDrawerContent({ onClose, onCheckout }: CartDrawerCon
             Los productos por encargo los importamos especialmente para ti y llegan en 13 a 17 días.
           </p>
         )}
+        <PromoStatusLine promo={cart.promo} className="mt-3" />
         <CartUpsell3ml candidates={[...homeSections, ...cartSections].flatMap((s) => s.products ?? [])} />
       </div>
 
       <div className="grid gap-2.5 border-t border-border px-5 pb-[calc(16px+env(safe-area-inset-bottom,0px))] pt-4">
+        {cart.promoDiscount > 0 && (
+          <>
+            <div className="flex justify-between font-body text-[15px] text-text-soft">
+              <span>Subtotal sin promo</span>
+              <span className="tabular-nums">{formatCurrency(cart.subtotal)}</span>
+            </div>
+            <div className="flex justify-between font-body text-[15px] text-text-soft">
+              <span>Promo {cart.promo.config.every} decants</span>
+              <span className="tabular-nums text-success">-{formatCurrency(cart.promoDiscount)}</span>
+            </div>
+          </>
+        )}
         {cart.couponDiscount > 0 && (
           <div className="flex justify-between font-body text-[15px] text-text-soft">
             <span>Cupón</span>
@@ -128,7 +144,7 @@ export default function CartDrawerContent({ onClose, onCheckout }: CartDrawerCon
         )}
         <div className="flex justify-between font-body text-lg font-bold text-text">
           <span>Subtotal</span>
-          <span className="tabular-nums">{formatCurrency(cart.subtotal)}</span>
+          <span className="tabular-nums">{formatCurrency(Math.max(0, cart.subtotal - cart.promoDiscount))}</span>
         </div>
         <p className="text-center font-body text-[12.5px] text-text-muted">
           El envío y el cupón se calculan en el siguiente paso.

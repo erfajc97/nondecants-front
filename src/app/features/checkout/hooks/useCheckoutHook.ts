@@ -12,6 +12,7 @@ import { normalizeCustomerField, validateContactFields } from '../validators';
 import { DEMO_ENABLED } from '@/app/lib/mock';
 import { ECUADOR_PROVINCES, ALL_CANTONS } from '@/app/data/ecuadorLocations';
 import { isPickupMethod, PICKUP_METHODS, type DeliveryMode } from '../components/DeliverySection';
+import { useDecantPromo } from '@/app/features/promo/useDecantPromo';
 import type { CustomerFormData, PaymentMethod, DeliveryMethod } from '../types';
 import { useCouponHook } from './useCouponHook';
 import { usePricingSettings } from '@/app/lib/pricingSettings';
@@ -199,7 +200,9 @@ export function useCheckoutHook() {
     }
   }, [deliveryOptions, deliveryMethod]);
 
-  const afterDiscount = Math.max(0, subtotal - (couponApplied ? couponDiscount : 0));
+  // Promo de decants (la calcula el servidor): va antes que el cupón y el envío.
+  const promo = useDecantPromo(items);
+  const afterDiscount = Math.max(0, subtotal - promo.total - (couponApplied ? couponDiscount : 0));
   const qualifiesFreeShipping =
     (couponApplied && couponFreeShipping) ||
     (freeShippingThreshold > 0 && afterDiscount >= freeShippingThreshold);
@@ -572,6 +575,7 @@ export function useCheckoutHook() {
     total,
     items,
     isPending,
+    promo,
     couponCode,
     couponDiscount,
     couponFreeShipping,

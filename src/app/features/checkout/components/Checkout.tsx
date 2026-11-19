@@ -62,6 +62,7 @@ function CheckoutContent() {
             deliveryCost={c.deliveryCost}
             total={c.total}
             payphoneSurcharge={c.payphoneSurcharge}
+            promo={c.promo}
             couponCode={c.couponCode}
             couponDiscount={c.couponDiscount}
             couponFreeShipping={c.couponFreeShipping}
