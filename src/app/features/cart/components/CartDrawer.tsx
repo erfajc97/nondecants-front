@@ -4,6 +4,7 @@ import { useCartStore } from '@/app/store/cart/cartStore';
 import { useDialogBehavior } from '@/app/features/landing/components/layout/useDialogBehavior';
 import { IconClose } from '@/app/features/landing/components/layout/NavIcons';
 import { splitCartStock, getSplit } from '@/app/helpers/cartStockSplit';
+import PromoPopup from '@/app/features/promo/PromoPopup';
 import CartDrawerContent from './CartDrawerContent';
 
 /** Rutas donde no se abre el drawer solo al agregar. */
@@ -124,6 +125,8 @@ export default function CartDrawer() {
         </div>
 
         {everOpened && <CartDrawerContent onClose={close} onCheckout={onCheckout} />}
+
+        <PromoPopup cartOpen={open} />
 
         {confirming && (
           <div className="absolute inset-0 z-10 grid place-items-center bg-text/45 p-5" onClick={() => setConfirming(false)}>

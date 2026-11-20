@@ -25,7 +25,7 @@ export function PromoStatusLine({ promo, className = '' }: { promo: DecantPromoS
   const text = promoStatusText(promo);
   if (!text) return null;
   return (
-    <p className={`font-body text-[13px] text-text-muted ${className}`} role="status">
+    <p className={`font-display text-[17px] leading-[1.5] text-text ${className}`} role="status">
       {text}
     </p>
   );
@@ -36,8 +36,8 @@ export function PromoTag({ className = '' }: { className?: string }) {
   const config = usePromoConfig();
   if (!config.active) return null;
   return (
-    <span className={`block font-body text-[11.5px] leading-snug text-text-muted ${className}`}>
-      {config.every} decants: el más barato al {config.percent} %
+    <span className={`block font-body text-[11px] font-semibold uppercase leading-snug tracking-[0.04em] text-text ${className}`}>
+      Promo tiempo limitado: tu {config.every === 3 ? 'tercer' : `${config.every}.º`} decant con {config.percent}% de descuento
     </span>
   );
 }

@@ -119,7 +119,7 @@ export default function CartDrawerContent({ onClose, onCheckout }: CartDrawerCon
             Los productos por encargo los importamos especialmente para ti y llegan en 13 a 17 días.
           </p>
         )}
-        <PromoStatusLine promo={cart.promo} className="mt-3" />
+        <PromoStatusLine promo={cart.promo} className="mb-1 mt-4" />
         <CartUpsell3ml candidates={[...homeSections, ...cartSections].flatMap((s) => s.products ?? [])} />
       </div>
 
