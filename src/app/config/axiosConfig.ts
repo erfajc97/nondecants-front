@@ -23,6 +23,13 @@ const axiosInstance = axios.create({
 
 // Interceptor de solicitud: agrega el token si existe y no ha expirado
 axiosInstance.interceptors.request.use((config) => {
+  // SSR: se identifica ante la API para no contar en el límite de peticiones por
+  // IP (todas las visitas pasan por la misma IP del servidor). La clave es una
+  // variable de entorno SOLO del servidor (sin prefijo VITE_): nunca llega al navegador.
+  if (import.meta.env.SSR && typeof process !== 'undefined' && process.env.INTERNAL_API_KEY) {
+    config.headers['x-internal-key'] = process.env.INTERNAL_API_KEY;
+  }
+
   const token = secureStorage.getItem('token');
   const expiration = Number(secureStorage.getItem('tokenExpiration'));
 

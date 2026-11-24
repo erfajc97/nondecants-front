@@ -9,9 +9,9 @@ import {
   homepageBannersJsonLd,
   websiteJsonLd,
 } from '@/app/helpers/seoMeta';
-import { fetchVisibleBanners } from '@/app/tanstack-queries/bannersQuery';
+import { fetchVisibleBannersServer } from '@/app/tanstack-queries/bannersQuery';
 
-const banners = await fetchVisibleBanners();
+const banners = await fetchVisibleBannersServer();
 const firstBannerImage = absoluteImageUrl(banners[0]?.imageUrl || banners[0]?.image);
 ---
 

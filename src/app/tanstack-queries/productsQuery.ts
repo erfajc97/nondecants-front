@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { cachedServerFetch } from '@/app/lib/serverCache';
 import axiosInstance from '@/app/config/axiosConfig';
 import { API_ENDPOINTS } from '@/app/api/endpoints';
 import { MOCK_ENABLED } from '@/app/lib/mock';
@@ -222,6 +223,10 @@ export const fetchAllProducts = async (
   const content = [...first.content, ...rest.flatMap((r) => r.content)];
   return { content, pagination: { page: 1, limit: content.length, total: content.length, totalPages: 1 } };
 };
+
+/** Para el SSR (índice SEO del catálogo): caché de 60 s y última respuesta buena si la API falla. */
+export const fetchAllProductsServer = (params: ProductQueryParams = {}) =>
+  cachedServerFetch(`products:all:${JSON.stringify(params)}`, 60_000, () => fetchAllProducts(params), (r) => r.content.length > 0);
 
 export const fetchProductById = async (id: string): Promise<Product> => {
   // La ruta pública es /producto/{id}-{slug}: resolver por el id numérico.
