@@ -152,3 +152,43 @@ export function comboProductNotes(cp: ComboProduct, max = 3): { name: string; co
   const rest = sections.flatMap((s) => s.notes ?? []).filter((n) => !picks.includes(n));
   return [...picks, ...rest].slice(0, max);
 }
+
+export interface ComboOrderLine {
+  productVariationId?: number;
+  productId?: number;
+  quantity: number;
+  /** Precio unitario ya con el descuento del combo. */
+  priceOverride: number;
+}
+
+/**
+ * Líneas de orden de un combo del carrito. El precio del combo se reparte POR
+ * UNIDAD (no por línea): cada decant vale `precio / unidades`, y los centavos
+ * sobrantes se asignan a las últimas unidades para que
+ *   Σ (precio unitario × cantidad) === precio del combo × cantidad del carrito
+ * exactamente, también cuando un perfume trae más de una unidad. Así el pedido
+ * cobra lo mismo que mostraba el carrito.
+ */
+export function comboOrderLines(item: CartItem): ComboOrderLine[] {
+  const cps = item.comboProducts ?? [];
+  const units = cps.reduce((n, cp) => n + (cp.quantity || 1), 0);
+  if (!cps.length || units <= 0) return [];
+
+  const totalCents = Math.round(item.price * 100);
+  const baseCents = Math.floor(totalCents / units);
+  let extra = totalCents - baseCents * units; // centavos sueltos (0 … units-1)
+
+  const lines: ComboOrderLine[] = [];
+  for (let i = cps.length - 1; i >= 0; i--) {
+    const cp = cps[i];
+    const q = cp.quantity || 1;
+    const withExtra = Math.min(q, extra);
+    extra -= withExtra;
+    const ref = cp.productVariationId
+      ? { productVariationId: cp.productVariationId }
+      : { productId: cp.productId ?? parseInt(item.productId, 10) };
+    if (q - withExtra > 0) lines.push({ ...ref, quantity: (q - withExtra) * item.quantity, priceOverride: baseCents / 100 });
+    if (withExtra > 0) lines.push({ ...ref, quantity: withExtra * item.quantity, priceOverride: (baseCents + 1) / 100 });
+  }
+  return lines.reverse();
+}

@@ -13,6 +13,7 @@ import { DEMO_ENABLED } from '@/app/lib/mock';
 import { ECUADOR_PROVINCES, ALL_CANTONS } from '@/app/data/ecuadorLocations';
 import { isPickupMethod, PICKUP_METHODS, type DeliveryMode } from '../components/DeliverySection';
 import { useDecantPromo } from '@/app/features/promo/useDecantPromo';
+import { comboOrderLines } from '@/app/features/combos/comboPricing';
 import type { CustomerFormData, PaymentMethod, DeliveryMethod } from '../types';
 import { useCouponHook } from './useCouponHook';
 import { usePricingSettings } from '@/app/lib/pricingSettings';
@@ -364,23 +365,7 @@ export function useCheckoutHook() {
       // Expand combo items into individual products for the backend
       const orderItems = items.flatMap((item): OrderItemPayload | OrderItemPayload[] => {
         if (item.comboProducts && item.comboProducts.length > 0) {
-          // Distribute combo price proportionally across items
-          const comboPrice = item.price; // This is the combo's actual price (finalPrice - discount)
-          const numProducts = item.comboProducts.length;
-          const pricePerItem = Math.round((comboPrice / numProducts) * 100) / 100;
-          // Last item gets the remainder to avoid rounding errors
-          const lastItemPrice = Math.round((comboPrice - pricePerItem * (numProducts - 1)) * 100) / 100;
-
-          return item.comboProducts.map((cp: any, idx: number) => {
-            const override = idx === numProducts - 1 ? lastItemPrice : pricePerItem;
-            if (cp.productVariationId) {
-              return { productVariationId: cp.productVariationId, quantity: cp.quantity * item.quantity, priceOverride: override };
-            }
-            if (cp.productId) {
-              return { productId: cp.productId, quantity: cp.quantity * item.quantity, priceOverride: override };
-            }
-            return { productId: parseInt(item.productId, 10), quantity: cp.quantity * item.quantity, priceOverride: override };
-          });
+          return comboOrderLines(item);
         }
         // Regular item
         const isFullBottle = item.variantId.startsWith('full-');
@@ -462,21 +447,7 @@ export function useCheckoutHook() {
       // Build order items (same logic as handleSubmit)
       const orderItems = items.flatMap((item): OrderItemPayload | OrderItemPayload[] => {
         if (item.comboProducts && item.comboProducts.length > 0) {
-          const comboPrice = item.price;
-          const numProducts = item.comboProducts.length;
-          const pricePerItem = Math.round((comboPrice / numProducts) * 100) / 100;
-          const lastItemPrice = Math.round((comboPrice - pricePerItem * (numProducts - 1)) * 100) / 100;
-
-          return item.comboProducts.map((cp: any, idx: number) => {
-            const override = idx === numProducts - 1 ? lastItemPrice : pricePerItem;
-            if (cp.productVariationId) {
-              return { productVariationId: cp.productVariationId, quantity: cp.quantity * item.quantity, priceOverride: override };
-            }
-            if (cp.productId) {
-              return { productId: cp.productId, quantity: cp.quantity * item.quantity, priceOverride: override };
-            }
-            return { productId: parseInt(item.productId, 10), quantity: cp.quantity * item.quantity, priceOverride: override };
-          });
+          return comboOrderLines(item);
         }
         const isFullBottle = item.variantId.startsWith('full-');
         if (isFullBottle) {
